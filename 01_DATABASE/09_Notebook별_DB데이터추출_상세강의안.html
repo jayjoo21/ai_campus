@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Notebook별 DB 데이터 추출 — 분석 목적에 맞는 원천 데이터 준비</title>
+<style>
+:root{
+ --bg:#f4f7fb;--paper:#fff;--ink:#182335;--muted:#596879;--line:#d8e3ee;
+ --navy:#102c49;--blue:#2563a7;--bluebg:#eef5ff;--green:#18704d;--greenbg:#eef9f4;
+ --amber:#a36b0d;--amberbg:#fff7e8;--red:#b13a3a;--redbg:#fff2f2;--purple:#6651b4;--purplebg:#f5f2ff;
+ --teal:#117c78;--tealbg:#eefaf8;--code:#0d1825;--shadow:0 9px 28px rgba(15,35,55,.06);
+}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","맑은 고딕","Noto Sans KR","Apple SD Gothic Neo","Segoe UI",Arial,sans-serif;line-height:1.72;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:1240px;margin:auto}
+.hero{padding:54px 24px 46px;color:#fff;background:radial-gradient(circle at 82% 16%,rgba(38,190,220,.23),transparent 27%),linear-gradient(135deg,#0b1b2d,#123d66 58%,#0d637b)}
+.eyebrow{font-size:.78rem;font-weight:900;letter-spacing:.14em;color:#cbe9ff}
+.hero h1{font-size:clamp(2rem,4.6vw,3.2rem);line-height:1.15;letter-spacing:-.045em;margin:9px 0 14px}
+.hero p{max-width:1020px;margin:0;color:#e4f1fb;font-size:1.04rem}
+.hero-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-top:22px}
+.hero-card{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);border-radius:14px;padding:13px 14px}
+.hero-card b{display:block;font-size:1.05rem}.hero-card span{font-size:.78rem;color:#d8e8f5}
+nav{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:7px;overflow-x:auto;padding:9px 16px;-webkit-overflow-scrolling:touch}
+nav a{white-space:nowrap;text-decoration:none;background:#eef5ff;border:1px solid #d6e4f3;color:#225781;padding:6px 10px;border-radius:999px;font-size:.76rem;font-weight:800}
+main{padding:30px 18px 74px}
+section{margin:0 0 31px;scroll-margin-top:74px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:27px;box-shadow:var(--shadow)}
+h2{font-size:clamp(1.55rem,2.5vw,1.95rem);line-height:1.36;color:var(--navy);letter-spacing:-.026em;margin:0 0 14px}
+h3{font-size:1.21rem;line-height:1.45;color:#174e80;margin:27px 0 9px}
+h4{font-size:1rem;color:#284d6c;margin:0 0 6px}
+p{margin:7px 0 12px;color:var(--muted)}.lead{font-size:1.055rem;color:#354556}
+.grid2,.grid3,.grid4,.term-grid,.query-meta,.check-grid,.role-grid{display:grid;gap:13px;margin:14px 0;align-items:stretch}
+.grid2,.query-meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.term-grid{grid-template-columns:repeat(auto-fit,minmax(225px,1fr))}
+.check-grid{grid-template-columns:repeat(auto-fit,minmax(235px,1fr))}
+.role-grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card,.term,.callout,.query-box,.step,.role-card{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fff}
+.card.soft,.role-card{background:linear-gradient(180deg,#fcfdff,#f6f9fc)}
+.term b,.step b,.role-card b{display:block;color:#153f6a;margin-bottom:4px}
+.term .en{display:block;font-family:Consolas,monospace;color:#654aa8;font-size:.84rem;margin-bottom:4px}
+.callout{margin:15px 0}.callout.info{border-left:5px solid var(--blue);background:var(--bluebg)}
+.callout.good{border-left:5px solid var(--green);background:var(--greenbg)}
+.callout.warn{border-left:5px solid #d18a1b;background:var(--amberbg)}
+.callout.danger{border-left:5px solid var(--red);background:var(--redbg)}
+.callout.purple{border-left:5px solid var(--purple);background:var(--purplebg)}
+.callout.teal{border-left:5px solid var(--teal);background:var(--tealbg)}
+.callout b,.query-box b{color:#123f69}
+.figure{margin:18px 0;border:1px solid #dbe5ef;border-radius:17px;overflow:hidden;background:#fff;box-shadow:var(--shadow)}
+.figure-title{padding:13px 16px;background:#fafcff;border-bottom:1px solid #e4eaf0;color:#113a65;font-weight:900}
+.figure-body{padding:18px}.figure-caption{padding:9px 13px;border-top:1px solid #e4eaf0;background:#fafcff;color:#667586;font-size:.82rem}
+.concept-img{width:100%;height:auto;display:block;max-height:340px;object-fit:contain}
+.pipeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;align-items:stretch}
+.node{border:1px solid #cfe0ee;border-radius:12px;padding:13px;background:#f8fbff;text-align:center}
+.node b{display:block;color:#163f69}.node small{display:block;color:#6b7988;margin-top:3px}
+.arrow{display:flex;align-items:center;justify-content:center;color:#31709e;font-weight:900;font-size:1.25rem}
+.lesson-goal{margin:16px 0 18px;border:1px solid #cfe0ee;border-radius:14px;background:linear-gradient(180deg,#f8fbff,#f2f7fc);overflow:hidden}
+.goal-head{padding:11px 15px;background:#eaf3fb;border-bottom:1px solid #cfe0ee;color:#153f69;font-weight:900}
+.goal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.goal-item{padding:13px 15px;border-bottom:1px solid #e1e9f1}.goal-item:nth-child(odd){border-right:1px solid #e1e9f1}
+.goal-item.wide{grid-column:1/-1;border-right:none}.goal-item b{display:block;color:#174d80;margin-bottom:4px}.goal-item p{margin:0}
+.table-wrap{width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:13px 0 18px;background:#fff;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:720px}
+th{background:#edf5ff;color:#174d80;text-align:left;padding:10px 11px;border-bottom:1px solid #cfe0ef}
+td{padding:10px 11px;border-bottom:1px solid #e7edf3;vertical-align:top}tr:last-child td{border-bottom:none}
+pre{margin:12px 0 16px;background:var(--code);color:#dcecff;border-radius:12px;padding:15px 16px;overflow:auto;max-width:100%;font-size:.82rem;line-height:1.57;white-space:pre}
+code{font-family:Consolas,"SFMono-Regular",Menlo,monospace}.inline{background:#e8eef5;color:#153a5f;border-radius:5px;padding:2px 5px}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#edf4fa;color:#315f84;font-size:.72rem;font-weight:850;margin:2px 3px 2px 0}
+.check{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#fbfdff}
+.check:before{content:"✓";display:inline-grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#e6f5ee;color:#146b4c;font-weight:900;margin-right:7px}
+footer{padding:24px 20px;text-align:center;background:#0d1d2f;color:#cbd7e5;font-size:.8rem}
+@media(max-width:960px){.hero-grid,.grid4,.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){
+ .hero{padding:40px 18px 34px}main{padding:24px 14px 58px}.panel{padding:19px}
+ .grid2,.grid3,.grid4,.query-meta,.hero-grid{grid-template-columns:1fr}.pipeline{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}
+ .goal-grid{grid-template-columns:1fr}.goal-item:nth-child(odd){border-right:none}.goal-item.wide{grid-column:auto}
+ table{min-width:620px}
+}
+@media(max-width:420px){.panel{padding:16px}.figure-body{padding:13px}.hero h1{font-size:1.82rem}.hero p{font-size:.94rem}table{min-width:560px}}
+@media print{nav{display:none}body{background:#fff}.panel,.figure{box-shadow:none;break-inside:avoid}main{max-width:none;padding:0}.hero{background:#fff;color:#111;border-bottom:2px solid #234}.hero p,.hero .eyebrow{color:#333}}
+
+.css-timeline{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;padding:28px 18px 8px;margin:8px 0 4px}
+.css-timeline::before{content:"";position:absolute;left:11%;right:11%;top:69px;height:7px;border-radius:999px;background:#86a5bf;z-index:0}
+.css-event{position:relative;z-index:1;text-align:center;display:flex;flex-direction:column;align-items:center}
+.css-event .tick{width:5px;height:35px;background:#86a5bf;margin-bottom:8px;border-radius:999px}
+.css-event .dot{width:70px;height:70px;border-radius:50%;border:6px solid #4c8a69;background:#d8f0e4;display:grid;place-items:center;font-weight:900;color:#285f46;box-shadow:0 0 0 7px #f7fbff}
+.css-event.current .dot{width:78px;height:78px;border-color:#be8523;background:#fff0c7;color:#8a5a0f}
+.css-event.future .dot{border-color:#bd6161;background:#ffe0e0;color:#8f4444}
+.css-event .event-card{width:100%;margin-top:30px;border:1px solid #cfe0ee;border-radius:13px;padding:13px 11px;background:#f8fbff;min-height:116px;display:flex;flex-direction:column;justify-content:center}
+.css-event .event-card b{display:block;color:#153f69;margin-bottom:4px;font-size:.96rem}
+.css-event .event-card small{display:block;color:#687889;line-height:1.55}
+.css-event.latest .event-card{background:#eef9f4;border-color:#cde6da}
+.css-event.current .event-card{background:#fff8e9;border-color:#edd399}
+.css-event.future .event-card{background:#fff2f2;border-color:#efcccc}
+.css-selection-note{margin:16px auto 0;max-width:840px;border:1px solid #d6e4ef;border-left:5px solid #2770a8;border-radius:12px;background:#f6fbff;padding:13px 15px;color:#42586d}
+.css-selection-note b{color:#174d80}
+@media(max-width:760px){
+  .css-timeline{grid-template-columns:1fr;padding:6px 0 0;gap:10px}
+  .css-timeline::before{left:34px;right:auto;top:24px;bottom:24px;width:6px;height:auto}
+  .css-event{display:grid;grid-template-columns:70px 1fr;gap:13px;text-align:left;align-items:center}
+  .css-event .tick{display:none}
+  .css-event .dot,.css-event.current .dot{width:58px;height:58px;border-width:5px;box-shadow:0 0 0 5px #f7fbff}
+  .css-event .event-card{margin-top:0;min-height:0;align-items:flex-start;text-align:left}
+}
+
+/* ===== diagram repair ===== */
+.figure-body .concept-img{display:none !important;}
+.flow-diagram,.rag-diagram,.ops-diagram{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+  align-items:stretch;
+}
+.flow-step{
+  position:relative;
+  border:1px solid #cfe0ee;
+  border-radius:16px;
+  background:linear-gradient(180deg,#fbfdff,#f4f8fc);
+  padding:18px 16px 16px;
+  min-height:128px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  text-align:center;
+}
+.flow-step b{
+  display:block;
+  color:#153f69;
+  font-size:1.05rem;
+  margin-bottom:6px;
+}
+.flow-step small{
+  display:block;
+  color:#617283;
+  font-size:.84rem;
+  line-height:1.55;
+}
+.flow-step .icon{
+  width:42px;height:42px;border-radius:12px;
+  background:#e9f3fc;
+  color:#245d8c;
+  display:grid;place-items:center;
+  font-weight:900;
+  font-size:1.1rem;
+  margin:0 auto 10px;
+}
+.flow-arrow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#3770a1;
+  font-size:1.65rem;
+  font-weight:900;
+}
+.diagram-row{
+  display:grid;
+  grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;
+  gap:12px;
+  align-items:stretch;
+}
+.timeline-diagram{
+  margin-top:8px;
+}
+.timeline-card{
+  border:1px solid #cfe0ee;
+  border-radius:16px;
+  background:#fff;
+  min-height:170px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.timeline-card .head{
+  padding:12px 14px;
+  border-bottom:1px solid #dfe8f1;
+  font-weight:900;
+  color:#153f69;
+}
+.timeline-card .head.past{background:#eef8f4;color:#1e6b4b;}
+.timeline-card .head.current{background:#fff7e8;color:#94630f;}
+.timeline-card .head.future{background:#fff2f2;color:#9d3737;}
+.timeline-card .body{
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  color:#5a697a;
+  font-size:.9rem;
+  line-height:1.62;
+}
+.timeline-card .stamp{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:999px;
+  background:#edf4fa;
+  color:#315f84;
+  font-size:.73rem;
+  font-weight:800;
+  width:fit-content;
+}
+.timeline-card .note{
+  margin-top:auto;
+  padding:10px 12px;
+  border-top:1px dashed #d8e3ee;
+  background:#fbfdff;
+  color:#506173;
+  font-size:.84rem;
+}
+.hub-diagram{
+  display:grid;
+  grid-template-columns:1fr 220px 1fr;
+  gap:18px;
+  align-items:center;
+}
+.hub-col{
+  display:grid;
+  gap:14px;
+}
+.hub-node,.hub-center{
+  border:1px solid #cfe0ee;
+  border-radius:16px;
+  background:#fff;
+  min-height:112px;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  text-align:center;
+}
+.hub-node b,.hub-center b{
+  color:#153f69;
+  display:block;
+  font-size:1.02rem;
+  margin-bottom:6px;
+}
+.hub-node small,.hub-center small{
+  color:#617283;
+  font-size:.85rem;
+  line-height:1.55;
+}
+.hub-center{
+  min-height:220px;
+  background:linear-gradient(180deg,#f8fbff,#eef5fb);
+  position:relative;
+}
+.hub-center .core{
+  width:62px;height:62px;border-radius:50%;
+  background:#4f83ae;
+  margin:0 auto 10px;
+}
+.hub-mid-label{
+  font-size:.82rem;
+  color:#6b7b8c;
+  margin-top:6px;
+}
+.bridge{
+  height:0;
+  border-top:6px solid #7da2c3;
+  position:relative;
+  margin:0 -8px;
+}
+.bridge:after{
+  content:"";
+  position:absolute;
+  right:-2px; top:-10px;
+  border-left:14px solid #7da2c3;
+  border-top:10px solid transparent;
+  border-bottom:10px solid transparent;
+}
+.hub-link-row{
+  display:grid;
+  grid-template-columns:1fr 220px 1fr;
+  gap:18px;
+  align-items:center;
+  margin-top:10px;
+}
+.hub-link-col{
+  display:grid;
+  gap:20px;
+}
+.hub-link-col .line{
+  height:0;
+  border-top:6px solid #7da2c3;
+  position:relative;
+}
+.hub-link-col.left .line:after{
+  content:""; position:absolute; right:-2px; top:-10px;
+  border-left:14px solid #7da2c3;
+  border-top:10px solid transparent; border-bottom:10px solid transparent;
+}
+.hub-link-col.right .line:after{
+  content:""; position:absolute; right:-2px; top:-10px;
+  border-left:14px solid #7da2c3;
+  border-top:10px solid transparent; border-bottom:10px solid transparent;
+}
+.center-spacer{height:1px;}
+.source-columns{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.source-card{
+  border:1px solid #cfe0ee;
+  border-radius:16px;
+  background:#fff;
+  padding:16px;
+}
+.source-card b{
+  display:block;color:#153f69;margin-bottom:6px;font-size:1rem;
+}
+.source-card small{color:#617283;display:block;line-height:1.55;}
+.source-card .mini-lines{margin-top:10px;display:grid;gap:6px;}
+.source-card .mini-lines span{
+  display:block;height:8px;background:#dce9f5;border-radius:999px;
+}
+.merge-arrow{
+  text-align:center;
+  color:#3770a1;
+  font-size:1.8rem;
+  font-weight:900;
+  margin:10px 0;
+}
+.corpus-card{
+  border:1px solid #cfe0ee;
+  border-radius:18px;
+  background:linear-gradient(180deg,#f8fbff,#eef6fb);
+  padding:18px;
+  text-align:center;
+}
+.corpus-card b{display:block;color:#153f69;font-size:1.08rem;margin-bottom:6px;}
+.corpus-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-top:12px;
+}
+.corpus-mini{
+  border:1px solid #d8e4ef;
+  border-radius:12px;
+  background:#fff;
+  padding:12px;
+}
+.corpus-mini strong{display:block;color:#225781;font-size:.9rem;margin-bottom:4px;}
+@media(max-width:900px){
+  .flow-diagram,.rag-diagram,.ops-diagram{grid-template-columns:1fr 1fr;}
+  .hub-diagram{grid-template-columns:1fr;}
+  .hub-link-row{display:none;}
+  .diagram-row{grid-template-columns:1fr;}
+  .flow-arrow{transform:rotate(90deg);}
+  .source-columns,.corpus-grid{grid-template-columns:1fr;}
+}
+@media(max-width:640px){
+  .flow-diagram,.rag-diagram,.ops-diagram{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+<div class="eyebrow">SQL → DATAFRAME → ANALYSIS · STOCK · CSS · FDS · PERSONALIZATION · RAG · OPS</div>
+<h1>Notebook별 DB 데이터 추출 — 분석 목적에 맞는 원천 데이터를 안전하게 준비하기</h1>
+<p>SELECT·JOIN·CTE·Window Function을 실제 분석 입력 데이터 준비에 연결합니다. 핵심은 SQL에서 모델을 완성하는 것이 아니라, 각 분석이 필요로 하는 데이터를 올바른 Grain·기간·시점 기준으로 추출해 Python에 넘기는 것입니다.</p>
+<div class="hero-grid">
+<div class="hero-card"><b>Purpose</b><span>분석 목적부터 정의</span></div>
+<div class="hero-card"><b>Grain</b><span>한 행의 의미 결정</span></div>
+<div class="hero-card"><b>Point-in-Time</b><span>미래정보 차단</span></div>
+<div class="hero-card"><b>Handoff</b><span>SQL → Python</span></div>
+</div></div></header>
+<nav><div class="wrap">
+<a href="#overview">전체 흐름</a><a href="#terms">핵심 용어</a><a href="#design">추출 설계</a>
+<a href="#stock">투자</a><a href="#css">CSS</a><a href="#fds">FDS</a>
+<a href="#personal">개인화</a><a href="#rag">RAG</a><a href="#ops">보안·MLOps</a><a href="#handoff">최종 검증</a>
+</div></nav>
+<main class="wrap">
+<section id="overview"><div class="panel">
+<h2>1. SQL에서 데이터를 꺼내는 목적부터 이해하기</h2>
+<p class="lead">데이터 추출은 “테이블에서 컬럼 몇 개를 SELECT하는 작업”이 아닙니다. 먼저 <strong>어떤 분석을 할 것인지</strong>를 정하고, 그 분석이 요구하는 한 행의 단위와 시점, 필요한 원천정보를 정의한 뒤 SQL을 작성합니다.</p>
+<div class="figure"><div class="figure-title">SQL → Python 분석의 전체 흐름</div>
+<div class="figure-body">
+<div class="flow-diagram">
+<div class="flow-step"><div class="icon">DB</div><b>DB 원천</b><small>분석 목적에 맞는 테이블을 선택합니다.<br/>예: customers, card_payments, stock_prices</small></div>
+<div class="flow-step"><div class="icon">SQL</div><b>SQL 추출</b><small>기간, 컬럼, JOIN, 기준시점, Grain을 정해 필요한 데이터만 정확히 꺼냅니다.</small></div>
+<div class="flow-step"><div class="icon">DF</div><b>DataFrame</b><small>중복, NULL, 타입, 정렬을 검증한 뒤 Python에서 쓰기 좋은 형태로 받습니다.</small></div>
+<div class="flow-step"><div class="icon">PY</div><b>Python 분석</b><small>Feature 생성, 통계 분석, 모델 학습, 시각화, 리포트 작성을 이어서 수행합니다.</small></div>
+</div>
+</div>
+<div class="figure-caption">SQL은 분석용 원천 데이터를 정확하게 준비하는 단계이고, Python은 그 데이터를 계산·모델링·시각화로 확장하는 단계입니다.</div></div>
+<div class="grid3">
+<div class="card soft"><h4>SQL의 역할</h4><p>원천 선택, 행·컬럼 제한, JOIN 관계 확인, 시점 조건 적용, 중복·Grain 검증, 안전한 데이터 전달.</p></div>
+<div class="card soft"><h4>Python의 역할</h4><p>수익률, rolling, WOE/IV, 스케일링, 머신러닝, Chunking, Embedding, 시각화 등 분석 계산.</p></div>
+<div class="card soft"><h4>중요한 질문</h4><p>“이 값은 판단 시점에 존재했는가?”, “결과 한 행은 무엇인가?”, “Target이나 사후정보가 Feature에 섞이지 않았는가?”</p></div>
+</div>
+<div class="callout purple"><b>핵심 원칙</b><br/>SQL에서 많이 계산하는 것이 목표가 아닙니다. <strong>분석의 의미를 깨뜨리지 않는 원천 데이터</strong>를 재현 가능하게 전달하는 것이 목표입니다.</div>
+</div></section>
+<section id="terms"><div class="panel">
+<h2>2. 데이터 추출에서 반드시 알아야 할 용어</h2>
+<div class="term-grid">
+<div class="term"><b>Raw Data</b><span class="en">원천 데이터</span><p>파생계산 전 DB에 저장되어 있는 기본 기록입니다. 결제금액, 거래시각, 종가 등이 예입니다.</p></div>
+<div class="term"><b>Grain</b><span class="en">한 행의 단위</span><p>결과 한 행이 무엇을 의미하는지 정의합니다. 예: 결제 1건, 신청 1건, 종목×거래일 1건.</p></div>
+<div class="term"><b>Feature</b><span class="en">입력 변수</span><p>모델이 예측에 사용하는 값입니다. 원천 컬럼일 수도 있고 Python에서 만든 파생변수일 수도 있습니다.</p></div>
+<div class="term"><b>Target</b><span class="en">정답</span><p>모델이 맞히려는 결과입니다. FDS의 <code>fraud_label</code>, CSS의 <code>default_12m_label</code> 등이 이에 해당합니다.</p></div>
+<div class="term"><b>Filter / Cohort</b><span class="en">분석 대상 조건</span><p>학습·분석에 포함할 행을 정하는 조건입니다. Feature와 역할이 다릅니다.</p></div>
+<div class="term"><b>Master Data</b><span class="en">기준정보</span><p>고객·가맹점·종목처럼 다른 이벤트 행을 설명하는 비교적 안정적인 정보입니다.</p></div>
+<div class="term"><b>Point-in-Time</b><span class="en">시점 정합성</span><p>판단 시점 이후에 생성된 미래정보를 사용하지 않는 원칙입니다.</p></div>
+<div class="term"><b>Snapshot</b><span class="en">특정 시점 상태</span><p>어떤 기준시점의 고객 상태를 한 행으로 정리한 데이터입니다.</p></div>
+<div class="term"><b>Data Leakage</b><span class="en">정보 누수</span><p>미래정보·사후판정·Target과 지나치게 가까운 정보를 Feature에 포함하는 오류입니다.</p></div>
+<div class="term"><b>Corpus</b><span class="en">문서 집합</span><p>RAG에서 검색 대상으로 사용할 문서 전체 집합입니다.</p></div>
+<div class="term"><b>Metadata</b><span class="en">문서 설명정보</span><p>문서 본문 외에 날짜, 유형, 출처, 버전 등을 설명하는 정보입니다.</p></div>
+<div class="term"><b>Handoff</b><span class="en">분석 전달 단계</span><p>SQL에서 준비한 결과를 Python DataFrame으로 넘기고 분석을 이어가는 경계입니다.</p></div>
+</div>
+</div></section>
+<section id="design"><div class="panel">
+<h2>3. 분석용 SQL을 설계하는 순서</h2>
+<p>쿼리를 바로 작성하지 않고 아래 질문을 먼저 정리합니다. 이 순서를 지키면 불필요한 JOIN과 미래정보 누수를 크게 줄일 수 있습니다.</p>
+<div class="grid4">
+<div class="step"><b>1 · 분석 질문</b>무엇을 예측·분석·검색하려는가?</div>
+<div class="step"><b>2 · Grain</b>최종 결과 한 행은 무엇인가?</div>
+<div class="step"><b>3 · 기준시점</b>언제까지의 정보만 사용할 수 있는가?</div>
+<div class="step"><b>4 · 원천 테이블</b>필요한 정보가 어느 테이블에 있는가?</div>
+<div class="step"><b>5 · 역할 구분</b>Raw·Feature·Target·Filter를 구분했는가?</div>
+<div class="step"><b>6 · 관계</b>JOIN이 N:1인지 1:N인지 확인했는가?</div>
+<div class="step"><b>7 · 정렬·기간</b>시계열 순서와 분석기간이 맞는가?</div>
+<div class="step"><b>8 · 검증</b>중복·누수·행 수를 확인했는가?</div>
+</div>
+<div class="table-wrap"><table>
+<thead><tr><th>분석</th><th>핵심 질문</th><th>기준 Grain</th><th>SQL이 준비하는 것</th><th>Python에서 이어지는 것</th></tr></thead>
+<tbody>
+<tr><td>투자</td><td>과거 가격 흐름을 이용해 추세·변동을 분석</td><td><code>stock_code × trade_date</code></td><td>정렬된 OHLCV + 종목정보</td><td>수익률·SMA·RSI·변동성·Target</td></tr>
+<tr><td>CSS</td><td>신청 당시 정보로 향후 부실위험 분석</td><td><code>application_id</code></td><td>신청·고객·bureau 시계열</td><td>merge_asof·파생변수·신용모델</td></tr>
+<tr><td>FDS</td><td>결제 순간 정보로 정상/사기 분류</td><td><code>payment_id</code></td><td>결제 Raw + 고객·가맹점·기기 Master</td><td>시간·위치·금액 Feature·분류모델</td></tr>
+<tr><td>개인화</td><td>캠페인 배정 당시 상태로 전환가능성 분석</td><td><code>experiment_id</code></td><td>배정시점 Customer 360 Snapshot</td><td>세그먼트·Propensity·NBA</td></tr>
+<tr><td>RAG</td><td>질문과 관련된 문서 근거 검색</td><td>문서 1건</td><td>안전한 원문 + 공통 Metadata</td><td>Cleaning·Chunking·Embedding·Retrieval</td></tr>
+</tbody></table></div>
+</div></section>
+<section id="stock"><div class="panel">
+<h2>4. 투자 Notebook — 실제 KRX 주가 데이터</h2>
+<p class="lead">투자 분석에서는 날짜순으로 정렬된 실제 가격과 거래량이 가장 중요한 원천입니다. SQL은 기술지표를 미리 계산하기보다 시계열 원천의 순서와 중복 여부를 정확하게 유지합니다.</p>
+<div class="figure"><div class="figure-title">투자 데이터가 분석으로 이어지는 구조</div>
+<div class="figure-body">
+<div class="flow-diagram">
+<div class="flow-step"><div class="icon">M</div><b>stocks</b><small>회사명, 시장(KOSPI/KOSDAQ), 업종 등 종목 Master 정보를 확인합니다.</small></div>
+<div class="flow-step"><div class="icon">P</div><b>stock_prices</b><small>거래일별 시가·고가·저가·종가·거래량을 날짜순으로 가져옵니다.</small></div>
+<div class="flow-step"><div class="icon">TS</div><b>정렬된 시계열</b><small><code>stock_code × trade_date</code> 1행 구조를 유지해 시계열 분석 입력을 만듭니다.</small></div>
+<div class="flow-step"><div class="icon">A</div><b>Python 분석</b><small>수익률, 이동평균, RSI, 변동성, 예측용 Target을 계산합니다.</small></div>
+</div>
+</div><div class="figure-caption">투자 Notebook에서는 먼저 종목 Master와 가격 시계열을 준비한 뒤, Python에서 각종 기술지표와 예측용 변수를 만듭니다.</div></div>
+<h3>4-1. 종목 Master 확인</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>가격을 조회하기 전에 종목코드가 어떤 회사와 시장·업종을 의미하는지 확인합니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>주가 데이터의 <code>stock_code</code>만 보면 종목의 의미를 알기 어렵기 때문에 Master 정보를 먼저 확인합니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>stock_data.stocks</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>종목 1개당 1행으로 종목코드·회사명·시장·업종이 보입니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p><code>stock_code</code> 1개 = 1행</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p>종목 선택, 시장·업종별 비교 기준으로 사용</p></div>
+</div></div>
+<pre><code>USE stock_data;
+-- [목적] 실제 가격 데이터를 읽기 전에 종목코드와 회사 정보를 확인합니다.
+SELECT
+    stock_code,
+    company_name,
+    market,
+    industry
+FROM stocks
+ORDER BY stock_code
+LIMIT 30;</code></pre>
+<h3>4-2. 삼성전자 가격 시계열</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>삼성전자(<code>005930</code>)의 일별 시가·고가·저가·종가·거래량을 시간순으로 얻습니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>수익률·이동평균·변동성은 이전 날짜와의 순서 관계가 중요하므로 정렬된 시계열 원천이 필요합니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>stock_data.stock_prices</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>거래일이 오래된 날짜부터 최신 날짜 순으로 나오고 각 날짜마다 OHLCV가 한 행씩 보입니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p><code>stock_code × trade_date</code> 1행</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p><code>pct_change</code>, SMA, RSI, Momentum, Volatility, 다음 시점 Target 계산</p></div>
+</div></div>
+<pre><code>USE stock_data;
+-- [목적] 삼성전자의 실제 일별 OHLCV를 날짜순으로 조회합니다.
+SELECT
+    stock_code,
+    trade_date,
+    open_price,
+    high_price,
+    low_price,
+    close_price,
+    volume,
+    change_rate
+FROM stock_prices
+WHERE stock_code = '005930'
+ORDER BY trade_date;</code></pre>
+<h3>4-3. 가격 + 종목 Master 결합</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>삼성전자 시계열에 회사명·시장·업종을 붙여 분석에서 바로 식별 가능한 입력 구조를 만듭니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p><code>stock_prices</code>에는 가격은 있지만 회사 설명정보가 부족합니다. N:1 Master JOIN으로 시계열 Grain을 유지하면서 설명정보를 보강합니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>stock_prices</code> + <code>stocks</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>삼성전자 거래일 수만큼 행이 유지되고 모든 날짜에 같은 회사명·시장·업종이 반복해서 붙습니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p><code>stock_code × trade_date</code> 1행</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p>가격 파생변수와 종목 단위 분석</p></div>
+</div></div>
+<pre><code>USE stock_data;
+-- [목적] 주가 시계열에 회사명·시장·업종을 붙여 Notebook 입력을 만듭니다.
+SELECT
+    p.stock_code,
+    s.company_name,
+    s.market,
+    s.industry,
+    p.trade_date,
+    p.open_price,
+    p.high_price,
+    p.low_price,
+    p.close_price,
+    p.volume,
+    p.change_rate
+FROM stock_prices AS p
+INNER JOIN stocks AS s
+  ON s.stock_code = p.stock_code
+WHERE p.stock_code = '005930'
+ORDER BY p.trade_date;</code></pre>
+<div class="callout danger"><b>잘못 추출하면</b><br/>날짜 정렬이 틀리면 전일수익률과 rolling 계산이 잘못되고, 같은 종목·거래일이 중복되면 지표가 왜곡됩니다.</div>
+</div></section>
+<section id="css"><div class="panel">
+<h2>5. CSS Notebook — 대출 신청 당시의 정보만 사용하기</h2>
+<p class="lead">CSS(Credit Scoring System)는 대출 신청이 발생한 시점에 알 수 있었던 정보만 사용해 향후 부실위험을 분석합니다. 따라서 서로 Grain과 시간축이 다른 신청·고객·신용보고서를 무작정 한 SQL에서 JOIN하지 않습니다.</p>
+<div class="figure">
+<div class="figure-title">CSS에서 Point-in-Time이 필요한 이유</div>
+<div class="figure-body">
+<div class="timeline-diagram">
+<div class="diagram-row">
+<div class="timeline-card">
+<div class="head past">과거 Report A</div>
+<div class="body">
+<span class="stamp">후보 1</span>
+<div>신청 이전에 이미 존재한 신용보고서입니다.</div>
+<div>사용 가능한 과거 후보입니다.</div>
+</div>
+<div class="note">report_date ≤ application_at 이므로 사용 가능</div>
+</div>
+<div class="flow-arrow">→</div>
+<div class="timeline-card">
+<div class="head past">과거 Report B</div>
+<div class="body">
+<span class="stamp">후보 2</span>
+<div>신청 이전에 존재한 보고서 중 가장 최신 보고서입니다.</div>
+<div><strong>최종 선택 대상</strong>입니다.</div>
+</div>
+<div class="note">신청시점 이전 최신값이므로 As-of 선택 결과</div>
+</div>
+<div class="flow-arrow">→</div>
+<div class="timeline-card">
+<div class="head current">대출 신청시점</div>
+<div class="body">
+<span class="stamp">기준시점</span>
+<div><code>application_at</code>이 과거와 미래를 나누는 기준입니다.</div>
+<div>이 시점에 실제로 알 수 있었던 정보만 입력 Feature로 사용할 수 있습니다.</div>
+</div>
+<div class="note">이 시점 이후의 보고서는 사용하면 안 됩니다.</div>
+</div>
+<div class="flow-arrow">→</div>
+<div class="timeline-card">
+<div class="head future">미래 Report C</div>
+<div class="body">
+<span class="stamp">사용 금지</span>
+<div>신청 이후에 생성된 신용보고서입니다.</div>
+<div>과거 심사행에 붙이면 미래정보 누수(Data Leakage)가 발생합니다.</div>
+</div>
+<div class="note">report_date &gt; application_at 이므로 제외</div>
+</div>
+</div>
+</div>
+</div>
+<div class="figure-caption">CSS에서는 신청시점 이전의 보고서만 후보가 되며, 그중 가장 최신 보고서 1건만 선택합니다.</div>
+</div>
+<h3>5-1. 대출 신청 원천</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>CSS 분석의 기준축이 되는 대출 신청 데이터를 신청 1건 단위로 읽습니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>모든 고객 정보와 bureau 정보는 결국 특정 대출 신청에 맞춰 연결되어야 하므로 먼저 기준 이벤트를 확보해야 합니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>loan_applications</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>각 application_id가 한 행씩 나오고 신청시각·요청금액·DTI·승인여부·12개월 부실라벨이 함께 보입니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p><code>application_id</code> 1건 = 1행</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p><code>approved</code>는 분석대상 Filter, <code>default_12m_label</code>은 Target으로 구분</p></div>
+</div></div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] CSS의 기준축인 대출 신청 1건 단위 데이터를 읽습니다.
+SELECT
+    application_id,
+    customer_id,
+    application_at,
+    product_type,
+    requested_amount,
+    loan_purpose,
+    annual_income,
+    employment_years,
+    debt_to_income,
+    bureau_score,
+    approved,
+    default_12m_label
+FROM loan_applications
+ORDER BY application_at;</code></pre>
+<h3>5-2. 고객 Master</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>신청 고객의 생년·성별·지역·소득구간·직업 정보를 별도 Master로 준비합니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>신청행에는 없는 고객 설명정보를 N:1 관계로 보강하기 위해 필요합니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>customers</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>customer_id별로 최대 한 행의 고객 정보가 보입니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p><code>customer_id</code> 1명 = 1행</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p><code>customer_id</code> 기준 many-to-one merge</p></div>
+</div></div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] 신청 고객의 인구통계·지역·소득구간을 별도 Master로 읽습니다.
+SELECT
+    customer_id,
+    birth_date,
+    gender,
+    region,
+    income_band,
+    occupation
+FROM customers;</code></pre>
+<h3>5-3. bureau 시계열</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>고객별 외부 신용보고서를 날짜순으로 모두 읽어 신청시점 이전 최신 보고서를 고를 수 있게 준비합니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>bureau_reports는 고객마다 여러 날짜의 보고서가 있으므로 현재 최신값 하나만 가져오면 과거 신청 시점을 재현할 수 없습니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>bureau_reports</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>고객별로 여러 report_date가 시간순으로 나타나며 각 시점의 외부점수·연체·조회·이용률이 보입니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p><code>customer_id × report_date</code> 수준의 시계열</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p><code>merge_asof(direction='backward')</code>로 신청시점 이전 최신 report 선택</p></div>
+</div></div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] 고객별 외부 신용정보를 시간순으로 읽습니다.
+SELECT
+    customer_id,
+    report_date,
+    external_credit_score,
+    credit_card_count,
+    loan_count,
+    delinquency_30d_count,
+    delinquency_90d_count,
+    inquiries_6m,
+    revolving_balance,
+    utilization_rate
+FROM bureau_reports
+ORDER BY customer_id, report_date;</code></pre>
+<div class="callout warn"><b>왜 SQL에서 단순 JOIN하지 않는가?</b><br/>고객 ID만으로 신청과 bureau를 붙이면 같은 신청에 과거·미래의 여러 보고서가 붙을 수 있습니다. 결과 행이 늘어나는 문제와 미래정보 누수가 동시에 발생할 수 있습니다.</div>
+</div></section>
+<section id="fds"><div class="panel">
+<h2>6. FDS Notebook — 결제 이벤트와 Master를 분리해 준비하기</h2>
+<p class="lead">FDS(Fraud Detection System)의 기준은 결제 1건입니다. 결제 당시 확보 가능한 원천정보를 중심으로 고객·가맹점·기기 Master를 붙여도 <code>payment_id</code> Grain이 유지되어야 합니다.</p>
+<div class="figure"><div class="figure-title">FDS 데이터 준비 구조</div>
+<div class="figure-body">
+<div class="hub-diagram">
+<div class="hub-col">
+<div class="hub-node"><b>card_payments</b><small>결제시각, 금액, 채널, 국가, 승인여부, fraud_label 등<br/><strong>기준 이벤트</strong></small></div>
+<div class="hub-node"><b>customers</b><small>고객의 지역, 연령대, 소득구간, 위험등급 등<br/>고객 설명정보</small></div>
+</div>
+<div class="hub-center">
+<div class="core"></div>
+<b>payment_id 기준 분석행</b>
+<small>결제 1건을 중심으로 필요한 Master 정보를 붙입니다.</small>
+<div class="hub-mid-label">최종 목표: <code>payment_id</code> 1건 = 1행 유지</div>
+</div>
+<div class="hub-col">
+<div class="hub-node"><b>merchants</b><small>가맹점 업종, 국가, 위험도, 카테고리 등<br/>가맹점 설명정보</small></div>
+<div class="hub-node"><b>devices</b><small>기기 유형, OS, 신뢰수준, 등록여부 등<br/>기기 설명정보</small></div>
+</div>
+</div>
+<div class="callout info" style="margin-bottom:0"><b>읽는 방법</b><br/><code>card_payments</code>가 중심 이벤트이고, 나머지 테이블은 결제행을 설명하는 Master입니다. JOIN 이후에도 결제행 수가 늘어나지 않아야 합니다.</div>
+</div><div class="figure-caption">FDS에서는 결제 이벤트를 기준축으로 두고 고객·가맹점·기기 Master를 붙입니다. 핵심은 JOIN 후에도 payment_id Grain을 유지하는 것입니다.</div></div>
+<h3>6-1. 결제 Raw</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>결제 발생 순간 사용할 수 있는 이벤트 원천과 분석대상 Filter·Target을 결제 1건 단위로 읽습니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>FDS 모델의 판단 대상 자체가 결제 이벤트이므로 결제 테이블이 기준축이 됩니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>card_payments</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>결제시각·금액·채널·국가·IP국가·온라인/해외여부와 승인여부·fraud_label이 payment_id별로 나타납니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p>시간·요일·야간·IP mismatch·상대적 고액 여부·로그금액 등 Feature 생성</p></div>
+</div></div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] FDS에 필요한 Raw·filter·Target 컬럼만 조회합니다.
+SELECT
+    payment_id,
+    card_id,
+    customer_id,
+    merchant_id,
+    device_id,
+    payment_at,
+    amount,
+    payment_channel,
+    auth_method,
+    country,
+    ip_country,
+    is_overseas,
+    is_online,
+    installment_months,
+    is_approved,
+    fraud_label
+FROM card_payments
+ORDER BY payment_at
+LIMIT 100000;</code></pre>
+<h3>6-2. 가맹점·기기·고객 Master</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>결제행을 설명하는 가맹점·기기·고객 정보를 각 Master 테이블에서 별도로 준비합니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>Master를 따로 읽으면 Python merge에서 연결키의 유일성을 검증하고 결제 Grain이 깨지는지 확인하기 쉽습니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>merchants</code>, <code>devices</code>, <code>customers</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>각 Master의 ID당 설명정보가 조회됩니다. 동일 ID가 여러 행이면 N:1 merge 전 점검이 필요합니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p>각 Master의 PK 1개 = 1행</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p><code>merge(validate='many_to_one')</code>로 결제 Raw에 결합</p></div>
+</div></div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [B] 가맹점 Master
+SELECT
+    merchant_id,
+    merchant_category,
+    risk_level,
+    avg_ticket_size
+FROM merchants;
+-- [C] 기기 Master
+SELECT
+    device_id,
+    is_trusted,
+    device_type,
+    os_type
+FROM devices;
+-- [D] 고객 Master
+SELECT
+    customer_id,
+    credit_score,
+    risk_segment,
+    income_band
+FROM customers;</code></pre>
+<h3>6-3. JOIN 후 Grain 검증</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 검증 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>Master를 결제에 붙였을 때 같은 payment_id가 여러 행으로 복제되지 않았는지 숫자로 확인합니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>JOIN은 SQL 문법상 정상이어도 오른쪽 키가 중복되어 있으면 결제 한 건이 여러 행으로 늘어날 수 있습니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>card_payments</code> + 3개 Master</p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p><code>joined_rows</code>와 <code>unique_payments</code>가 같아야 합니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p>검증 결과 1행</p></div>
+</div></div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] N:1 Master JOIN이 payment_id Grain을 깨지 않는지 확인합니다.
+SELECT
+    COUNT(*) AS `joined_rows`,
+    COUNT(DISTINCT cp.payment_id) AS `unique_payments`
+FROM card_payments AS cp
+LEFT JOIN merchants AS m
+  ON cp.merchant_id = m.merchant_id
+LEFT JOIN devices AS d
+  ON cp.device_id = d.device_id
+LEFT JOIN customers AS c
+  ON cp.customer_id = c.customer_id;</code></pre>
+<div class="callout danger"><b>Feature로 사용하면 위험한 정보</b><br/><code>fraud_type</code>, 사후 fraud score, chargeback 시점, analyst decision처럼 결제 이후 판정 과정에서 만들어지는 값은 실제 승인 순간에 없을 수 있으므로 입력 Feature에서 제외해야 합니다.</div>
+</div></section>
+<section id="personal"><div class="panel">
+<h2>7. 개인화 Notebook — 캠페인 배정시점 Customer 360 Snapshot</h2>
+<p class="lead">개인화 분석의 한 행은 고객 자체가 아니라 <strong>고객이 특정 캠페인에 배정된 사건</strong>입니다. 따라서 같은 고객이라도 배정시점이 다르면 금융상태도 달라질 수 있습니다.</p>
+<h3>7-1. 캠페인 기준축</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>Customer 360 Snapshot의 기준이 되는 캠페인 배정 이벤트를 확인합니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>계좌·대출·거래·동의 상태를 어느 시점 기준으로 계산할지 정하려면 <code>assigned_at</code>이 있는 기준 이벤트가 먼저 필요합니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>campaign_experiments</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>experiment_id별 고객·캠페인·배정시각·노출·클릭·전환 정보가 나타납니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p><code>experiment_id</code> 1건 = 1행</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p>배정 사건을 Target/성과와 연결하고 Customer 360 Feature와 결합</p></div>
+</div></div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] Customer 360 Snapshot의 기준 이벤트를 확인합니다.
+SELECT
+    experiment_id,
+    customer_id,
+    campaign_name,
+    group_name,
+    assigned_at,
+    exposed,
+    clicked,
+    converted,
+    revenue_amount
+FROM campaign_experiments
+ORDER BY assigned_at
+LIMIT 100;</code></pre>
+<h3>7-2. 배정 직전 90일 거래건수</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>각 캠페인 배정 직전 90일 동안 고객이 얼마나 거래했는지 experiment별로 집계합니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>개인화 추천은 배정 이후 행동이 아니라 배정 전에 이미 관찰할 수 있었던 최근 금융활동을 사용해야 합니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>campaign_experiments</code>, <code>transactions</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>각 experiment_id마다 1행이 나오고 배정 이전 90일의 거래건수 <code>txn_90d</code>가 표시됩니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p><code>experiment_id</code> 1건 = 1행</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p>net flow, 세그먼트, Propensity, Next-Best-Action 계산</p></div>
+</div></div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] assigned_at 기준 과거 90일 거래건수를 experiment별로 집계합니다.
+WITH ce AS (
+    SELECT
+        experiment_id,
+        customer_id,
+        assigned_at
+    FROM campaign_experiments
+),
+txn AS (
+    SELECT
+        ce.experiment_id,
+        COUNT(t.transaction_id) AS `txn_90d`
+    FROM ce
+    LEFT JOIN transactions AS t
+      ON t.customer_id = ce.customer_id
+     AND t.transaction_at &lt; ce.assigned_at
+     AND t.transaction_at &gt;= DATE_SUB(ce.assigned_at, INTERVAL 90 DAY)
+    GROUP BY ce.experiment_id
+)
+SELECT
+    ce.experiment_id,
+    ce.customer_id,
+    ce.assigned_at,
+    COALESCE(txn.txn_90d, 0) AS `txn_90d`
+FROM ce
+LEFT JOIN txn
+  ON txn.experiment_id = ce.experiment_id
+ORDER BY ce.assigned_at;</code></pre>
+<div class="figure"><div class="figure-title">배정시점 Snapshot의 사고방식</div>
+<div class="figure-body">
+<div class="timeline-diagram">
+<div class="diagram-row">
+<div class="timeline-card">
+<div class="head past">과거 상태 1</div>
+<div class="body">
+<span class="stamp">사용 가능</span>
+<div>배정 이전에 이미 보유하고 있던 계좌·대출 상태입니다.</div>
+<div>Customer 360 Snapshot의 입력 후보입니다.</div>
+</div>
+<div class="note">예: 계좌 수, 활성잔액, 대출 수, 연체일수</div>
+</div>
+<div class="flow-arrow">→</div>
+<div class="timeline-card">
+<div class="head past">과거 상태 2</div>
+<div class="body">
+<span class="stamp">사용 가능</span>
+<div>배정 직전 90일 거래와 동의 상태처럼 최근 행동 정보도 포함할 수 있습니다.</div>
+<div>단, 모두 <code>assigned_at</code> 이전이어야 합니다.</div>
+</div>
+<div class="note">예: 90일 유입·유출금액, AI_PROFILING 동의 여부</div>
+</div>
+<div class="flow-arrow">→</div>
+<div class="timeline-card">
+<div class="head current">assigned_at</div>
+<div class="body">
+<span class="stamp">기준시점</span>
+<div>캠페인에 배정된 시점입니다.</div>
+<div>Snapshot은 바로 이 시점의 고객 상태를 1행으로 재현합니다.</div>
+</div>
+<div class="note">최종 Grain: <code>experiment_id</code> 1건 = 1행</div>
+</div>
+<div class="flow-arrow">→</div>
+<div class="timeline-card">
+<div class="head future">이후 행동</div>
+<div class="body">
+<span class="stamp">Feature 사용 금지</span>
+<div>배정 이후의 추가 거래, 계좌 개설, 클릭/전환 이후 행동은 입력 Feature에 쓰지 않습니다.</div>
+<div>성과평가나 Target으로만 따로 봅니다.</div>
+</div>
+<div class="note">배정 이후 정보가 섞이면 미래정보 누수가 발생합니다.</div>
+</div>
+</div>
+</div>
+</div><div class="figure-caption">개인화 분석에서는 배정시점 이전 정보만 모아 Customer 360 Snapshot을 만들고, 이후 행동은 성과나 Target으로 구분합니다.</div></div>
+</div></section>
+<section id="rag"><div class="panel">
+<h2>8. RAG Notebook — 검색 가능한 안전한 문서 Corpus 만들기</h2>
+<p class="lead">RAG에서는 SQL이 문서 의미를 임베딩하는 것이 아니라, 검색 대상으로 사용할 원문과 Metadata를 안전하고 일관된 구조로 준비합니다.</p>
+<div class="figure"><div class="figure-title">여러 문서 소스를 하나의 Corpus로</div>
+<div class="figure-body">
+<div class="source-columns">
+<div class="source-card"><b>정책 문서</b><small>규정, 내부 정책, 가이드 문서를 현재성·민감도 기준으로 선별합니다.</small><div class="mini-lines"><span></span><span style="width:78%"></span><span style="width:86%"></span></div></div>
+<div class="source-card"><b>상품 문서</b><small>상품 설명서, 약관, 판매 포인트, 대상 조건 등 상품 관련 원문을 준비합니다.</small><div class="mini-lines"><span></span><span style="width:82%"></span><span style="width:72%"></span></div></div>
+<div class="source-card"><b>뉴스 문서</b><small>시장 변화와 외부 이슈를 설명하는 텍스트를 공통 구조로 맞춥니다.</small><div class="mini-lines"><span></span><span style="width:80%"></span><span style="width:90%"></span></div></div>
+</div>
+<div class="merge-arrow">↓</div>
+<div class="corpus-card">
+<b>공통 RAG Corpus</b>
+<div>모든 문서를 <code>source_type / source_id / title / body_text / doc_date / category / extra_meta</code> 구조로 통합합니다.</div>
+<div class="corpus-grid">
+<div class="corpus-mini"><strong>원문 보존</strong>본문은 가능한 그대로 유지합니다.</div>
+<div class="corpus-mini"><strong>Metadata 정리</strong>출처·날짜·분류를 일관되게 맞춥니다.</div>
+<div class="corpus-mini"><strong>Python 후속작업</strong>Cleaning → Chunking → Embedding → Retrieval</div>
+</div>
+</div>
+</div><div class="figure-caption">RAG에서는 서로 다른 문서 소스를 공통 스키마로 통합한 뒤, Python에서 청크 분할과 임베딩을 이어서 수행합니다.</div></div>
+<h3>8-1. 현재 유효한 정책문서</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>현재 유효하고 HIGH PII가 아닌 정책문서만 검색 후보로 가져옵니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>RAG는 검색된 본문이 LLM 컨텍스트로 들어갈 수 있으므로 민감도가 높은 문서와 구버전 문서를 사전에 제한해야 합니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>financial_policy_docs</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>최신 유효 정책문서가 effective_date 역순으로 나오며 HIGH PII 문서는 제외됩니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p>문서 <code>doc_id</code> 1건 = 1행</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p>Cleaning·Chunking·Embedding·Retrieval</p></div>
+</div></div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] 현재 유효하고 HIGH PII가 아닌 정책문서만 조회합니다.
+SELECT
+    doc_id,
+    doc_type,
+    title,
+    version,
+    effective_date,
+    body_text,
+    pii_level
+FROM financial_policy_docs
+WHERE is_current = 1
+  AND pii_level &lt;&gt; 'HIGH'
+ORDER BY effective_date DESC
+LIMIT 3000;</code></pre>
+<h3>8-2. 정책·상품·뉴스를 공통 Schema로 통합</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>서로 컬럼명이 다른 세 문서 소스를 같은 컬럼 구조로 맞춰 하나의 RAG Corpus를 만듭니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>Python에서 소스마다 다른 컬럼명을 계속 예외 처리하지 않도록 SQL에서 공통 인터페이스를 만드는 것이 편리합니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>financial_policy_docs</code>, <code>product_documents</code>, <code>news_documents</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>모든 행이 <code>source_type/source_id/title/body_text/doc_date/category/extra_meta</code> 구조로 출력됩니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p>문서 1건 = 1행</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p>중복제거 → Chunking → Embedding → Vector Search → 근거 기반 LLM 응답</p></div>
+</div></div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] 정책·상품·뉴스 문서를 같은 컬럼 구조로 맞춰 RAG Corpus를 만듭니다.
+(SELECT
+    'POLICY' AS `source_type`,
+    CAST(doc_id AS CHAR) AS `source_id`,
+    title,
+    body_text,
+    CAST(effective_date AS DATETIME) AS `doc_date`,
+    doc_type AS `category`,
+    version AS `extra_meta`
+ FROM financial_policy_docs
+ WHERE is_current = 1
+   AND pii_level &lt;&gt; 'HIGH'
+ LIMIT 3000)
+UNION ALL
+(SELECT
+    'PRODUCT',
+    CAST(product_doc_id AS CHAR),
+    title,
+    body_text,
+    updated_at,
+    product_type,
+    product_name
+ FROM product_documents
+ LIMIT 3000)
+UNION ALL
+(SELECT
+    'NEWS',
+    CAST(news_id AS CHAR),
+    title,
+    body_text,
+    published_at,
+    topic,
+    source_name
+ FROM news_documents
+ WHERE pii_level IN ('NONE', 'LOW')
+ LIMIT 3000);</code></pre>
+<div class="callout info"><b>왜 SQL에서 Chunking하지 않는가?</b><br/>Chunk 크기와 overlap은 임베딩 모델과 검색전략에 따라 바뀔 수 있습니다. 원문은 가능한 한 보존하고 Python에서 실험 가능하게 나누는 편이 재사용성이 높습니다.</div>
+</div></section>
+<section id="ops"><div class="panel">
+<h2>9. 보안·MLOps Notebook — 운영 기록을 분석 가능한 증적으로 준비하기</h2>
+<p class="lead">보안·MLOps 영역에서는 모델을 새로 만드는 것보다 누가 데이터를 사용했고, API와 모델이 어떻게 동작했고, 예측과 Drift가 어떻게 변했는지를 추적하는 것이 중요합니다.</p>
+<div class="figure"><div class="figure-title">운영 증적 데이터의 흐름</div>
+<div class="figure-body">
+<div class="flow-diagram ops-diagram">
+<div class="flow-step"><div class="icon">L</div><b>접근 로그</b><small>누가 어떤 데이터 자산에 접근했는지, 조회·실패·승인 여부를 기록합니다.</small></div>
+<div class="flow-step"><div class="icon">API</div><b>API 로그</b><small>요청 시간, 응답 코드, 지연시간, 재시도, 실패 사유를 확인합니다.</small></div>
+<div class="flow-step"><div class="icon">ML</div><b>모델 기록</b><small>모델 버전, 예측값, Drift 지표, 파이프라인 실행 결과를 추적합니다.</small></div>
+<div class="flow-step"><div class="icon">D</div><b>운영 분석</b><small>위험 징후 탐지, SLA 확인, Drift 모니터링, 감사 증적과 대시보드로 이어집니다.</small></div>
+</div>
+</div><div class="figure-caption">운영·보안 영역에서는 여러 로그를 하나로 합쳐 서비스 위험과 모델 상태를 추적 가능한 증적으로 만듭니다.</div></div>
+<div class="lesson-goal">
+<div class="goal-head">이 조회 묶음을 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 얻으려는가?</b><p>데이터 자산·계보·접근·API·동의·모델·예측·Drift·파이프라인 기록을 각각 소량 조회해 구조와 기록 형태를 확인합니다.</p></div>
+<div class="goal-item"><b>왜 이 데이터가 필요한가?</b><p>운영 분석을 시작하려면 어떤 로그가 어떤 시각·대상·상태 정보를 갖고 있는지 먼저 파악해야 합니다.</p></div>
+<div class="goal-item"><b>사용 테이블</b><p><code>data_assets</code>, <code>data_lineage_edges</code>, <code>access_logs</code>, <code>api_request_logs</code>, <code>consent_records</code>, <code>model_registry</code>, <code>model_predictions</code>, <code>model_drift_metrics</code>, <code>mlops_pipeline_runs</code></p></div>
+<div class="goal-item"><b>실행 결과에서 확인할 것</b><p>각 테이블에서 일부 기록이 조회되어 이후 어떤 컬럼을 명시적으로 선택할지 판단할 수 있어야 합니다.</p></div>
+<div class="goal-item wide"><b>결과 Grain</b><p>테이블별 원천 기록 1건 = 1행</p></div>
+<div class="goal-item wide"><b>Python에서 이어지는 작업</b><p>위험도 집계·추세 분석·PSI/KS 재계산·시각화</p></div>
+</div></div>
+<pre><code>USE fintech_fraud_lab_class;
+-- 데이터 자산/계보
+SELECT * FROM data_assets LIMIT 100;
+SELECT * FROM data_lineage_edges LIMIT 100;
+-- 접근/API 로그
+SELECT * FROM access_logs ORDER BY accessed_at DESC LIMIT 200;
+SELECT * FROM api_request_logs LIMIT 200;
+-- 동의 기록
+SELECT * FROM consent_records LIMIT 200;
+-- 모델/예측/드리프트/파이프라인
+SELECT * FROM model_registry LIMIT 100;
+SELECT * FROM model_predictions LIMIT 200;
+SELECT * FROM model_drift_metrics ORDER BY measured_at LIMIT 200;
+SELECT * FROM mlops_pipeline_runs LIMIT 200;</code></pre>
+<div class="callout warn"><b><code>SELECT *</code>는 언제 쓰나?</b><br/>테이블 구조를 처음 확인하는 탐색 단계에서는 사용할 수 있지만, 실제 분석 Loader에서는 필요한 컬럼을 명시하는 편이 데이터량·개인정보 노출·스키마 변경 위험을 줄일 수 있습니다.</div>
+</div></section>
+<section id="handoff"><div class="panel">
+<h2>10. Python으로 넘기기 전 최종 검증</h2>
+<p class="lead">SQL이 실행된다는 사실만으로 분석 데이터가 올바른 것은 아닙니다. 잘못된 Grain이나 미래정보가 들어가도 Python 코드는 정상적으로 실행될 수 있기 때문에 전달 직전에 구조를 확인해야 합니다.</p>
+<div class="check-grid">
+<div class="check">결과 한 행의 Grain이 분석 목적과 맞는가?</div>
+<div class="check">기준 PK가 예상치 않게 중복되지 않는가?</div>
+<div class="check">기준시점 이후의 미래정보가 들어오지 않았는가?</div>
+<div class="check">Target·사후판정 컬럼이 Feature에 섞이지 않았는가?</div>
+<div class="check">분석하려는 기간만 포함되어 있는가?</div>
+<div class="check">시계열은 필요한 순서로 정렬되어 있는가?</div>
+<div class="check">JOIN 전후 행 수가 예상과 맞는가?</div>
+<div class="check">NULL이 ‘정보 없음’인지 ‘오류’인지 구분했는가?</div>
+<div class="check">Python에서 만들 Feature를 SQL에서 중복 계산하지 않았는가?</div>
+<div class="check">데이터량이 크다면 기간·LIMIT·chunksize 전략이 필요한가?</div>
+</div>
+<div class="callout teal"><b>마지막 한 문장</b><br/>좋은 Loader는 “데이터를 많이 가져오는 코드”가 아니라 <strong>분석 시점에 실제로 사용할 수 있는 데이터를 정확한 한 행 단위로 재현하는 코드</strong>입니다.</div>
+</div></section>
+</main>
+<footer>SQL → Python Handoff · Grain · Point-in-Time · Stock · CSS · FDS · Personalization · RAG · MLOps</footer>
+</body>
+</html>

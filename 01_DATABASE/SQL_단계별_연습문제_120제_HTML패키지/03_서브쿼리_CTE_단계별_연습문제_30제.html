@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>서브쿼리·CTE 단계별 연습문제 30제</title><style>
+:root{--bg:#f4f7fb;--paper:#fff;--ink:#172335;--muted:#5b6877;--line:#d8e3ee;--navy:#102c49;--blue:#2563a7;--bluebg:#eef5ff;--green:#18704d;--greenbg:#edf8f3;--amber:#a46b0d;--amberbg:#fff7e8;--code:#0d1825;--shadow:0 8px 26px rgba(15,35,55,.06)}
+*{box-sizing:border-box;min-width:0}html{scroll-behavior:smooth;overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","맑은 고딕","Noto Sans KR","Segoe UI",Arial,sans-serif;line-height:1.68;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:1200px;margin:auto}.hero{padding:48px 22px 40px;color:#fff;background:linear-gradient(135deg,#0b1b2e,#123f68 58%,#0e667c)}
+.eyebrow{font-size:.76rem;font-weight:900;letter-spacing:.13em;color:#cbe9ff}.hero h1{font-size:clamp(1.9rem,4vw,3rem);line-height:1.16;letter-spacing:-.04em;margin:8px 0 12px}.hero p{margin:0;max-width:980px;color:#e1eff9}
+.hero-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}.stat{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);border-radius:13px;padding:12px}.stat b{display:block;font-size:1.05rem}.stat small{color:#d5e5f1}
+nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.98);border-bottom:1px solid var(--line)}nav .wrap{display:flex;gap:7px;overflow-x:auto;padding:9px 14px}nav a{white-space:nowrap;text-decoration:none;background:#eef5ff;border:1px solid #d6e4f3;color:#225781;padding:6px 10px;border-radius:999px;font-size:.76rem;font-weight:800}
+main{padding:28px 16px 70px}.intro,.level-section{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow);margin-bottom:26px}
+h2{font-size:clamp(1.45rem,2.2vw,1.85rem);color:var(--navy);margin:0 0 12px}p{color:var(--muted)}
+.level-head{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;margin-bottom:15px}.level-num{width:48px;height:48px;border-radius:14px;background:#eaf3fb;color:#19527e;display:grid;place-items:center;font-weight:900}.level-head p{margin:3px 0 0}
+.progression{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:14px 0}.progression div{padding:10px;border:1px solid var(--line);border-radius:11px;text-align:center;background:#fbfdff;font-size:.78rem}
+.exercise{border:1px solid #d9e4ee;border-radius:15px;background:#fff;margin:12px 0;overflow:hidden}.ex-head{display:flex;gap:11px;align-items:flex-start;padding:16px 17px;background:#fbfdff;border-bottom:1px solid #e4ebf2}.ex-no{flex:0 0 auto;width:38px;height:38px;border-radius:11px;background:#173f68;color:#fff;display:grid;place-items:center;font-weight:900}.ex-title{font-weight:900;color:#153f69;font-size:1.02rem;margin-top:2px}
+.ex-body{padding:16px 17px}.goal{padding:12px 14px;border-left:5px solid var(--blue);background:var(--bluebg);border-radius:10px;margin-bottom:12px}.meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0}.meta-box{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fafcff}.meta-box b{display:block;color:#28567b;font-size:.8rem;margin-bottom:3px}.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.tag{font-size:.72rem;font-weight:800;padding:3px 7px;border-radius:999px;background:#edf4fa;color:#315f84}
+details{border:1px solid var(--line);border-radius:11px;background:#fff;margin:9px 0;overflow:hidden}summary{cursor:pointer;padding:11px 13px;font-weight:850;color:#184d7e;background:#fbfdff}.details-body{padding:12px 13px}details.hint summary{color:#8a5a0b;background:#fff9ec}details.answer summary{color:#176447;background:#f0f9f4}
+pre{margin:10px 0;background:var(--code);color:#dcecff;border-radius:10px;padding:14px;overflow:auto;max-width:100%;font-size:.82rem;line-height:1.56;white-space:pre}code{font-family:Consolas,"SFMono-Regular",Menlo,monospace}.explain{border-left:4px solid var(--green);background:var(--greenbg);padding:11px 13px;border-radius:9px;color:#435c51}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}button{border:1px solid #c9d9e7;background:#fff;color:#23577f;border-radius:9px;padding:8px 11px;font-weight:800;cursor:pointer}.checkline{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:.82rem;color:#607083}.checkline input{width:17px;height:17px}.footer{padding:24px;text-align:center;background:#0d1d2f;color:#cbd7e5;font-size:.8rem}
+@media(max-width:850px){.hero-stats,.progression{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:680px){.hero{padding:36px 16px 30px}.intro,.level-section{padding:17px}.meta{grid-template-columns:1fr}.progression{grid-template-columns:1fr}.ex-head{padding:13px}.ex-body{padding:13px}}
+
+.hint-table-info{margin-bottom:8px;padding:8px 10px;border-radius:8px;background:#fff3d8;border:1px solid #ead29a;color:#62460d}
+.hint-table-info b{color:#704b06}.hint-table-info code{font-weight:800}
+.hint-text{color:#5b6877}
+</style></head><body>
+<header class="hero"><div class="wrap"><div class="eyebrow">SQL PRACTICE · 30 EXERCISES · ANSWERS COLLAPSED</div><h1>서브쿼리·CTE 단계별 연습문제 30제</h1><p>서브쿼리에서 시작해 단일 CTE, 필터·집계 CTE, 다중 CTE, 사전 집계, Point-in-Time Snapshot, Customer 360 프로젝트 쿼리까지 연습합니다.</p><div class="hero-stats"><div class="stat"><b>30문제</b><small>6단계 × 5</small></div><div class="stat"><b>MySQL</b><small>현재 금융·주가 DB</small></div><div class="stat"><b>힌트</b><small>필요할 때만 펼침</small></div><div class="stat"><b>정답</b><small>기본값은 접힘</small></div></div></div></header>
+<nav><div class="wrap"><a href="#l1">L1 아주 쉬움</a><a href="#l2">L2 기초 응용</a><a href="#l3">L3 중간</a><a href="#l4">L4 실무 준비</a><a href="#l5">L5 프로젝트 응용</a><a href="#l6">L6 프로젝트 수준</a></div></nav><main class="wrap"><section class="intro"><h2>연습 방법</h2><p>서브쿼리와 CTE 강의안의 WHERE/FROM/SELECT 서브쿼리, WITH/AS, Grain 변화, Pre-aggregation, Fan-out 방지, Snapshot, Consent, Customer 360 흐름을 기준으로 구성했습니다.</p><p><strong>힌트 표시:</strong> 각 문제의 힌트에는 정답을 보기 전에 어떤 원본 테이블을 사용해야 하는지 <code>스키마.테이블</code> 형식으로 함께 표시합니다.</p><div class="progression"><div><b>L1</b><br/>아주 쉬움<br/><small>1~5번</small></div><div><b>L2</b><br/>기초 응용<br/><small>6~10번</small></div><div><b>L3</b><br/>중간<br/><small>11~15번</small></div><div><b>L4</b><br/>실무 준비<br/><small>16~20번</small></div><div><b>L5</b><br/>프로젝트 응용<br/><small>21~25번</small></div><div><b>L6</b><br/>프로젝트 수준<br/><small>26~30번</small></div></div><div class="controls"><button onclick="toggleAll('.answer',true)">정답 모두 펼치기</button><button onclick="toggleAll('.answer',false)">정답 모두 접기</button><button onclick="toggleAll('.hint',false)">힌트 모두 접기</button><button onclick="resetChecks()">완료 체크 초기화</button></div><p><strong>권장 순서:</strong> 문제 확인 → 직접 SQL 작성 → 실행 결과와 Grain 확인 → 필요할 때 힌트 → 마지막에 정답 비교.</p></section><section class="level-section" id="l1"><div class="level-head"><div class="level-num">L1</div><div><h2>아주 쉬움</h2><p>한 가지 문법을 중심으로 기본 구조를 익히는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">1</div><div><div class="ex-title">WHERE 서브쿼리로 고액결제 고객</div><div class="tags"><span class="tag">서브쿼리</span><span class="tag">IN</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>50만원 이상 승인결제가 있는 고객의 지역·신용점수를 조회하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>조건을 만족하는 고객만 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code>, <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">안쪽 쿼리에서 고객 ID 목록을 만들고 바깥 WHERE IN에서 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT customer_id, region, credit_score
+FROM customers
+WHERE customer_id IN (
+    SELECT DISTINCT customer_id
+    FROM card_payments
+    WHERE is_approved = 1
+      AND amount &gt;= 500000
+);</code></pre><div class="explain"><b>해설</b><br/>서브쿼리는 먼저 중간 결과를 만들고 그 결과를 바깥 쿼리에서 다시 사용합니다.</div></div></details>
+<label class="checkline"><input data-q="1" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">2</div><div><div class="ex-title">FROM 서브쿼리로 고객요약 필터</div><div class="tags"><span class="tag">FROM Subquery</span><span class="tag">Derived Table</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>고객별 승인결제 건수·총액을 만든 뒤 10건 이상 고객만 남기세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>10건 이상 고객의 요약이 총액순으로 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">FROM 안에서 GROUP BY 후 바깥에서 payment_count를 필터합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT customer_id, payment_count, total_amount
+FROM (
+    SELECT customer_id,
+           COUNT(*) AS payment_count,
+           SUM(amount) AS total_amount
+    FROM card_payments
+    WHERE is_approved = 1
+    GROUP BY customer_id
+) AS payment_summary
+WHERE payment_count &gt;= 10
+ORDER BY total_amount DESC;</code></pre><div class="explain"><b>해설</b><br/>FROM 안의 서브쿼리 결과는 임시 테이블처럼 사용됩니다.</div></div></details>
+<label class="checkline"><input data-q="2" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">3</div><div><div class="ex-title">SELECT 서브쿼리로 승인결제 건수 붙이기</div><div class="tags"><span class="tag">Scalar Subquery</span><span class="tag">Correlated</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>고객행 옆에 해당 고객의 승인결제 건수를 계산해 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객마다 승인결제 건수가 하나의 값으로 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">안쪽 WHERE에서 cp.customer_id = c.customer_id로 연결합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT c.customer_id, c.region, c.credit_score,
+       (SELECT COUNT(*)
+        FROM card_payments AS cp
+        WHERE cp.customer_id = c.customer_id
+          AND cp.is_approved = 1) AS approved_payment_count
+FROM customers AS c
+LIMIT 20;</code></pre><div class="explain"><b>해설</b><br/>SELECT 위치의 서브쿼리는 각 바깥행에 한 개의 값을 반환해야 합니다.</div></div></details>
+<label class="checkline"><input data-q="3" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">4</div><div><div class="ex-title">삼성전자 단일 CTE</div><div class="tags"><span class="tag">WITH</span><span class="tag">AS</span><span class="tag">CTE</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>삼성전자 주가에 samsung_prices라는 이름을 붙여 다시 조회하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>stock_data</div><div class="meta-box"><b>기대 결과</b>삼성전자 거래일·종가가 날짜순으로 보입니다.</div><div class="meta-box"><b>결과 Grain</b>stock_code × trade_date = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>stock_data.stock_prices</code></div><div class="hint-text">WITH samsung_prices AS (...) 뒤에 SELECT FROM samsung_prices를 씁니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE stock_data;
+WITH samsung_prices AS (
+    SELECT stock_code, trade_date, close_price
+    FROM stock_prices
+    WHERE stock_code = '005930'
+)
+SELECT stock_code, trade_date, close_price
+FROM samsung_prices
+ORDER BY trade_date
+LIMIT 10;</code></pre><div class="explain"><b>해설</b><br/>CTE는 한 SQL 문 안에서 사용할 이름 붙은 중간 결과입니다.</div></div></details>
+<label class="checkline"><input data-q="4" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">5</div><div><div class="ex-title">고액 승인결제 고객 CTE</div><div class="tags"><span class="tag">CTE</span><span class="tag">DISTINCT</span><span class="tag">JOIN</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>고액 승인결제 고객 ID를 CTE에 담고 customers와 연결하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고액 승인결제가 있는 고객의 Master 정보가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">CTE에서 DISTINCT customer_id를 만든 뒤 JOIN합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH high_value_customers AS (
+    SELECT DISTINCT customer_id
+    FROM card_payments
+    WHERE is_approved = 1
+      AND amount &gt;= 500000
+)
+SELECT c.customer_id, c.region, c.credit_score
+FROM customers AS c
+INNER JOIN high_value_customers AS h
+  ON c.customer_id = h.customer_id;</code></pre><div class="explain"><b>해설</b><br/>서브쿼리와 같은 논리를 CTE로 위쪽에 펼쳐 쓰면 의미가 더 잘 보입니다.</div></div></details>
+<label class="checkline"><input data-q="5" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l2"><div class="level-head"><div class="level-num">L2</div><div><h2>기초 응용</h2><p>두세 가지 문법을 조합하는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">6</div><div><div class="ex-title">기간 내 승인결제 필터 CTE</div><div class="tags"><span class="tag">필터 CTE</span><span class="tag">기간</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>2026년 1~7월 승인결제만 먼저 CTE로 만드세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>기간 내 승인결제가 시간순으로 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">CTE 안 WHERE에서 승인과 기간을 제한합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH recent_approved_payments AS (
+    SELECT payment_id, customer_id, payment_at, amount, fraud_label
+    FROM card_payments
+    WHERE is_approved = 1
+      AND payment_at &gt;= '2026-01-01'
+      AND payment_at &lt;  '2026-08-01'
+)
+SELECT *
+FROM recent_approved_payments
+ORDER BY payment_at
+LIMIT 100;</code></pre><div class="explain"><b>해설</b><br/>필터는 행 수를 줄이지만 payment_id Grain은 유지합니다.</div></div></details>
+<label class="checkline"><input data-q="6" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">7</div><div><div class="ex-title">고액결제 CTE</div><div class="tags"><span class="tag">CTE</span><span class="tag">WHERE</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>50만원 이상 결제행을 high_payments라는 CTE로 만드세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고액결제가 금액 큰 순으로 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">CTE 안에서 amount &gt;= 500000을 적용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH high_payments AS (
+    SELECT payment_id, customer_id, payment_at, amount
+    FROM card_payments
+    WHERE amount &gt;= 500000
+)
+SELECT *
+FROM high_payments
+ORDER BY amount DESC
+LIMIT 50;</code></pre><div class="explain"><b>해설</b><br/>CTE 이름은 중간 결과의 의미가 드러나게 짓는 것이 좋습니다.</div></div></details>
+<label class="checkline"><input data-q="7" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">8</div><div><div class="ex-title">주가 원천 컬럼 정리 CTE</div><div class="tags"><span class="tag">CTE</span><span class="tag">컬럼 선택</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>삼성전자에서 분석에 필요한 open/close/volume만 CTE에 남기세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>stock_data</div><div class="meta-box"><b>기대 결과</b>필요한 시계열 컬럼만 보입니다.</div><div class="meta-box"><b>결과 Grain</b>stock_code × trade_date = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>stock_data.stock_prices</code></div><div class="hint-text">CTE에서 불필요한 컬럼을 제외합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE stock_data;
+WITH price_base AS (
+    SELECT stock_code, trade_date, open_price, close_price, volume
+    FROM stock_prices
+    WHERE stock_code = '005930'
+)
+SELECT trade_date, open_price, close_price, volume
+FROM price_base
+ORDER BY trade_date;</code></pre><div class="explain"><b>해설</b><br/>중간 단계에서도 필요한 컬럼만 유지하면 쿼리 의미가 선명해집니다.</div></div></details>
+<label class="checkline"><input data-q="8" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">9</div><div><div class="ex-title">위험고객 CTE</div><div class="tags"><span class="tag">CTE</span><span class="tag">IN</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>HIGH와 MEDIUM 위험고객만 risk_customers CTE로 만드세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>두 위험구간 고객만 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">customers에서 IN 조건을 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH risk_customers AS (
+    SELECT customer_id, region, credit_score, risk_segment
+    FROM customers
+    WHERE risk_segment IN ('HIGH','MEDIUM')
+)
+SELECT *
+FROM risk_customers
+ORDER BY risk_segment, customer_id;</code></pre><div class="explain"><b>해설</b><br/>단순 필터에도 CTE를 쓸 수 있지만 복잡도가 낮다면 일반 SELECT도 충분합니다.</div></div></details>
+<label class="checkline"><input data-q="9" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">10</div><div><div class="ex-title">신용점수 분류 CTE</div><div class="tags"><span class="tag">CTE</span><span class="tag">CASE</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>고객 신용점수를 HIGH/MID/LOW로 나눈 CTE를 만드세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객별 score_band가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">CASE 결과를 CTE 안에서 만듭니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH scored_customers AS (
+    SELECT customer_id, credit_score,
+           CASE
+             WHEN credit_score &gt;= 750 THEN 'HIGH'
+             WHEN credit_score &gt;= 600 THEN 'MID'
+             ELSE 'LOW'
+           END AS score_band
+    FROM customers
+)
+SELECT *
+FROM scored_customers
+ORDER BY credit_score DESC;</code></pre><div class="explain"><b>해설</b><br/>실제 모델 Binning과 별개로 CASE 문법과 CTE 구조를 함께 연습하는 문제입니다.</div></div></details>
+<label class="checkline"><input data-q="10" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l3"><div class="level-head"><div class="level-num">L3</div><div><h2>중간</h2><p>집계·관계·순서를 함께 생각하는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">11</div><div><div class="ex-title">필터 CTE → 고객 집계 CTE</div><div class="tags"><span class="tag">다중 CTE</span><span class="tag">GROUP BY</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>승인결제를 먼저 필터한 뒤 고객별 건수·합계·평균을 만드세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객별 결제요약 한 행이 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id → customer_id Grain</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">첫 CTE 결과를 두 번째 CTE의 FROM에서 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH approved_payments AS (
+    SELECT payment_id, customer_id, payment_at, amount
+    FROM card_payments
+    WHERE is_approved = 1
+),
+customer_summary AS (
+    SELECT customer_id,
+           COUNT(*) AS payment_count,
+           SUM(amount) AS total_amount,
+           AVG(amount) AS avg_amount
+    FROM approved_payments
+    GROUP BY customer_id
+)
+SELECT *
+FROM customer_summary
+ORDER BY total_amount DESC;</code></pre><div class="explain"><b>해설</b><br/>GROUP BY 단계에서 결과 Grain이 결제에서 고객으로 바뀝니다.</div></div></details>
+<label class="checkline"><input data-q="11" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">12</div><div><div class="ex-title">결제요약 CTE에 고객 Master 붙이기</div><div class="tags"><span class="tag">CTE</span><span class="tag">JOIN</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>고객별 결제요약에 region과 income_band를 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객설명정보와 결제요약이 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">요약 CTE가 customer_id당 1행인지 먼저 확인합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH customer_payment AS (
+    SELECT customer_id,
+           COUNT(*) AS payment_count,
+           SUM(amount) AS total_amount
+    FROM card_payments
+    WHERE is_approved = 1
+    GROUP BY customer_id
+)
+SELECT c.customer_id, c.region, c.income_band,
+       cp.payment_count, cp.total_amount
+FROM customers AS c
+LEFT JOIN customer_payment AS cp
+  ON c.customer_id = cp.customer_id
+ORDER BY cp.total_amount DESC;</code></pre><div class="explain"><b>해설</b><br/>JOIN 전에 CTE의 Grain을 맞춰 두면 최종 Grain을 유지하기 쉽습니다.</div></div></details>
+<label class="checkline"><input data-q="12" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">13</div><div><div class="ex-title">계좌요약·거래요약 CTE</div><div class="tags"><span class="tag">다중 CTE</span><span class="tag">Pre-aggregation</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>accounts와 transactions를 각각 고객별 1행으로 요약해 함께 조회하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객별 계좌·거래요약이 함께 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.accounts</code>, <code>fintech_fraud_lab_class.transactions</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">두 CTE 모두 GROUP BY customer_id를 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH account_summary AS (
+    SELECT customer_id, COUNT(*) AS account_count, SUM(balance) AS total_balance
+    FROM accounts
+    GROUP BY customer_id
+),
+transaction_summary AS (
+    SELECT customer_id, COUNT(*) AS transaction_count, SUM(amount) AS total_transaction_amount
+    FROM transactions
+    GROUP BY customer_id
+)
+SELECT c.customer_id,
+       a.account_count, a.total_balance,
+       t.transaction_count, t.total_transaction_amount
+FROM customers AS c
+LEFT JOIN account_summary AS a ON c.customer_id = a.customer_id
+LEFT JOIN transaction_summary AS t ON c.customer_id = t.customer_id;</code></pre><div class="explain"><b>해설</b><br/>각 N쪽 테이블을 먼저 고객 1행으로 만들면 Fan-out을 막을 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="13" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">14</div><div><div class="ex-title">COALESCE로 없는 계좌요약 0 처리</div><div class="tags"><span class="tag">COALESCE</span><span class="tag">LEFT JOIN</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>계좌가 없는 고객의 account_count와 total_balance를 0으로 보정하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>계좌 없는 고객도 0으로 표시됩니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.accounts</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">최종 SELECT에서 COALESCE를 씁니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH account_summary AS (
+    SELECT customer_id, COUNT(*) AS account_count, SUM(balance) AS total_balance
+    FROM accounts
+    GROUP BY customer_id
+)
+SELECT c.customer_id,
+       COALESCE(a.account_count,0) AS account_count,
+       COALESCE(a.total_balance,0) AS total_balance
+FROM customers AS c
+LEFT JOIN account_summary AS a
+  ON c.customer_id = a.customer_id;</code></pre><div class="explain"><b>해설</b><br/>NULL을 0으로 바꾸는 것이 의미상 맞는 경우에만 COALESCE를 사용해야 합니다.</div></div></details>
+<label class="checkline"><input data-q="14" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">15</div><div><div class="ex-title">역할별 다중 CTE</div><div class="tags"><span class="tag">다중 CTE</span><span class="tag">역할 분리</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>approved_payments→customer_payment→customer_master→최종 JOIN 흐름으로 작성하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객 Master와 결제요약이 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">CTE마다 한 가지 역할만 줍니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH approved_payments AS (
+    SELECT payment_id, customer_id, amount
+    FROM card_payments
+    WHERE is_approved = 1
+),
+customer_payment AS (
+    SELECT customer_id, COUNT(*) AS payment_count, SUM(amount) AS total_amount
+    FROM approved_payments
+    GROUP BY customer_id
+),
+customer_master AS (
+    SELECT customer_id, region, income_band, risk_segment
+    FROM customers
+)
+SELECT c.customer_id, c.region, c.income_band, c.risk_segment,
+       COALESCE(p.payment_count,0) AS payment_count,
+       COALESCE(p.total_amount,0) AS total_amount
+FROM customer_master AS c
+LEFT JOIN customer_payment AS p
+  ON c.customer_id = p.customer_id;</code></pre><div class="explain"><b>해설</b><br/>각 단계가 무엇을 입력받고 어떤 Grain을 출력하는지 확인합니다.</div></div></details>
+<label class="checkline"><input data-q="15" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l4"><div class="level-head"><div class="level-num">L4</div><div><h2>실무 준비</h2><p>Grain·NULL·중복·시점을 함께 점검하는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">16</div><div><div class="ex-title">Fan-out 방지 고객 360 기초</div><div class="tags"><span class="tag">Fan-out</span><span class="tag">Pre-aggregation</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>계좌와 거래를 각각 CTE에서 고객별로 요약한 뒤 customers에 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객별 계좌·거래요약 한 행이 만들어집니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.accounts</code>, <code>fintech_fraud_lab_class.transactions</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">accounts와 transactions를 직접 서로 JOIN하지 않습니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH account_summary AS (
+    SELECT customer_id, COUNT(*) AS account_count, SUM(balance) AS total_balance
+    FROM accounts GROUP BY customer_id
+),
+transaction_summary AS (
+    SELECT customer_id, COUNT(*) AS transaction_count, SUM(amount) AS total_transaction_amount
+    FROM transactions GROUP BY customer_id
+)
+SELECT c.customer_id, c.region,
+       COALESCE(a.account_count,0) AS account_count,
+       COALESCE(a.total_balance,0) AS total_balance,
+       COALESCE(t.transaction_count,0) AS transaction_count,
+       COALESCE(t.total_transaction_amount,0) AS total_transaction_amount
+FROM customers AS c
+LEFT JOIN account_summary AS a ON c.customer_id=a.customer_id
+LEFT JOIN transaction_summary AS t ON c.customer_id=t.customer_id;</code></pre><div class="explain"><b>해설</b><br/>사전 집계는 여러 1:N 테이블을 안전하게 결합하는 핵심 패턴입니다.</div></div></details>
+<label class="checkline"><input data-q="16" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">17</div><div><div class="ex-title">계좌·대출 고객요약</div><div class="tags"><span class="tag">accounts</span><span class="tag">loans</span><span class="tag">CTE</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>계좌수·잔액과 대출수·활성대출원금을 고객별로 결합하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객별 계좌·대출요약이 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.accounts</code>, <code>fintech_fraud_lab_class.loans</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">loan CTE에서 ACTIVE/RESTRUCTURED 원금만 조건부 합산합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH acct AS (
+    SELECT customer_id, COUNT(*) AS account_count, SUM(balance) AS total_balance
+    FROM accounts GROUP BY customer_id
+),
+loan AS (
+    SELECT customer_id, COUNT(*) AS loan_count,
+           SUM(CASE WHEN status IN ('ACTIVE','RESTRUCTURED') THEN principal ELSE 0 END) AS active_loan_principal
+    FROM loans GROUP BY customer_id
+)
+SELECT c.customer_id,
+       COALESCE(acct.account_count,0) AS account_count,
+       COALESCE(acct.total_balance,0) AS total_balance,
+       COALESCE(loan.loan_count,0) AS loan_count,
+       COALESCE(loan.active_loan_principal,0) AS active_loan_principal
+FROM customers AS c
+LEFT JOIN acct ON c.customer_id=acct.customer_id
+LEFT JOIN loan ON c.customer_id=loan.customer_id;</code></pre><div class="explain"><b>해설</b><br/>현재상태 요약과 기준시점 Snapshot은 구분해야 합니다.</div></div></details>
+<label class="checkline"><input data-q="17" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">18</div><div><div class="ex-title">캠페인 기준축 CTE</div><div class="tags"><span class="tag">campaign_experiments</span><span class="tag">Grain</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>experiment_id, customer_id, assigned_at을 중심으로 ce CTE를 만드세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>캠페인 배정 이벤트가 시간순으로 보입니다.</div><div class="meta-box"><b>결과 Grain</b>experiment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.campaign_experiments</code></div><div class="hint-text">기준 이벤트와 기준시점을 먼저 정합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH ce AS (
+    SELECT experiment_id, customer_id, assigned_at, campaign_name, converted
+    FROM campaign_experiments
+)
+SELECT *
+FROM ce
+ORDER BY assigned_at;</code></pre><div class="explain"><b>해설</b><br/>Point-in-Time Snapshot에서는 기준축을 먼저 명확히 잡습니다.</div></div></details>
+<label class="checkline"><input data-q="18" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">19</div><div><div class="ex-title">배정시점 계좌 Snapshot</div><div class="tags"><span class="tag">Point-in-Time</span><span class="tag">accounts</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>각 experiment의 assigned_at 이전에 개설된 계좌만 집계하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>experiment_id별 account_count가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>experiment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.campaign_experiments</code>, <code>fintech_fraud_lab_class.accounts</code></div><div class="hint-text"><code>a.opened_at &lt;= ce.assigned_at</code>로 배정시점 이전에 이미 개설된 계좌만 남깁니다. 과거 시점의 잔액·상태 이력이 없으므로 현재 <code>balance/status</code>는 Snapshot Feature로 사용하지 않습니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH ce AS (
+    SELECT experiment_id, customer_id, assigned_at
+    FROM campaign_experiments
+),
+acct AS (
+    SELECT ce.experiment_id,
+           COUNT(DISTINCT a.account_id) AS account_count
+    FROM ce
+    LEFT JOIN accounts AS a
+      ON a.customer_id = ce.customer_id
+     AND a.opened_at &lt;= ce.assigned_at
+    GROUP BY ce.experiment_id
+)
+SELECT experiment_id, account_count
+FROM acct
+ORDER BY experiment_id;</code></pre><div class="explain"><b>해설</b><br/><code>opened_at</code>은 계좌가 기준시점 이전에 존재했는지를 판단할 수 있는 시점 컬럼입니다. 반면 <code>accounts.balance</code>와 <code>status</code>는 별도 이력 테이블이 없는 현재 상태이므로 과거 <code>assigned_at</code>의 잔액·활성상태라고 단정할 수 없습니다. 따라서 이 문제에서는 시점상 안전한 <b>계좌 존재 건수</b>만 계산합니다.</div></div></details>
+<label class="checkline"><input data-q="19" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">20</div><div><div class="ex-title">배정시점 동의 여부</div><div class="tags"><span class="tag">consent</span><span class="tag">MAX CASE</span><span class="tag">Point-in-Time</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>각 experiment에서 AI_PROFILING 동의가 당시 유효했는지 0/1로 만드세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>experiment별 ai_profiling_granted가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>experiment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.campaign_experiments</code>, <code>fintech_fraud_lab_class.consent_records</code></div><div class="hint-text"><code>granted_at &lt;= assigned_at</code>, <code>revoked_at IS NULL OR revoked_at &gt; assigned_at</code>, <code>DATE_ADD(granted_at, INTERVAL retention_days DAY) &gt; assigned_at</code>를 함께 확인합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH ce AS (
+    SELECT experiment_id, customer_id, assigned_at
+    FROM campaign_experiments
+),
+consent AS (
+    SELECT ce.experiment_id,
+           MAX(
+               CASE
+                 WHEN cr.consent_type = 'AI_PROFILING'
+                  AND cr.granted_at &lt;= ce.assigned_at
+                  AND (cr.revoked_at IS NULL OR cr.revoked_at &gt; ce.assigned_at)
+                  AND DATE_ADD(
+                        cr.granted_at,
+                        INTERVAL cr.retention_days DAY
+                      ) &gt; ce.assigned_at
+                 THEN 1
+                 ELSE 0
+               END
+           ) AS ai_profiling_granted
+    FROM ce
+    LEFT JOIN consent_records AS cr
+      ON cr.customer_id = ce.customer_id
+    GROUP BY ce.experiment_id
+)
+SELECT experiment_id, ai_profiling_granted
+FROM consent
+ORDER BY experiment_id;</code></pre><div class="explain"><b>해설</b><br/>과거 시점의 동의 유효성은 현재 <code>consent_status</code>만으로 판단하면 안 됩니다. <code>granted_at</code>이 기준시점 이전이고, 그때까지 철회되지 않았으며, <code>granted_at + retention_days</code>로 계산한 유효기간도 끝나지 않았는지를 함께 확인합니다.</div></div></details>
+<label class="checkline"><input data-q="20" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l5"><div class="level-head"><div class="level-num">L5</div><div><h2>프로젝트 응용</h2><p>금융 AI 데이터 준비 패턴을 연습하는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">21</div><div><div class="ex-title">배정시점 대출 Snapshot</div><div class="tags"><span class="tag">loans</span><span class="tag">Point-in-Time</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>배정 전에 존재한 대출만 experiment별로 집계하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>experiment_id별 loan_count와 originated_principal_sum이 보입니다.</div><div class="meta-box"><b>결과 Grain</b>experiment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.campaign_experiments</code>, <code>fintech_fraud_lab_class.loans</code></div><div class="hint-text"><code>l.opened_at &lt;= ce.assigned_at</code>로 배정 전에 이미 존재한 대출만 연결합니다. 현재 <code>status/overdue_days</code>는 과거 상태로 사용하지 않고, 원금 합계는 <code>SUM(principal)</code>로 계산합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH ce AS (
+    SELECT experiment_id, customer_id, assigned_at
+    FROM campaign_experiments
+),
+loan AS (
+    SELECT ce.experiment_id,
+           COUNT(DISTINCT l.loan_id) AS loan_count,
+           COALESCE(SUM(l.principal), 0) AS originated_principal_sum
+    FROM ce
+    LEFT JOIN loans AS l
+      ON l.customer_id = ce.customer_id
+     AND l.opened_at &lt;= ce.assigned_at
+    GROUP BY ce.experiment_id
+)
+SELECT experiment_id, loan_count, originated_principal_sum
+FROM loan
+ORDER BY experiment_id;</code></pre><div class="explain"><b>해설</b><br/><code>opened_at</code>으로 배정시점 이전에 이미 존재한 대출만 선택합니다. <code>principal</code>은 대출 발생 시점에 확정되는 원금이므로 사용할 수 있지만, 현재 <code>status</code>와 <code>overdue_days</code>는 과거 시점의 상태 이력이 아니므로 진정한 Point-in-Time Feature에서는 제외합니다.</div></div></details>
+<label class="checkline"><input data-q="21" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">22</div><div><div class="ex-title">배정 직전 90일 거래 Snapshot</div><div class="tags"><span class="tag">transactions</span><span class="tag">90 DAY</span><span class="tag">Point-in-Time</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>각 experiment의 assigned_at 직전 90일 거래건수·유입·유출을 구하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>txn_90d·inflow_90d·outflow_90d가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>experiment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.campaign_experiments</code>, <code>fintech_fraud_lab_class.transactions</code></div><div class="hint-text">transaction_at을 assigned_at 이전 90일로 제한합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH ce AS (
+    SELECT experiment_id, customer_id, assigned_at
+    FROM campaign_experiments
+),
+txn AS (
+    SELECT ce.experiment_id,
+           COUNT(t.transaction_id) AS txn_90d,
+           SUM(CASE WHEN t.transaction_type IN ('DEPOSIT','TRANSFER_IN','INTEREST') THEN t.amount ELSE 0 END) AS inflow_90d,
+           SUM(CASE WHEN t.transaction_type IN ('WITHDRAWAL','TRANSFER_OUT','FEE') THEN t.amount ELSE 0 END) AS outflow_90d
+    FROM ce
+    LEFT JOIN transactions AS t
+      ON t.customer_id=ce.customer_id
+     AND t.transaction_at&lt;ce.assigned_at
+     AND t.transaction_at&gt;=DATE_SUB(ce.assigned_at,INTERVAL 90 DAY)
+    GROUP BY ce.experiment_id
+)
+SELECT *
+FROM txn;</code></pre><div class="explain"><b>해설</b><br/>각 experiment마다 서로 다른 90일 관찰창이 만들어집니다.</div></div></details>
+<label class="checkline"><input data-q="22" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">23</div><div><div class="ex-title">계좌 + 대출 Snapshot 결합</div><div class="tags"><span class="tag">다중 CTE</span><span class="tag">Snapshot</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>acct와 loan CTE를 ce에 experiment_id로 결합하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>각 experiment에 계좌·대출상태가 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>experiment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.campaign_experiments</code>, <code>fintech_fraud_lab_class.accounts</code>, <code>fintech_fraud_lab_class.loans</code></div><div class="hint-text">보조 CTE를 모두 experiment_id당 1행으로 만듭니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH ce AS (
+    SELECT experiment_id, customer_id, assigned_at
+    FROM campaign_experiments
+),
+acct AS (
+    SELECT ce.experiment_id,
+           COUNT(DISTINCT a.account_id) AS account_count
+    FROM ce LEFT JOIN accounts AS a
+      ON a.customer_id=ce.customer_id AND a.opened_at&lt;=ce.assigned_at
+    GROUP BY ce.experiment_id
+),
+loan AS (
+    SELECT ce.experiment_id,
+           COUNT(DISTINCT l.loan_id) AS loan_count
+    FROM ce LEFT JOIN loans AS l
+      ON l.customer_id=ce.customer_id AND l.opened_at&lt;=ce.assigned_at
+    GROUP BY ce.experiment_id
+)
+SELECT ce.experiment_id, ce.customer_id, ce.assigned_at,
+       COALESCE(acct.account_count,0) AS account_count,
+       COALESCE(loan.loan_count,0) AS loan_count
+FROM ce
+LEFT JOIN acct ON acct.experiment_id=ce.experiment_id
+LEFT JOIN loan ON loan.experiment_id=ce.experiment_id;</code></pre><div class="explain"><b>해설</b><br/>모든 보조 CTE의 Grain을 동일하게 맞추면 최종 JOIN이 안전해집니다.</div></div></details>
+<label class="checkline"><input data-q="23" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">24</div><div><div class="ex-title">계좌 + 대출 + 최근90일 거래</div><div class="tags"><span class="tag">Customer 360</span><span class="tag">다중 CTE</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>세 Snapshot CTE를 experiment_id 기준으로 결합하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>각 experiment에 세 영역 요약이 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>experiment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.campaign_experiments</code>, <code>fintech_fraud_lab_class.accounts</code>, <code>fintech_fraud_lab_class.loans</code>, <code>fintech_fraud_lab_class.transactions</code></div><div class="hint-text">23번 구조에 txn CTE를 추가합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH ce AS (
+    SELECT experiment_id, customer_id, assigned_at FROM campaign_experiments
+),
+acct AS (
+    SELECT ce.experiment_id, COUNT(DISTINCT a.account_id) AS account_count
+    FROM ce LEFT JOIN accounts AS a
+      ON a.customer_id=ce.customer_id AND a.opened_at&lt;=ce.assigned_at
+    GROUP BY ce.experiment_id
+),
+loan AS (
+    SELECT ce.experiment_id, COUNT(DISTINCT l.loan_id) AS loan_count
+    FROM ce LEFT JOIN loans AS l
+      ON l.customer_id=ce.customer_id AND l.opened_at&lt;=ce.assigned_at
+    GROUP BY ce.experiment_id
+),
+txn AS (
+    SELECT ce.experiment_id, COUNT(t.transaction_id) AS txn_90d
+    FROM ce LEFT JOIN transactions AS t
+      ON t.customer_id=ce.customer_id
+     AND t.transaction_at&lt;ce.assigned_at
+     AND t.transaction_at&gt;=DATE_SUB(ce.assigned_at,INTERVAL 90 DAY)
+    GROUP BY ce.experiment_id
+)
+SELECT ce.experiment_id, ce.customer_id, ce.assigned_at,
+       COALESCE(acct.account_count,0) AS account_count,
+       COALESCE(loan.loan_count,0) AS loan_count,
+       COALESCE(txn.txn_90d,0) AS txn_90d
+FROM ce
+LEFT JOIN acct ON acct.experiment_id=ce.experiment_id
+LEFT JOIN loan ON loan.experiment_id=ce.experiment_id
+LEFT JOIN txn ON txn.experiment_id=ce.experiment_id;</code></pre><div class="explain"><b>해설</b><br/>Customer 360은 서로 다른 원천을 동일 기준시점·동일 Grain으로 맞추는 과정입니다.</div></div></details>
+<label class="checkline"><input data-q="24" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">25</div><div><div class="ex-title">동의상태 CTE를 Snapshot에 추가</div><div class="tags"><span class="tag">Consent</span><span class="tag">Customer 360</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>Customer 360 결과에 ai_profiling_granted를 함께 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>experiment별 동의상태가 금융정보와 함께 보입니다.</div><div class="meta-box"><b>결과 Grain</b>experiment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.campaign_experiments</code>, <code>fintech_fraud_lab_class.consent_records</code></div><div class="hint-text">동의 CTE를 <code>experiment_id</code>당 1행으로 만든 뒤 LEFT JOIN합니다. 유효성은 <code>granted_at</code>, <code>revoked_at</code>, <code>retention_days</code>를 기준시점과 비교합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH ce AS (
+    SELECT experiment_id, customer_id, assigned_at
+    FROM campaign_experiments
+),
+consent AS (
+    SELECT ce.experiment_id,
+           MAX(
+               CASE
+                 WHEN cr.consent_type = 'AI_PROFILING'
+                  AND cr.granted_at &lt;= ce.assigned_at
+                  AND (cr.revoked_at IS NULL OR cr.revoked_at &gt; ce.assigned_at)
+                  AND DATE_ADD(
+                        cr.granted_at,
+                        INTERVAL cr.retention_days DAY
+                      ) &gt; ce.assigned_at
+                 THEN 1
+                 ELSE 0
+               END
+           ) AS ai_profiling_granted
+    FROM ce
+    LEFT JOIN consent_records AS cr
+      ON cr.customer_id = ce.customer_id
+    GROUP BY ce.experiment_id
+)
+SELECT ce.experiment_id, ce.customer_id, ce.assigned_at,
+       COALESCE(consent.ai_profiling_granted, 0) AS ai_profiling_granted
+FROM ce
+LEFT JOIN consent
+  ON consent.experiment_id = ce.experiment_id
+ORDER BY ce.experiment_id;</code></pre><div class="explain"><b>해설</b><br/>동의 여부는 현재 상태값이 아니라 배정시점 기준으로 재구성합니다. 부여시점·철회시점·보유기간을 모두 비교한 뒤 experiment별 0/1로 요약해 Snapshot에 붙입니다.</div></div></details>
+<label class="checkline"><input data-q="25" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l6"><div class="level-head"><div class="level-num">L6</div><div><h2>프로젝트 수준</h2><p>여러 개념을 결합해 실제 입력 데이터에 가까운 쿼리를 만드는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">26</div><div><div class="ex-title">Snapshot Grain 검증</div><div class="tags"><span class="tag">Validation</span><span class="tag">COUNT DISTINCT</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>최종 experiment 결과의 전체행수와 고유 experiment_id 수를 비교하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>두 값이 같아야 합니다.</div><div class="meta-box"><b>결과 Grain</b>검증 결과 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.campaign_experiments</code></div><div class="hint-text">final_snapshot CTE를 만든 뒤 COUNT를 비교합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH final_snapshot AS (
+    SELECT experiment_id, customer_id, assigned_at
+    FROM campaign_experiments
+)
+SELECT COUNT(*) AS result_rows,
+       COUNT(DISTINCT experiment_id) AS distinct_experiments
+FROM final_snapshot;</code></pre><div class="explain"><b>해설</b><br/>복잡한 CTE의 최종 Grain은 숫자로 검증하는 것이 안전합니다.</div></div></details>
+<label class="checkline"><input data-q="26" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">27</div><div><div class="ex-title">배정 이후 계좌 누수 검증</div><div class="tags"><span class="tag">Leakage Validation</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>시점조건을 적용한 후보에서 opened_at이 assigned_at보다 늦은 행이 있는지 확인하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>leakage_rows=0이어야 합니다.</div><div class="meta-box"><b>결과 Grain</b>검증 결과 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.campaign_experiments</code>, <code>fintech_fraud_lab_class.accounts</code></div><div class="hint-text">정상 JOIN 조건과 반대조건을 검증부에서 확인합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH candidates AS (
+    SELECT ce.experiment_id, ce.assigned_at, a.account_id, a.opened_at
+    FROM campaign_experiments AS ce
+    LEFT JOIN accounts AS a
+      ON a.customer_id=ce.customer_id
+     AND a.opened_at&lt;=ce.assigned_at
+)
+SELECT COUNT(*) AS leakage_rows
+FROM candidates
+WHERE opened_at &gt; assigned_at;</code></pre><div class="explain"><b>해설</b><br/>정상적으로 시점조건이 적용됐다면 미래계좌는 0건이어야 합니다.</div></div></details>
+<label class="checkline"><input data-q="27" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">28</div><div><div class="ex-title">기간별 FDS 고객요약 CTE</div><div class="tags"><span class="tag">FDS</span><span class="tag">필터 CTE</span><span class="tag">집계 CTE</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>기간 필터와 고객 집계를 두 CTE로 분리하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객별 기간 내 결제요약이 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">period_payments와 customer_fds_summary 두 단계로 나눕니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH period_payments AS (
+    SELECT payment_id, customer_id, amount
+    FROM card_payments
+    WHERE is_approved=1
+      AND payment_at&gt;='2026-01-01'
+      AND payment_at&lt;'2026-08-01'
+),
+customer_fds_summary AS (
+    SELECT customer_id,
+           COUNT(*) AS payment_count,
+           SUM(amount) AS total_amount,
+           AVG(amount) AS avg_amount
+    FROM period_payments
+    GROUP BY customer_id
+)
+SELECT *
+FROM customer_fds_summary
+ORDER BY total_amount DESC
+LIMIT 100;</code></pre><div class="explain"><b>해설</b><br/>필터와 Grain 변경을 분리하면 긴 SQL을 검증하기 쉽습니다.</div></div></details>
+<label class="checkline"><input data-q="28" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">29</div><div><div class="ex-title">현재 기준 고객 360 기초</div><div class="tags"><span class="tag">Pre-aggregation</span><span class="tag">Customer 360</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>계좌·대출·거래를 세 사전집계 CTE로 만든 뒤 고객에 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객마다 세 영역 요약이 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.accounts</code>, <code>fintech_fraud_lab_class.loans</code>, <code>fintech_fraud_lab_class.transactions</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">각 CTE가 customer_id당 1행인지 확인합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH acct AS (
+    SELECT customer_id, COUNT(*) AS account_count, SUM(balance) AS total_balance
+    FROM accounts GROUP BY customer_id
+),
+loan AS (
+    SELECT customer_id, COUNT(*) AS loan_count, SUM(principal) AS total_principal
+    FROM loans GROUP BY customer_id
+),
+txn AS (
+    SELECT customer_id, COUNT(*) AS transaction_count, SUM(amount) AS total_transaction_amount
+    FROM transactions GROUP BY customer_id
+)
+SELECT c.customer_id, c.region,
+       COALESCE(acct.account_count,0) AS account_count,
+       COALESCE(loan.loan_count,0) AS loan_count,
+       COALESCE(txn.transaction_count,0) AS transaction_count
+FROM customers AS c
+LEFT JOIN acct ON acct.customer_id=c.customer_id
+LEFT JOIN loan ON loan.customer_id=c.customer_id
+LEFT JOIN txn ON txn.customer_id=c.customer_id;</code></pre><div class="explain"><b>해설</b><br/>시점이 필요한 프로젝트에서는 현재상태가 아니라 기준시점 Snapshot으로 발전시켜야 합니다.</div></div></details>
+<label class="checkline"><input data-q="29" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">30</div><div><div class="ex-title">프로젝트형 Customer 360 Snapshot</div><div class="tags"><span class="tag">프로젝트</span><span class="tag">Point-in-Time</span><span class="tag">Customer 360</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>캠페인 배정시점 계좌·대출·90일 거래·동의상태를 experiment 한 행에 결합하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>experiment_id별 account_count·loan_count·originated_principal_sum·최근 90일 거래·AI_PROFILING 동의 여부가 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>experiment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.campaign_experiments</code>, <code>fintech_fraud_lab_class.accounts</code>, <code>fintech_fraud_lab_class.loans</code>, <code>fintech_fraud_lab_class.transactions</code>, <code>fintech_fraud_lab_class.consent_records</code></div><div class="hint-text">모든 보조 CTE를 <code>experiment_id</code>당 1행으로 만듭니다. 계좌·대출은 <code>opened_at &lt;= assigned_at</code>, 거래는 직전 90일, 동의는 <code>granted_at/revoked_at/retention_days</code>로 기준시점 유효성을 판정합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+WITH ce AS (
+    SELECT experiment_id, customer_id, campaign_name, group_name,
+           assigned_at, converted
+    FROM campaign_experiments
+),
+acct AS (
+    SELECT ce.experiment_id,
+           COUNT(DISTINCT a.account_id) AS account_count
+    FROM ce
+    LEFT JOIN accounts AS a
+      ON a.customer_id = ce.customer_id
+     AND a.opened_at &lt;= ce.assigned_at
+    GROUP BY ce.experiment_id
+),
+loan AS (
+    SELECT ce.experiment_id,
+           COUNT(DISTINCT l.loan_id) AS loan_count,
+           COALESCE(SUM(l.principal), 0) AS originated_principal_sum
+    FROM ce
+    LEFT JOIN loans AS l
+      ON l.customer_id = ce.customer_id
+     AND l.opened_at &lt;= ce.assigned_at
+    GROUP BY ce.experiment_id
+),
+txn AS (
+    SELECT ce.experiment_id,
+           COUNT(t.transaction_id) AS txn_90d,
+           SUM(CASE
+                 WHEN t.transaction_type IN ('DEPOSIT','TRANSFER_IN','INTEREST')
+                 THEN t.amount ELSE 0
+               END) AS inflow_90d,
+           SUM(CASE
+                 WHEN t.transaction_type IN ('WITHDRAWAL','TRANSFER_OUT','FEE')
+                 THEN t.amount ELSE 0
+               END) AS outflow_90d
+    FROM ce
+    LEFT JOIN transactions AS t
+      ON t.customer_id = ce.customer_id
+     AND t.transaction_at &lt; ce.assigned_at
+     AND t.transaction_at &gt;= DATE_SUB(ce.assigned_at, INTERVAL 90 DAY)
+    GROUP BY ce.experiment_id
+),
+consent AS (
+    SELECT ce.experiment_id,
+           MAX(
+               CASE
+                 WHEN cr.consent_type = 'AI_PROFILING'
+                  AND cr.granted_at &lt;= ce.assigned_at
+                  AND (cr.revoked_at IS NULL OR cr.revoked_at &gt; ce.assigned_at)
+                  AND DATE_ADD(
+                        cr.granted_at,
+                        INTERVAL cr.retention_days DAY
+                      ) &gt; ce.assigned_at
+                 THEN 1
+                 ELSE 0
+               END
+           ) AS ai_profiling_granted
+    FROM ce
+    LEFT JOIN consent_records AS cr
+      ON cr.customer_id = ce.customer_id
+    GROUP BY ce.experiment_id
+)
+SELECT ce.experiment_id, ce.customer_id, ce.campaign_name, ce.group_name,
+       ce.assigned_at, ce.converted,
+       COALESCE(acct.account_count, 0) AS account_count,
+       COALESCE(loan.loan_count, 0) AS loan_count,
+       COALESCE(loan.originated_principal_sum, 0) AS originated_principal_sum,
+       COALESCE(txn.txn_90d, 0) AS txn_90d,
+       COALESCE(txn.inflow_90d, 0) AS inflow_90d,
+       COALESCE(txn.outflow_90d, 0) AS outflow_90d,
+       COALESCE(consent.ai_profiling_granted, 0) AS ai_profiling_granted
+FROM ce
+LEFT JOIN acct
+  ON acct.experiment_id = ce.experiment_id
+LEFT JOIN loan
+  ON loan.experiment_id = ce.experiment_id
+LEFT JOIN txn
+  ON txn.experiment_id = ce.experiment_id
+LEFT JOIN consent
+  ON consent.experiment_id = ce.experiment_id
+ORDER BY ce.assigned_at, ce.experiment_id;</code></pre><div class="explain"><b>해설</b><br/>최종 Snapshot은 모든 보조 CTE를 <code>experiment_id</code> 1행으로 맞춰 결합합니다. 계좌·대출은 <code>opened_at</code>으로 기준시점 이전 존재 여부만 사용하고, 현재 상태인 <code>balance/status/overdue_days</code>는 과거 Feature로 쓰지 않습니다. 거래는 배정 직전 90일만 사용하고, 동의는 부여·철회·보유기간으로 당시 유효성을 재구성합니다. <code>converted</code>는 배정 이후의 성과이므로 Feature가 아니라 Target/성과 컬럼으로 분리해 해석해야 합니다.</div></div></details>
+<label class="checkline"><input data-q="30" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section></main><footer class="footer">서브쿼리·CTE 단계별 연습문제 30제</footer>
+<script>function toggleAll(s,o){document.querySelectorAll(s).forEach(d=>d.open=o)}const key='sql-practice-'+location.pathname.split('/').pop();const saved=JSON.parse(localStorage.getItem(key)||'{}');document.querySelectorAll('input[data-q]').forEach(c=>{c.checked=!!saved[c.dataset.q];c.addEventListener('change',()=>{saved[c.dataset.q]=c.checked;localStorage.setItem(key,JSON.stringify(saved))})});function resetChecks(){document.querySelectorAll('input[data-q]').forEach(c=>c.checked=false);localStorage.removeItem(key)}</script></body></html>

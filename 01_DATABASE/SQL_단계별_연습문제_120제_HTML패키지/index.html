@@ -1,0 +1,38 @@
+<!doctype html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SQL 단계별 연습문제 패키지</title><style>
+:root{--bg:#f4f7fb;--paper:#fff;--ink:#172335;--muted:#5b6877;--line:#d8e3ee;--navy:#102c49;--blue:#2563a7;--bluebg:#eef5ff;--green:#18704d;--greenbg:#edf8f3;--amber:#a46b0d;--amberbg:#fff7e8;--code:#0d1825;--shadow:0 8px 26px rgba(15,35,55,.06)}
+*{box-sizing:border-box;min-width:0}html{scroll-behavior:smooth;overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","맑은 고딕","Noto Sans KR","Segoe UI",Arial,sans-serif;line-height:1.68;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:1200px;margin:auto}.hero{padding:48px 22px 40px;color:#fff;background:linear-gradient(135deg,#0b1b2e,#123f68 58%,#0e667c)}
+.eyebrow{font-size:.76rem;font-weight:900;letter-spacing:.13em;color:#cbe9ff}.hero h1{font-size:clamp(1.9rem,4vw,3rem);line-height:1.16;letter-spacing:-.04em;margin:8px 0 12px}.hero p{margin:0;max-width:980px;color:#e1eff9}
+.hero-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}.stat{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);border-radius:13px;padding:12px}.stat b{display:block;font-size:1.05rem}.stat small{color:#d5e5f1}
+nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.98);border-bottom:1px solid var(--line)}nav .wrap{display:flex;gap:7px;overflow-x:auto;padding:9px 14px}nav a{white-space:nowrap;text-decoration:none;background:#eef5ff;border:1px solid #d6e4f3;color:#225781;padding:6px 10px;border-radius:999px;font-size:.76rem;font-weight:800}
+main{padding:28px 16px 70px}.intro,.level-section{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow);margin-bottom:26px}
+h2{font-size:clamp(1.45rem,2.2vw,1.85rem);color:var(--navy);margin:0 0 12px}p{color:var(--muted)}
+.level-head{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;margin-bottom:15px}.level-num{width:48px;height:48px;border-radius:14px;background:#eaf3fb;color:#19527e;display:grid;place-items:center;font-weight:900}.level-head p{margin:3px 0 0}
+.progression{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:14px 0}.progression div{padding:10px;border:1px solid var(--line);border-radius:11px;text-align:center;background:#fbfdff;font-size:.78rem}
+.exercise{border:1px solid #d9e4ee;border-radius:15px;background:#fff;margin:12px 0;overflow:hidden}.ex-head{display:flex;gap:11px;align-items:flex-start;padding:16px 17px;background:#fbfdff;border-bottom:1px solid #e4ebf2}.ex-no{flex:0 0 auto;width:38px;height:38px;border-radius:11px;background:#173f68;color:#fff;display:grid;place-items:center;font-weight:900}.ex-title{font-weight:900;color:#153f69;font-size:1.02rem;margin-top:2px}
+.ex-body{padding:16px 17px}.goal{padding:12px 14px;border-left:5px solid var(--blue);background:var(--bluebg);border-radius:10px;margin-bottom:12px}.meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0}.meta-box{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fafcff}.meta-box b{display:block;color:#28567b;font-size:.8rem;margin-bottom:3px}.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.tag{font-size:.72rem;font-weight:800;padding:3px 7px;border-radius:999px;background:#edf4fa;color:#315f84}
+details{border:1px solid var(--line);border-radius:11px;background:#fff;margin:9px 0;overflow:hidden}summary{cursor:pointer;padding:11px 13px;font-weight:850;color:#184d7e;background:#fbfdff}.details-body{padding:12px 13px}details.hint summary{color:#8a5a0b;background:#fff9ec}details.answer summary{color:#176447;background:#f0f9f4}
+pre{margin:10px 0;background:var(--code);color:#dcecff;border-radius:10px;padding:14px;overflow:auto;max-width:100%;font-size:.82rem;line-height:1.56;white-space:pre}code{font-family:Consolas,"SFMono-Regular",Menlo,monospace}.explain{border-left:4px solid var(--green);background:var(--greenbg);padding:11px 13px;border-radius:9px;color:#435c51}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}button{border:1px solid #c9d9e7;background:#fff;color:#23577f;border-radius:9px;padding:8px 11px;font-weight:800;cursor:pointer}.checkline{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:.82rem;color:#607083}.checkline input{width:17px;height:17px}.footer{padding:24px;text-align:center;background:#0d1d2f;color:#cbd7e5;font-size:.8rem}
+@media(max-width:850px){.hero-stats,.progression{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:680px){.hero{padding:36px 16px 30px}.intro,.level-section{padding:17px}.meta{grid-template-columns:1fr}.progression{grid-template-columns:1fr}.ex-head{padding:13px}.ex-body{padding:13px}}
+
+.file-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.file-card{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:15px;background:#fff;padding:18px}
+.file-card b{display:block;color:#153f69;font-size:1.05rem;margin-bottom:6px}
+.file-card p{margin:0}
+@media(max-width:680px){.file-grid{grid-template-columns:1fr}}
+</style></head><body>
+<header class="hero"><div class="wrap"><div class="eyebrow">SQL PRACTICE PACK</div>
+<h1>SQL 단계별 연습문제 패키지</h1>
+<p>각 단원 30문제, 총 120문제입니다. 정답은 모두 접힌 상태로 시작하며 문제별 힌트와 완료 체크 기능을 제공합니다.</p></div></header>
+<main class="wrap"><section class="intro"><h2>파일 선택</h2>
+<div class="file-grid">
+<a class="file-card" href="00_SQL_단계별_연습문제_통합_120제.html"><b>통합 120제</b><p>네 단원을 한 파일에서 순서대로 연습합니다.</p></a>
+<a class="file-card" href="01_SQL_기초문법_단계별_연습문제_30제.html"><b>기초문법 30제</b><p>SELECT부터 금융 AI Raw 데이터 추출까지.</p></a>
+<a class="file-card" href="02_ERD_JOIN_단계별_연습문제_30제.html"><b>ERD·JOIN 30제</b><p>단순 JOIN부터 Fan-out·Point-in-Time 후보 연결·검증까지.</p></a>
+<a class="file-card" href="03_서브쿼리_CTE_단계별_연습문제_30제.html"><b>서브쿼리·CTE 30제</b><p>서브쿼리부터 Customer 360 Snapshot까지.</p></a>
+<a class="file-card" href="04_Window_Function_단계별_연습문제_30제.html"><b>Window Function 30제</b><p>순위·LAG·Frame·As-of·CSS 프로젝트 입력까지.</p></a>
+</div></section></main></body></html>

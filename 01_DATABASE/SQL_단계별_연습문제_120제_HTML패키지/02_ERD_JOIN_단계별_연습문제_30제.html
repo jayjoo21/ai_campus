@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>ERD·JOIN 단계별 연습문제 30제</title><style>
+:root{--bg:#f4f7fb;--paper:#fff;--ink:#172335;--muted:#5b6877;--line:#d8e3ee;--navy:#102c49;--blue:#2563a7;--bluebg:#eef5ff;--green:#18704d;--greenbg:#edf8f3;--amber:#a46b0d;--amberbg:#fff7e8;--code:#0d1825;--shadow:0 8px 26px rgba(15,35,55,.06)}
+*{box-sizing:border-box;min-width:0}html{scroll-behavior:smooth;overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","맑은 고딕","Noto Sans KR","Segoe UI",Arial,sans-serif;line-height:1.68;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:1200px;margin:auto}.hero{padding:48px 22px 40px;color:#fff;background:linear-gradient(135deg,#0b1b2e,#123f68 58%,#0e667c)}
+.eyebrow{font-size:.76rem;font-weight:900;letter-spacing:.13em;color:#cbe9ff}.hero h1{font-size:clamp(1.9rem,4vw,3rem);line-height:1.16;letter-spacing:-.04em;margin:8px 0 12px}.hero p{margin:0;max-width:980px;color:#e1eff9}
+.hero-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}.stat{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);border-radius:13px;padding:12px}.stat b{display:block;font-size:1.05rem}.stat small{color:#d5e5f1}
+nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.98);border-bottom:1px solid var(--line)}nav .wrap{display:flex;gap:7px;overflow-x:auto;padding:9px 14px}nav a{white-space:nowrap;text-decoration:none;background:#eef5ff;border:1px solid #d6e4f3;color:#225781;padding:6px 10px;border-radius:999px;font-size:.76rem;font-weight:800}
+main{padding:28px 16px 70px}.intro,.level-section{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow);margin-bottom:26px}
+h2{font-size:clamp(1.45rem,2.2vw,1.85rem);color:var(--navy);margin:0 0 12px}p{color:var(--muted)}
+.level-head{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;margin-bottom:15px}.level-num{width:48px;height:48px;border-radius:14px;background:#eaf3fb;color:#19527e;display:grid;place-items:center;font-weight:900}.level-head p{margin:3px 0 0}
+.progression{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:14px 0}.progression div{padding:10px;border:1px solid var(--line);border-radius:11px;text-align:center;background:#fbfdff;font-size:.78rem}
+.exercise{border:1px solid #d9e4ee;border-radius:15px;background:#fff;margin:12px 0;overflow:hidden}.ex-head{display:flex;gap:11px;align-items:flex-start;padding:16px 17px;background:#fbfdff;border-bottom:1px solid #e4ebf2}.ex-no{flex:0 0 auto;width:38px;height:38px;border-radius:11px;background:#173f68;color:#fff;display:grid;place-items:center;font-weight:900}.ex-title{font-weight:900;color:#153f69;font-size:1.02rem;margin-top:2px}
+.ex-body{padding:16px 17px}.goal{padding:12px 14px;border-left:5px solid var(--blue);background:var(--bluebg);border-radius:10px;margin-bottom:12px}.meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0}.meta-box{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fafcff}.meta-box b{display:block;color:#28567b;font-size:.8rem;margin-bottom:3px}.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.tag{font-size:.72rem;font-weight:800;padding:3px 7px;border-radius:999px;background:#edf4fa;color:#315f84}
+details{border:1px solid var(--line);border-radius:11px;background:#fff;margin:9px 0;overflow:hidden}summary{cursor:pointer;padding:11px 13px;font-weight:850;color:#184d7e;background:#fbfdff}.details-body{padding:12px 13px}details.hint summary{color:#8a5a0b;background:#fff9ec}details.answer summary{color:#176447;background:#f0f9f4}
+pre{margin:10px 0;background:var(--code);color:#dcecff;border-radius:10px;padding:14px;overflow:auto;max-width:100%;font-size:.82rem;line-height:1.56;white-space:pre}code{font-family:Consolas,"SFMono-Regular",Menlo,monospace}.explain{border-left:4px solid var(--green);background:var(--greenbg);padding:11px 13px;border-radius:9px;color:#435c51}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}button{border:1px solid #c9d9e7;background:#fff;color:#23577f;border-radius:9px;padding:8px 11px;font-weight:800;cursor:pointer}.checkline{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:.82rem;color:#607083}.checkline input{width:17px;height:17px}.footer{padding:24px;text-align:center;background:#0d1d2f;color:#cbd7e5;font-size:.8rem}
+@media(max-width:850px){.hero-stats,.progression{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:680px){.hero{padding:36px 16px 30px}.intro,.level-section{padding:17px}.meta{grid-template-columns:1fr}.progression{grid-template-columns:1fr}.ex-head{padding:13px}.ex-body{padding:13px}}
+
+.hint-table-info{margin-bottom:8px;padding:8px 10px;border-radius:8px;background:#fff3d8;border:1px solid #ead29a;color:#62460d}
+.hint-table-info b{color:#704b06}.hint-table-info code{font-weight:800}
+.hint-text{color:#5b6877}
+</style></head><body>
+<header class="hero"><div class="wrap"><div class="eyebrow">SQL PRACTICE · 30 EXERCISES · ANSWERS COLLAPSED</div><h1>ERD·JOIN 단계별 연습문제 30제</h1><p>PK·FK·Grain을 확인하고 INNER/LEFT JOIN부터 다중 JOIN, Cardinality, Fan-out, 사전 집계, 프로젝트형 FDS·CSS 연결과 검증까지 연습합니다.</p><div class="hero-stats"><div class="stat"><b>30문제</b><small>6단계 × 5</small></div><div class="stat"><b>MySQL</b><small>현재 금융·주가 DB</small></div><div class="stat"><b>힌트</b><small>필요할 때만 펼침</small></div><div class="stat"><b>정답</b><small>기본값은 접힘</small></div></div></div></header>
+<nav><div class="wrap"><a href="#l1">L1 아주 쉬움</a><a href="#l2">L2 기초 응용</a><a href="#l3">L3 중간</a><a href="#l4">L4 실무 준비</a><a href="#l5">L5 프로젝트 응용</a><a href="#l6">L6 프로젝트 수준</a></div></nav><main class="wrap"><section class="intro"><h2>연습 방법</h2><p>JOIN 강의안의 기준 테이블·연결키·INNER/LEFT JOIN·N:1/1:N·Grain·Fan-out·Pre-aggregation·Point-in-Time 후보 연결·JOIN 검증 흐름을 기준으로 구성했습니다.</p><p><strong>힌트 표시:</strong> 각 문제의 힌트에는 정답을 보기 전에 어떤 원본 테이블을 사용해야 하는지 <code>스키마.테이블</code> 형식으로 함께 표시합니다.</p><div class="progression"><div><b>L1</b><br/>아주 쉬움<br/><small>1~5번</small></div><div><b>L2</b><br/>기초 응용<br/><small>6~10번</small></div><div><b>L3</b><br/>중간<br/><small>11~15번</small></div><div><b>L4</b><br/>실무 준비<br/><small>16~20번</small></div><div><b>L5</b><br/>프로젝트 응용<br/><small>21~25번</small></div><div><b>L6</b><br/>프로젝트 수준<br/><small>26~30번</small></div></div><div class="controls"><button onclick="toggleAll('.answer',true)">정답 모두 펼치기</button><button onclick="toggleAll('.answer',false)">정답 모두 접기</button><button onclick="toggleAll('.hint',false)">힌트 모두 접기</button><button onclick="resetChecks()">완료 체크 초기화</button></div><p><strong>권장 순서:</strong> 문제 확인 → 직접 SQL 작성 → 실행 결과와 Grain 확인 → 필요할 때 힌트 → 마지막에 정답 비교.</p></section><section class="level-section" id="l1"><div class="level-head"><div class="level-num">L1</div><div><h2>아주 쉬움</h2><p>한 가지 문법을 중심으로 기본 구조를 익히는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">1</div><div><div class="ex-title">결제에 고객 지역 붙이기</div><div class="tags"><span class="tag">INNER JOIN</span><span class="tag">ON</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>card_payments에 customers의 region을 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>각 결제행에 고객 지역이 함께 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">cp.customer_id와 c.customer_id를 연결합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT cp.payment_id, cp.customer_id, c.region
+FROM card_payments AS cp
+INNER JOIN customers AS c
+  ON cp.customer_id = c.customer_id
+LIMIT 20;</code></pre><div class="explain"><b>해설</b><br/>결제 N건이 고객 1행을 참조하는 N:1 JOIN이므로 고객 키가 유일하면 결제 Grain이 유지됩니다.</div></div></details>
+<label class="checkline"><input data-q="1" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">2</div><div><div class="ex-title">주가에 회사명 붙이기</div><div class="tags"><span class="tag">INNER JOIN</span><span class="tag">stock_code</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>stock_prices에 stocks의 company_name을 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>stock_data</div><div class="meta-box"><b>기대 결과</b>각 주가행에 회사명이 보입니다.</div><div class="meta-box"><b>결과 Grain</b>stock_code × trade_date = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>stock_data.stock_prices</code>, <code>stock_data.stocks</code></div><div class="hint-text">공통키 stock_code를 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE stock_data;
+SELECT p.stock_code, s.company_name, p.trade_date, p.close_price
+FROM stock_prices AS p
+INNER JOIN stocks AS s
+  ON p.stock_code = s.stock_code
+WHERE p.stock_code = '005930'
+ORDER BY p.trade_date;</code></pre><div class="explain"><b>해설</b><br/>stocks는 종목당 1행인 Master이므로 주가 Grain을 유지할 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="2" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">3</div><div><div class="ex-title">결제에 기기유형 붙이기</div><div class="tags"><span class="tag">LEFT JOIN</span><span class="tag">NULL</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>기기정보가 없어도 결제행을 남기면서 device_type을 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>모든 결제가 유지되고 기기가 없으면 NULL입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.devices</code></div><div class="hint-text">기준행을 모두 남기려면 LEFT JOIN을 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT cp.payment_id, cp.device_id, d.device_type
+FROM card_payments AS cp
+LEFT JOIN devices AS d
+  ON cp.device_id = d.device_id
+LIMIT 50;</code></pre><div class="explain"><b>해설</b><br/>LEFT JOIN은 오른쪽에 매칭이 없어도 왼쪽 기준행을 유지합니다.</div></div></details>
+<label class="checkline"><input data-q="3" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">4</div><div><div class="ex-title">결제에 가맹점 카테고리 붙이기</div><div class="tags"><span class="tag">LEFT JOIN</span><span class="tag">merchant_id</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>merchant_id로 merchants를 연결해 merchant_category를 표시하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>결제마다 가맹점 카테고리가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.merchants</code></div><div class="hint-text">cp.merchant_id = m.merchant_id입니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT cp.payment_id, cp.merchant_id, cp.amount, m.merchant_category
+FROM card_payments AS cp
+LEFT JOIN merchants AS m
+  ON cp.merchant_id = m.merchant_id
+LIMIT 50;</code></pre><div class="explain"><b>해설</b><br/>가맹점 Master 키가 유일하면 결제행은 늘어나지 않습니다.</div></div></details>
+<label class="checkline"><input data-q="4" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">5</div><div><div class="ex-title">계좌에 고객 지역 붙이기</div><div class="tags"><span class="tag">JOIN</span><span class="tag">accounts</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>accounts를 기준으로 customers의 region을 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>계좌마다 고객 지역이 보입니다.</div><div class="meta-box"><b>결과 Grain</b>account_id 1개 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.accounts</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">accounts.customer_id를 customers.customer_id에 연결합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT a.account_id, a.customer_id, a.balance, a.status, c.region
+FROM accounts AS a
+INNER JOIN customers AS c
+  ON a.customer_id = c.customer_id
+LIMIT 50;</code></pre><div class="explain"><b>해설</b><br/>계좌 여러 개가 고객 한 명을 참조하는 N:1 관계입니다.</div></div></details>
+<label class="checkline"><input data-q="5" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l2"><div class="level-head"><div class="level-num">L2</div><div><h2>기초 응용</h2><p>두세 가지 문법을 조합하는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">6</div><div><div class="ex-title">INNER와 LEFT JOIN 건수 비교</div><div class="tags"><span class="tag">INNER JOIN</span><span class="tag">LEFT JOIN</span><span class="tag">COUNT</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>devices 연결에서 INNER JOIN과 LEFT JOIN의 행 수를 각각 세어 비교하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>매칭 없는 기기가 있으면 LEFT JOIN 건수가 더 큽니다.</div><div class="meta-box"><b>결과 Grain</b>각 COUNT 결과 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.devices</code></div><div class="hint-text">두 COUNT 쿼리를 각각 실행합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT COUNT(*) AS inner_rows
+FROM card_payments AS cp
+INNER JOIN devices AS d
+  ON cp.device_id = d.device_id;
+
+SELECT COUNT(*) AS left_rows
+FROM card_payments AS cp
+LEFT JOIN devices AS d
+  ON cp.device_id = d.device_id;</code></pre><div class="explain"><b>해설</b><br/>INNER JOIN은 매칭행만, LEFT JOIN은 모든 결제를 유지합니다.</div></div></details>
+<label class="checkline"><input data-q="6" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">7</div><div><div class="ex-title">연결되지 않는 device 찾기</div><div class="tags"><span class="tag">LEFT JOIN</span><span class="tag">IS NULL</span><span class="tag">Orphan</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>device_id는 있지만 devices에 대응 행이 없는 결제를 세세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>매칭되지 않는 기기 참조 건수가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>검증 결과 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.devices</code></div><div class="hint-text">LEFT JOIN 후 d.device_id IS NULL을 찾습니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT COUNT(*) AS unmatched_devices
+FROM card_payments AS cp
+LEFT JOIN devices AS d
+  ON cp.device_id = d.device_id
+WHERE cp.device_id IS NOT NULL
+  AND d.device_id IS NULL;</code></pre><div class="explain"><b>해설</b><br/>0보다 크면 참조 무결성이나 Master 적재 상태를 점검할 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="7" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">8</div><div><div class="ex-title">카드에 고객 위험정보 붙이기</div><div class="tags"><span class="tag">JOIN</span><span class="tag">cards</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>cards에 customers의 region과 risk_segment를 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>카드마다 고객 위험정보가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>card_id 1개 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.cards</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">ca.customer_id = c.customer_id입니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT ca.card_id, ca.customer_id, c.region, c.risk_segment
+FROM cards AS ca
+INNER JOIN customers AS c
+  ON ca.customer_id = c.customer_id
+LIMIT 50;</code></pre><div class="explain"><b>해설</b><br/>카드 Grain을 유지하면서 고객 Master를 보강합니다.</div></div></details>
+<label class="checkline"><input data-q="8" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">9</div><div><div class="ex-title">삼성전자 주가에 시장·업종 붙이기</div><div class="tags"><span class="tag">JOIN</span><span class="tag">Master</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>삼성전자 각 거래일에 company_name, market, industry를 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>stock_data</div><div class="meta-box"><b>기대 결과</b>각 날짜마다 회사·시장·업종이 반복됩니다.</div><div class="meta-box"><b>결과 Grain</b>stock_code × trade_date = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>stock_data.stock_prices</code>, <code>stock_data.stocks</code></div><div class="hint-text">stock_prices를 기준으로 stocks를 붙입니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE stock_data;
+SELECT p.stock_code, s.company_name, s.market, s.industry,
+       p.trade_date, p.close_price
+FROM stock_prices AS p
+JOIN stocks AS s
+  ON p.stock_code = s.stock_code
+WHERE p.stock_code = '005930'
+ORDER BY p.trade_date;</code></pre><div class="explain"><b>해설</b><br/>Master 정보는 시계열 각 행을 설명하기 위해 반복해서 붙을 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="9" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">10</div><div><div class="ex-title">대출신청에 고객 정보 붙이기</div><div class="tags"><span class="tag">LEFT JOIN</span><span class="tag">application_id</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>loan_applications에 고객 region과 income_band를 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>각 신청행에 고객 설명정보가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>application_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.loan_applications</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">la.customer_id = c.customer_id로 연결합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT la.application_id, la.customer_id, la.application_at,
+       la.requested_amount, c.region, c.income_band
+FROM loan_applications AS la
+LEFT JOIN customers AS c
+  ON la.customer_id = c.customer_id
+ORDER BY la.application_at
+LIMIT 100;</code></pre><div class="explain"><b>해설</b><br/>신청 Event에 고객 Master를 N:1로 연결합니다.</div></div></details>
+<label class="checkline"><input data-q="10" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l3"><div class="level-head"><div class="level-num">L3</div><div><h2>중간</h2><p>집계·관계·순서를 함께 생각하는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">11</div><div><div class="ex-title">FDS 다중 Master JOIN</div><div class="tags"><span class="tag">다중 LEFT JOIN</span><span class="tag">FDS</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>결제 한 행에 가맹점·기기·고객 정보를 동시에 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>결제마다 세 Master 정보가 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.merchants</code>, <code>fintech_fraud_lab_class.devices</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">card_payments를 기준으로 Master 3개를 차례로 붙입니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT cp.payment_id, cp.customer_id, cp.payment_at, cp.amount,
+       m.merchant_category, m.risk_level AS merchant_risk_level,
+       d.device_type, d.is_trusted,
+       c.credit_score, c.risk_segment
+FROM card_payments AS cp
+LEFT JOIN merchants AS m ON cp.merchant_id = m.merchant_id
+LEFT JOIN devices AS d ON cp.device_id = d.device_id
+LEFT JOIN customers AS c ON cp.customer_id = c.customer_id
+ORDER BY cp.payment_at
+LIMIT 200;</code></pre><div class="explain"><b>해설</b><br/>오른쪽 Master가 키당 1행이면 결제 Grain이 유지됩니다.</div></div></details>
+<label class="checkline"><input data-q="11" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">12</div><div><div class="ex-title">고액결제의 가맹점 위험 확인</div><div class="tags"><span class="tag">JOIN</span><span class="tag">WHERE</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>50만원 이상 결제에 merchant risk_level을 붙여 금액 큰 순으로 보세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고액결제와 가맹점 위험정보가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.merchants</code></div><div class="hint-text">JOIN 후 cp.amount &gt;= 500000을 적용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT cp.payment_id, cp.amount, cp.merchant_id,
+       m.merchant_category, m.risk_level
+FROM card_payments AS cp
+LEFT JOIN merchants AS m
+  ON cp.merchant_id = m.merchant_id
+WHERE cp.amount &gt;= 500000
+ORDER BY cp.amount DESC
+LIMIT 100;</code></pre><div class="explain"><b>해설</b><br/>JOIN으로 설명정보를 붙인 뒤 원본 결제 조건을 WHERE에 적용합니다.</div></div></details>
+<label class="checkline"><input data-q="12" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">13</div><div><div class="ex-title">신뢰되지 않은 기기 결제</div><div class="tags"><span class="tag">INNER JOIN</span><span class="tag">WHERE</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>devices.is_trusted=0인 결제만 조회하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>신뢰되지 않은 기기의 결제가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.devices</code></div><div class="hint-text">오른쪽 정보가 반드시 필요하므로 INNER JOIN을 사용할 수 있습니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT cp.payment_id, cp.customer_id, cp.payment_at, cp.amount,
+       d.device_type, d.is_trusted
+FROM card_payments AS cp
+INNER JOIN devices AS d
+  ON cp.device_id = d.device_id
+WHERE d.is_trusted = 0
+ORDER BY cp.payment_at
+LIMIT 100;</code></pre><div class="explain"><b>해설</b><br/>오른쪽 조건이 필수라면 INNER JOIN이 의도를 분명히 표현합니다.</div></div></details>
+<label class="checkline"><input data-q="13" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">14</div><div><div class="ex-title">가맹점 위험등급별 결제건수</div><div class="tags"><span class="tag">JOIN</span><span class="tag">GROUP BY</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>결제를 merchants와 연결한 뒤 risk_level별 건수를 구하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>risk_level별 결제건수가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>risk_level 1개 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.merchants</code></div><div class="hint-text">JOIN 후 m.risk_level로 그룹화합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT m.risk_level, COUNT(*) AS payment_count
+FROM card_payments AS cp
+INNER JOIN merchants AS m
+  ON cp.merchant_id = m.merchant_id
+GROUP BY m.risk_level
+ORDER BY payment_count DESC;</code></pre><div class="explain"><b>해설</b><br/>JOIN으로 얻은 Master 속성을 기준으로 집계할 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="14" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">15</div><div><div class="ex-title">기기 신뢰여부 × 사기라벨 분포</div><div class="tags"><span class="tag">JOIN</span><span class="tag">GROUP BY</span><span class="tag">fraud_label</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>is_trusted와 fraud_label 조합별 건수를 구하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>두 변수 조합별 건수가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>is_trusted × fraud_label = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.devices</code></div><div class="hint-text">두 컬럼을 GROUP BY에 함께 둡니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT d.is_trusted, cp.fraud_label, COUNT(*) AS rows
+FROM card_payments AS cp
+LEFT JOIN devices AS d
+  ON cp.device_id = d.device_id
+WHERE cp.is_approved = 1
+GROUP BY d.is_trusted, cp.fraud_label
+ORDER BY d.is_trusted, cp.fraud_label;</code></pre><div class="explain"><b>해설</b><br/>기기정보가 없으면 NULL 그룹도 나타날 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="15" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l4"><div class="level-head"><div class="level-num">L4</div><div><h2>실무 준비</h2><p>Grain·NULL·중복·시점을 함께 점검하는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">16</div><div><div class="ex-title">고객별 계좌 수</div><div class="tags"><span class="tag">LEFT JOIN</span><span class="tag">GROUP BY</span><span class="tag">COUNT</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>고객을 모두 유지하면서 계좌 수를 구하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객마다 계좌수가 보이고 계좌 없는 고객도 남습니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code>, <code>fintech_fraud_lab_class.accounts</code></div><div class="hint-text">COUNT(a.account_id)를 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT c.customer_id, c.region,
+       COUNT(a.account_id) AS account_count
+FROM customers AS c
+LEFT JOIN accounts AS a
+  ON c.customer_id = a.customer_id
+GROUP BY c.customer_id, c.region
+ORDER BY account_count DESC;</code></pre><div class="explain"><b>해설</b><br/>COUNT(*)를 쓰면 계좌 없는 고객도 1로 셀 수 있으므로 자식 PK를 COUNT하는 것이 중요합니다.</div></div></details>
+<label class="checkline"><input data-q="16" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">17</div><div><div class="ex-title">고객별 승인 결제 건수·총액</div><div class="tags"><span class="tag">LEFT JOIN</span><span class="tag">ON 조건</span><span class="tag">GROUP BY</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>고객을 모두 유지하면서 승인결제 요약을 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객별 승인건수·총액이 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code>, <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">승인조건을 ON 절에 두면 결제 없는 고객도 유지할 수 있습니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT c.customer_id, c.region,
+       COUNT(cp.payment_id) AS approved_payment_count,
+       COALESCE(SUM(cp.amount),0) AS approved_total_amount
+FROM customers AS c
+LEFT JOIN card_payments AS cp
+  ON c.customer_id = cp.customer_id
+ AND cp.is_approved = 1
+GROUP BY c.customer_id, c.region
+ORDER BY approved_total_amount DESC;</code></pre><div class="explain"><b>해설</b><br/>LEFT JOIN에서 오른쪽 필터 위치가 결과 보존 여부를 바꿀 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="17" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">18</div><div><div class="ex-title">가맹점별 결제건수·평균금액</div><div class="tags"><span class="tag">LEFT JOIN</span><span class="tag">GROUP BY</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>모든 가맹점을 유지하면서 결제 활동을 요약하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>가맹점별 결제건수·평균금액이 보입니다.</div><div class="meta-box"><b>결과 Grain</b>merchant_id 1개 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.merchants</code>, <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">merchants를 왼쪽 기준으로 둡니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT m.merchant_id, m.merchant_category, m.risk_level,
+       COUNT(cp.payment_id) AS payment_count,
+       AVG(cp.amount) AS avg_payment_amount
+FROM merchants AS m
+LEFT JOIN card_payments AS cp
+  ON m.merchant_id = cp.merchant_id
+GROUP BY m.merchant_id, m.merchant_category, m.risk_level
+ORDER BY payment_count DESC;</code></pre><div class="explain"><b>해설</b><br/>Master를 왼쪽에 두면 아직 결제가 없는 가맹점도 확인할 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="18" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">19</div><div><div class="ex-title">시장별 주가행 수</div><div class="tags"><span class="tag">JOIN</span><span class="tag">GROUP BY</span><span class="tag">market</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>stock_prices와 stocks를 연결해 market별 가격행 수를 구하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>stock_data</div><div class="meta-box"><b>기대 결과</b>시장별 가격행 수가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>market 1개 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>stock_data.stock_prices</code>, <code>stock_data.stocks</code></div><div class="hint-text">s.market으로 그룹화합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE stock_data;
+SELECT s.market, COUNT(*) AS price_rows
+FROM stock_prices AS p
+INNER JOIN stocks AS s
+  ON p.stock_code = s.stock_code
+GROUP BY s.market
+ORDER BY price_rows DESC;</code></pre><div class="explain"><b>해설</b><br/>가격행 수와 종목 수는 서로 다른 의미이므로 결과 Grain을 확인합니다.</div></div></details>
+<label class="checkline"><input data-q="19" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">20</div><div><div class="ex-title">대출신청과 bureau 단순 JOIN 관찰</div><div class="tags"><span class="tag">LEFT JOIN</span><span class="tag">1:N</span><span class="tag">CSS</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>customer_id만으로 두 테이블을 연결해 같은 application_id가 여러 report와 연결되는지 관찰하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>같은 신청이 여러 report_date에 반복될 수 있습니다.</div><div class="meta-box"><b>결과 Grain</b>application_id × report 후보</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.loan_applications</code>, <code>fintech_fraud_lab_class.bureau_reports</code></div><div class="hint-text">시점조건 없이 customer_id만 연결합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT la.application_id, la.customer_id, la.application_at,
+       br.report_id, br.report_date, br.external_credit_score
+FROM loan_applications AS la
+LEFT JOIN bureau_reports AS br
+  ON la.customer_id = br.customer_id
+WHERE la.customer_id = 1
+ORDER BY la.application_at, br.report_date;</code></pre><div class="explain"><b>해설</b><br/>이 결과는 최종 CSS 입력이 아니라 왜 Point-in-Time 처리가 필요한지 보여주는 후보 JOIN입니다.</div></div></details>
+<label class="checkline"><input data-q="20" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l5"><div class="level-head"><div class="level-num">L5</div><div><h2>프로젝트 응용</h2><p>금융 AI 데이터 준비 패턴을 연습하는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">21</div><div><div class="ex-title">Fan-out 직접 확인</div><div class="tags"><span class="tag">Fan-out</span><span class="tag">1:N</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>고객 한 명에 accounts와 transactions를 동시에 붙여 행 증폭을 관찰하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객 1명인데 여러 조합행이 생깁니다.</div><div class="meta-box"><b>결과 Grain</b>고객 × 계좌 × 거래 조합</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code>, <code>fintech_fraud_lab_class.accounts</code>, <code>fintech_fraud_lab_class.transactions</code></div><div class="hint-text">두 자식 테이블을 customer_id로 직접 LEFT JOIN합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT c.customer_id, a.account_id, t.transaction_id
+FROM customers AS c
+LEFT JOIN accounts AS a ON c.customer_id = a.customer_id
+LEFT JOIN transactions AS t ON c.customer_id = t.customer_id
+WHERE c.customer_id = 1;</code></pre><div class="explain"><b>해설</b><br/>계좌 N행과 거래 M행이 조합되면 최대 N×M행이 만들어질 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="21" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">22</div><div><div class="ex-title">사전 집계 후 안전한 계좌요약 JOIN</div><div class="tags"><span class="tag">Pre-aggregation</span><span class="tag">Derived Table</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>accounts를 고객별 1행으로 집계한 뒤 customers에 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객별 계좌수·총잔액이 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code>, <code>fintech_fraud_lab_class.accounts</code></div><div class="hint-text">LEFT JOIN 안에 GROUP BY 파생테이블을 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT c.customer_id, c.region,
+       COALESCE(a.account_count,0) AS account_count,
+       COALESCE(a.total_balance,0) AS total_balance
+FROM customers AS c
+LEFT JOIN (
+    SELECT customer_id,
+           COUNT(*) AS account_count,
+           SUM(balance) AS total_balance
+    FROM accounts
+    GROUP BY customer_id
+) AS a
+  ON c.customer_id = a.customer_id
+ORDER BY total_balance DESC;</code></pre><div class="explain"><b>해설</b><br/>N쪽을 먼저 customer_id당 1행으로 만들면 고객 Grain을 유지하기 쉽습니다.</div></div></details>
+<label class="checkline"><input data-q="22" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">23</div><div><div class="ex-title">주가 JOIN 전후 행 수 검증</div><div class="tags"><span class="tag">Validation</span><span class="tag">COUNT</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>삼성전자 가격행 수가 Master JOIN 전후 같은지 확인하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>stock_data</div><div class="meta-box"><b>기대 결과</b>rows_before와 rows_after가 같아야 합니다.</div><div class="meta-box"><b>결과 Grain</b>각 검증 결과 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>stock_data.stock_prices</code>, <code>stock_data.stocks</code></div><div class="hint-text">JOIN 전 COUNT와 JOIN 후 COUNT를 각각 구합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE stock_data;
+SELECT COUNT(*) AS rows_before
+FROM stock_prices
+WHERE stock_code = '005930';
+
+SELECT COUNT(*) AS rows_after
+FROM stock_prices AS p
+JOIN stocks AS s ON p.stock_code = s.stock_code
+WHERE p.stock_code = '005930';</code></pre><div class="explain"><b>해설</b><br/>Master 키가 유일하면 가격행이 복제되지 않아야 합니다.</div></div></details>
+<label class="checkline"><input data-q="23" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">24</div><div><div class="ex-title">연결되지 않는 가맹점 FK</div><div class="tags"><span class="tag">Orphan Record</span><span class="tag">LEFT JOIN</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>merchant_id는 있지만 merchants에 없는 결제를 세세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>unmatched_merchants가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>검증 결과 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.merchants</code></div><div class="hint-text">LEFT JOIN 후 m.merchant_id IS NULL을 찾습니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT COUNT(*) AS unmatched_merchants
+FROM card_payments AS cp
+LEFT JOIN merchants AS m
+  ON cp.merchant_id = m.merchant_id
+WHERE cp.merchant_id IS NOT NULL
+  AND m.merchant_id IS NULL;</code></pre><div class="explain"><b>해설</b><br/>0보다 크면 Master 누락이나 참조 무결성 문제를 의심할 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="24" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">25</div><div><div class="ex-title">LEFT JOIN의 오른쪽 조건 위치 비교</div><div class="tags"><span class="tag">LEFT JOIN</span><span class="tag">ON</span><span class="tag">WHERE</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>d.is_trusted=1을 ON과 WHERE에 각각 둔 두 쿼리를 실행해 결과 차이를 설명하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>ON 버전은 모든 결제를 유지하고 WHERE 버전은 신뢰기기 결제만 남습니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id Grain 비교</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.devices</code></div><div class="hint-text">두 쿼리를 모두 실행합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+-- A
+SELECT cp.payment_id, d.is_trusted
+FROM card_payments AS cp
+LEFT JOIN devices AS d
+  ON cp.device_id = d.device_id
+ AND d.is_trusted = 1;
+
+-- B
+SELECT cp.payment_id, d.is_trusted
+FROM card_payments AS cp
+LEFT JOIN devices AS d
+  ON cp.device_id = d.device_id
+WHERE d.is_trusted = 1;</code></pre><div class="explain"><b>해설</b><br/>LEFT JOIN에서는 오른쪽 필터 위치가 기준행 보존 여부를 바꿉니다.</div></div></details>
+<label class="checkline"><input data-q="25" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l6"><div class="level-head"><div class="level-num">L6</div><div><h2>프로젝트 수준</h2><p>여러 개념을 결합해 실제 입력 데이터에 가까운 쿼리를 만드는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">26</div><div><div class="ex-title">프로젝트형 FDS 입력 JOIN</div><div class="tags"><span class="tag">FDS</span><span class="tag">다중 JOIN</span><span class="tag">Grain</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>기간 내 결제에 가맹점·기기·고객 정보를 붙여 모델 입력 직전 구조를 만드세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>결제와 세 Master가 한 행에 모입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.merchants</code>, <code>fintech_fraud_lab_class.devices</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">card_payments를 기준으로 Master 3개를 LEFT JOIN합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT cp.payment_id, cp.customer_id, cp.payment_at, cp.amount,
+       cp.payment_channel, cp.auth_method, cp.country, cp.ip_country,
+       cp.is_overseas, cp.is_online, cp.fraud_label,
+       m.merchant_category, m.risk_level AS merchant_risk_level, m.avg_ticket_size,
+       d.is_trusted, d.device_type, d.os_type,
+       c.credit_score, c.risk_segment, c.income_band
+FROM card_payments AS cp
+LEFT JOIN merchants AS m ON cp.merchant_id = m.merchant_id
+LEFT JOIN devices AS d ON cp.device_id = d.device_id
+LEFT JOIN customers AS c ON cp.customer_id = c.customer_id
+WHERE cp.payment_at &gt;= '2026-01-01'
+  AND cp.payment_at &lt;  '2026-08-01'
+ORDER BY cp.payment_at;</code></pre><div class="explain"><b>해설</b><br/>실제 FDS Loader 직전과 유사한 구조이며 fraud_label은 Target으로 구분합니다.</div></div></details>
+<label class="checkline"><input data-q="26" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">27</div><div><div class="ex-title">프로젝트형 주가 JOIN + 기간</div><div class="tags"><span class="tag">주가</span><span class="tag">JOIN</span><span class="tag">기간</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>삼성전자 가격과 Master를 결합하고 2025년 데이터만 추출하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>stock_data</div><div class="meta-box"><b>기대 결과</b>2025년 삼성전자 OHLCV와 회사정보가 날짜순으로 보입니다.</div><div class="meta-box"><b>결과 Grain</b>stock_code × trade_date = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>stock_data.stock_prices</code>, <code>stock_data.stocks</code></div><div class="hint-text">trade_date에 [시작, 종료) 조건을 둡니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE stock_data;
+SELECT p.stock_code, s.company_name, s.market, s.industry,
+       p.trade_date, p.open_price, p.high_price, p.low_price,
+       p.close_price, p.volume, p.change_rate
+FROM stock_prices AS p
+JOIN stocks AS s ON p.stock_code = s.stock_code
+WHERE p.stock_code = '005930'
+  AND p.trade_date &gt;= '2025-01-01'
+  AND p.trade_date &lt;  '2026-01-01'
+ORDER BY p.trade_date;</code></pre><div class="explain"><b>해설</b><br/>시계열 프로젝트에서는 JOIN뿐 아니라 기간과 정렬도 함께 관리해야 합니다.</div></div></details>
+<label class="checkline"><input data-q="27" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">28</div><div><div class="ex-title">CSS Point-in-Time 후보 JOIN</div><div class="tags"><span class="tag">CSS</span><span class="tag">Point-in-Time</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>대출신청마다 신청시점 이전의 bureau report만 후보로 연결하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>미래 report는 제외되지만 한 신청에 과거 report 여러 건이 남을 수 있습니다.</div><div class="meta-box"><b>결과 Grain</b>application_id × 과거 report 후보</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.loan_applications</code>, <code>fintech_fraud_lab_class.bureau_reports</code></div><div class="hint-text">ON에 br.report_date &lt;= DATE(la.application_at)를 추가합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT la.application_id, la.customer_id, la.application_at,
+       br.report_id, br.report_date, br.external_credit_score
+FROM loan_applications AS la
+LEFT JOIN bureau_reports AS br
+  ON la.customer_id = br.customer_id
+ AND br.report_date &lt;= DATE(la.application_at)
+ORDER BY la.application_at, br.report_date DESC;</code></pre><div class="explain"><b>해설</b><br/>미래정보는 차단했지만 최신 1건 선택은 Window Function 단계에서 완성합니다.</div></div></details>
+<label class="checkline"><input data-q="28" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">29</div><div><div class="ex-title">Customer 360용 계좌·거래 요약 JOIN</div><div class="tags"><span class="tag">Fan-out 방지</span><span class="tag">Pre-aggregation</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>계좌와 거래를 각각 고객별 1행으로 요약한 뒤 customers에 붙이세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객마다 계좌·거래요약이 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code>, <code>fintech_fraud_lab_class.accounts</code>, <code>fintech_fraud_lab_class.transactions</code></div><div class="hint-text">두 파생테이블을 각각 customer_id로 GROUP BY합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT c.customer_id, c.region,
+       COALESCE(a.account_count,0) AS account_count,
+       COALESCE(a.total_balance,0) AS total_balance,
+       COALESCE(t.transaction_count,0) AS transaction_count,
+       COALESCE(t.total_transaction_amount,0) AS total_transaction_amount
+FROM customers AS c
+LEFT JOIN (
+    SELECT customer_id, COUNT(*) AS account_count, SUM(balance) AS total_balance
+    FROM accounts GROUP BY customer_id
+) AS a ON c.customer_id = a.customer_id
+LEFT JOIN (
+    SELECT customer_id, COUNT(*) AS transaction_count, SUM(amount) AS total_transaction_amount
+    FROM transactions GROUP BY customer_id
+) AS t ON c.customer_id = t.customer_id;</code></pre><div class="explain"><b>해설</b><br/>두 1:N 원천을 직접 동시에 JOIN하지 않고 먼저 집계해 Fan-out을 방지합니다.</div></div></details>
+<label class="checkline"><input data-q="29" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">30</div><div><div class="ex-title">FDS JOIN 결과 Grain 최종 검증</div><div class="tags"><span class="tag">Validation</span><span class="tag">COUNT DISTINCT</span><span class="tag">프로젝트</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>다중 Master JOIN 후 전체 행 수와 고유 payment_id 수를 비교하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>joined_rows와 distinct_payments가 같아야 합니다.</div><div class="meta-box"><b>결과 Grain</b>검증 결과 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code>, <code>fintech_fraud_lab_class.merchants</code>, <code>fintech_fraud_lab_class.devices</code>, <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">최종 JOIN 구조를 COUNT(*)와 COUNT(DISTINCT ...)로 감쌉니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT COUNT(*) AS joined_rows,
+       COUNT(DISTINCT cp.payment_id) AS distinct_payments
+FROM card_payments AS cp
+LEFT JOIN merchants AS m ON cp.merchant_id = m.merchant_id
+LEFT JOIN devices AS d ON cp.device_id = d.device_id
+LEFT JOIN customers AS c ON cp.customer_id = c.customer_id
+WHERE cp.payment_at &gt;= '2026-01-01'
+  AND cp.payment_at &lt;  '2026-08-01';</code></pre><div class="explain"><b>해설</b><br/>프로젝트형 JOIN은 결과를 만든 뒤 Grain 검증까지 포함해야 완결됩니다.</div></div></details>
+<label class="checkline"><input data-q="30" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section></main><footer class="footer">ERD·JOIN 단계별 연습문제 30제</footer>
+<script>function toggleAll(s,o){document.querySelectorAll(s).forEach(d=>d.open=o)}const key='sql-practice-'+location.pathname.split('/').pop();const saved=JSON.parse(localStorage.getItem(key)||'{}');document.querySelectorAll('input[data-q]').forEach(c=>{c.checked=!!saved[c.dataset.q];c.addEventListener('change',()=>{saved[c.dataset.q]=c.checked;localStorage.setItem(key,JSON.stringify(saved))})});function resetChecks(){document.querySelectorAll('input[data-q]').forEach(c=>c.checked=false);localStorage.removeItem(key)}</script></body></html>

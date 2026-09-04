@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workbench ERD → Database 생성 → finance_stock.sql 데이터 적재 실습</title>
+<style>
+:root{
+  --navy:#0b1f3a;--navy2:#153b63;--blue:#145b9a;--cyan:#0c91b7;--green:#197a5c;
+  --gold:#a56e13;--red:#ad4040;--purple:#6357bd;--ink:#17212b;--muted:#5f6d7b;
+  --line:#d8e2ec;--paper:#fff;--panel:#f8fbff;--soft:#f4f7fb;
+  --shadow:0 10px 28px rgba(17,38,64,.07);
+}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{margin:0;background:#edf2f7;color:var(--ink);font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Segoe UI",Arial,sans-serif;line-height:1.72;word-break:keep-all;overflow-wrap:anywhere}
+a{color:#115a96}
+.wrap{max-width:1320px;margin:auto;background:#fff;min-height:100vh}
+.hero{padding:56px 60px 44px;color:#fff;background:radial-gradient(circle at 84% 18%,rgba(32,188,229,.20),transparent 28%),linear-gradient(135deg,#07192e,#0b3155 60%,#10223e)}
+.hero .kicker{font-size:.78rem;letter-spacing:.14em;opacity:.86;font-weight:800}
+.hero h1{font-size:clamp(2rem,3.6vw,2.75rem);line-height:1.18;margin:9px 0 14px}
+.hero p{max-width:1060px;color:#dceaf6;margin:0;font-size:1.04rem}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}
+.badge{padding:6px 10px;border:1px solid rgba(255,255,255,.24);border-radius:999px;background:rgba(255,255,255,.06);font-size:.76rem}
+.layout{display:block}
+.toc{position:relative;padding:20px 56px 18px;background:#f8fbff;border-bottom:1px solid var(--line)}
+.toc h2{font-size:1rem;color:var(--navy);margin:0 0 11px}
+.toc a{display:inline-block;margin:0 7px 8px 0;padding:7px 11px;color:#2d5d8c;text-decoration:none;border:1px solid #d9e5ef;border-radius:999px;background:#fff;font-size:.8rem;line-height:1.35}
+.toc a:hover{background:#edf6ff;border-color:#bdd4e7}
+.toc .sub{padding-left:11px;font-size:.76rem;color:#677b91;background:#f5f8fb}
+.content{padding:0 56px 74px;min-width:0}
+section{padding:42px 0 24px;border-bottom:1px solid #e8edf3;min-width:0}
+h2{font-size:clamp(1.55rem,2.4vw,1.92rem);color:var(--navy);line-height:1.35;margin:0 0 15px}
+h3{font-size:1.23rem;color:#143f6b;line-height:1.42;margin:29px 0 10px}
+h4{font-size:1rem;color:#183e68;margin:0 0 7px;line-height:1.4}
+p{margin:0 0 12px} .lead{font-size:1.08rem;color:#324252}
+.small{font-size:.84rem;color:var(--muted)}
+.grid2,.grid3,.grid4,.auto-grid,.check-grid,.schema-grid{display:grid;gap:14px;margin:16px 0;align-items:stretch}
+.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.auto-grid{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.check-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.schema-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card,.step-card,.mini,.schema-card,.schema-table,.check-item{border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px;min-width:0;overflow-wrap:anywhere}
+.card.soft,.soft{background:linear-gradient(180deg,#fbfdff,#f6f9fc)}
+.card h4,.mini h4{margin-bottom:6px}
+.callout{margin:17px 0;padding:15px 17px;border:1px solid #c9ddeb;border-radius:13px;background:#edf6ff;min-width:0}
+.callout.green{background:#edf8f4;border-color:#c7e7da}
+.callout.warn{background:#fff7e7;border-color:#ead49e}
+.callout.danger{background:#fff2f2;border-color:#efc8c8}
+.callout.purple{background:#f4f1ff;border-color:#d9d2fb}
+.callout b{color:#103d69}
+.tiny-chip{display:inline-block;margin:3px 4px 3px 0;padding:3px 8px;border-radius:999px;background:#eef5ff;color:#315f98;font-size:.72rem;font-weight:750}
+.viz{margin:19px 0;border:1px solid #dbe5ee;border-radius:17px;background:#fff;overflow:hidden;box-shadow:var(--shadow)}
+.viz-head{padding:14px 17px;font-weight:850;color:#0d3158;background:#fafcff;border-bottom:1px solid #e4ebf2}
+.viz-body{padding:18px;min-width:0}
+.viz-caption{padding:9px 13px;border-top:1px solid #e3eaf1;background:#fafcff;color:#607080;font-size:.82rem}
+.pipeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;align-items:stretch}
+.pipe{border:1px solid #d7e2ed;border-radius:13px;padding:14px;background:#fff;position:relative;min-width:0}
+.pipe b{display:block;color:#143f6b;margin-bottom:5px}
+.pipe .num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#eaf4ff;color:#174d80;font-weight:900;margin-bottom:8px}
+.flow-arrow{display:flex;align-items:center;justify-content:center;color:#2f6598;font-weight:900;font-size:1.2rem}
+.model-overview{display:grid;grid-template-columns:1.4fr .8fr;gap:14px}
+.schema-card h3{margin:0 0 7px;font-size:1.1rem}
+.schema-card.primary{border-top:4px solid var(--blue)} .schema-card.stock{border-top:4px solid var(--green)}
+.group-box{border-top:1px dashed #dbe4ed;padding-top:9px;margin-top:9px}
+.group-box b{display:block;font-size:.84rem;color:#526a81;margin-bottom:3px}
+.wb-window{border:1px solid #aebdca;border-radius:11px;overflow:hidden;background:#f7f9fb;box-shadow:0 7px 18px rgba(17,38,64,.08)}
+.wb-title{background:linear-gradient(#f4f7fa,#dfe6ec);padding:7px 10px;border-bottom:1px solid #b6c2cc;font-size:.8rem;font-weight:700;color:#384b5d}
+.wb-menu{display:flex;gap:16px;padding:6px 10px;background:#fff;border-bottom:1px solid #d7dfe6;font-size:.75rem;color:#43586d;overflow-x:auto}
+.wb-body{display:grid;grid-template-columns:180px 1fr;min-height:270px}
+.wb-side{background:#eef3f7;border-right:1px solid #ccd7e0;padding:12px;font-size:.78rem}
+.wb-side div{padding:5px 6px;border-radius:5px;margin-bottom:2px}
+.wb-side .active{background:#d8e9f6;color:#194f7e;font-weight:800}
+.wb-main{padding:18px;background:#fff}
+.fake-tab{display:inline-block;background:#e6eef5;border:1px solid #c4d0db;border-bottom:0;padding:6px 12px;border-radius:6px 6px 0 0;font-size:.78rem;font-weight:700}
+.fake-canvas{border:1px solid #cbd7e2;border-radius:0 8px 8px 8px;min-height:190px;padding:16px;background:linear-gradient(90deg,rgba(226,235,243,.5) 1px,transparent 1px),linear-gradient(rgba(226,235,243,.5) 1px,transparent 1px);background-size:22px 22px}
+.fake-schema{display:inline-block;vertical-align:top;width:min(260px,100%);margin:6px;padding:11px;border:1px solid #97b3cc;border-radius:7px;background:#f7fbff}
+.fake-schema b{color:#174f81}
+.screen{margin:18px 0;border:1px solid #d8e1e9;border-radius:15px;background:#fff;overflow:hidden;box-shadow:var(--shadow)}
+.screen img{display:block;width:100%;height:auto;object-fit:contain;background:#f7f9fb}
+.screen figcaption{padding:9px 12px;color:#5d6b79;font-size:.82rem;background:#fafcff;border-top:1px solid #e3e9ef}
+.img-fallback{padding:28px;text-align:center;background:#f7f9fb;color:#66798a;font-size:.88rem}
+.table-wrap{width:100%;overflow-x:auto;border:1px solid #dfe6ee;border-radius:12px;margin:14px 0 18px;background:#fff;-webkit-overflow-scrolling:touch}
+.table-wrap table{margin:0;min-width:680px}
+.table-wrap.compact table{min-width:500px}
+table{width:100%;border-collapse:collapse;font-size:.89rem}
+th{background:#10375e;color:#fff;padding:10px;text-align:left;white-space:normal}
+td{padding:10px;border-bottom:1px solid #e2e8ee;vertical-align:top}
+tr:nth-child(even) td{background:#fafcfe}
+code,kbd{font-family:Consolas,"SFMono-Regular",Menlo,monospace}
+code{color:#174f81}
+.code{margin:12px 0 16px;padding:15px 16px;border-radius:11px;background:#101d2b;color:#e8f3ff;overflow:auto;max-width:100%;font-family:Consolas,"SFMono-Regular",Menlo,monospace;font-size:.84rem;line-height:1.62;white-space:pre}
+.code .comment{color:#9dc3a7}
+.clickpath{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:11px 0}
+.clickpath span{padding:5px 9px;border-radius:7px;background:#eef4f9;border:1px solid #d1dce6;font-size:.81rem;font-weight:800;color:#385d7c}
+.clickpath i{font-style:normal;color:#47759b;font-weight:900}
+.memory-meter{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.mem-card{border:1px solid var(--line);border-radius:14px;padding:15px;text-align:center;background:#fff}
+.mem-card strong{display:block;font-size:1.7rem;color:#0f4d80}
+.mem-card.hot{background:#fff7e7;border-color:#e4cb8b} .mem-card.safe{background:#edf8f4;border-color:#c5e5d8}
+.timeline{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.timeline .phase{border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff}
+.timeline .phase b{display:block;color:#174c7d;margin-bottom:4px}
+.check-item::before{content:"✓";display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#e9f6f0;color:#166d51;font-weight:900;margin-right:7px}
+.footer{padding:25px 56px;background:#0b1f3a;color:#c9d7e5;font-size:.82rem}
+.ref-list li{margin:6px 0}
+@media(max-width:1050px){
+  .toc{padding:18px 28px 14px}
+  .content{padding:0 28px 64px} .hero{padding:46px 28px 38px} .footer{padding:24px 28px}
+  .model-overview{grid-template-columns:1fr}
+}
+@media(max-width:780px){
+  .grid2,.grid3,.grid4,.check-grid,.schema-grid,.memory-meter,.timeline{grid-template-columns:1fr}
+  .content{padding:0 18px 52px} section{padding:34px 0 18px}
+  .toc{padding:16px 18px 12px} .toc a{font-size:.76rem;padding:6px 9px;margin-right:5px}
+  .hero{padding:38px 18px 32px}
+  .wb-body{grid-template-columns:1fr} .wb-side{border-right:0;border-bottom:1px solid #ccd7e0}
+  .pipeline{grid-template-columns:1fr} .flow-arrow{transform:rotate(90deg)}
+  .table-wrap table{min-width:620px}
+}
+@media(max-width:430px){
+  .hero h1{font-size:1.85rem} .hero p{font-size:.95rem}
+  .content{padding-left:14px;padding-right:14px}
+  .card,.step-card,.schema-card,.schema-table{padding:14px}
+  .viz-body{padding:14px} .table-wrap table{min-width:560px}
+}
+@media print{
+  .toc{display:none} .layout{display:block} body{background:#fff} .wrap{max-width:none}
+  .hero{background:#fff;color:#111;border-bottom:2px solid #1e3550;padding:24px}
+  .hero p{color:#333} .viz,.card,.step-card{box-shadow:none;break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <div class="kicker">FINTECH AI CAMPUS · DATABASE PRACTICE</div>
+  <h1>ERD를 Workbench로 열어 Database 만들기<br>+ finance_stock.sql 학습 데이터 적재</h1>
+  <p>첨부된 <b>fintech_ai_campus_db.mwb</b> 모델을 MySQL Workbench에서 직접 열고, ERD가 정의한 스키마와 테이블을 실제 MySQL Server에 생성한 뒤 <b>finance_stock.sql</b>을 이용해 주식 학습 데이터를 적재하고 검증하는 전 과정을 클릭 순서와 SQL까지 따라 할 수 있도록 구성했습니다.</p>
+  <div class="badges">
+    <span class="badge">MySQL 8.0.x</span><span class="badge">MySQL Workbench</span>
+    <span class="badge">EER / Forward Engineering</span><span class="badge">stock_data</span>
+    <span class="badge">16GB → 4GB 임시 Buffer Pool</span>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="toc">
+  <h2>실습 순서</h2>
+  <a href="#goal">0. 오늘 만들 최종 상태</a>
+  <a href="#model">1. 첨부 ERD 구조 이해</a>
+  <a href="#open">2. Workbench에서 .mwb 열기</a>
+  <a href="#precheck">3. MySQL Server 사전 점검</a>
+  <a href="#forward">4. ERD → 실제 Database 생성</a>
+  <a class="sub" href="#verify-schema">4-1. 생성 결과 검증</a>
+  <a href="#buffer16">5. Buffer Pool을 16GB로 임시 확대</a>
+  <a href="#import">6. finance_stock.sql Import</a>
+  <a class="sub" href="#import-alt">6-1. SQL Editor 방식</a>
+  <a href="#buffer4">7. 적재 직후 Buffer Pool을 4GB로 복구</a>
+  <a href="#verify-data">8. 학습 데이터 검증</a>
+  <a href="#trouble">9. 오류 해결</a>
+  <a href="#check">10. 최종 체크리스트</a>
+</nav>
+
+<main class="content">
+
+<section id="goal">
+<h2>0. 오늘 실습에서 만들 최종 상태</h2>
+<p class="lead">이 실습은 단순히 SQL 파일을 실행하는 것이 아닙니다. <b>논리·물리 모델(ERD)을 실제 데이터베이스 구조로 만들고 → 데이터를 적재하고 → 데이터가 정상인지 검증하는 전체 DB 구축 과정</b>을 경험하는 것이 목표입니다.</p>
+
+<div class="viz">
+  <div class="viz-head">전체 실습 흐름</div>
+  <div class="viz-body">
+    <div class="pipeline">
+      <div class="pipe"><span class="num">1</span><b>.mwb 모델 열기</b>Workbench에서 ERD와 스키마 확인</div>
+      <div class="pipe"><span class="num">2</span><b>Forward Engineer</b>ERD를 CREATE TABLE SQL로 변환</div>
+      <div class="pipe"><span class="num">3</span><b>DB 구조 검증</b>스키마·테이블 수와 FK 확인</div>
+      <div class="pipe"><span class="num">4</span><b>Buffer 16GB</b>대량 적재 전 일시적 확대</div>
+      <div class="pipe"><span class="num">5</span><b>finance_stock.sql</b>stock_data에 학습 데이터 적재</div>
+      <div class="pipe"><span class="num">6</span><b>4GB 복구 후 검증</b>Import 완료 즉시 메모리를 원복한 뒤 건수·기간 확인</div>
+    </div>
+  </div>
+  <div class="viz-caption">ERD는 설계도이고, Forward Engineering은 설계도를 실제 MySQL 객체로 만드는 과정입니다.</div>
+</div>
+
+<div class="callout green"><b>실습 종료 기준</b><br>
+① <code>fintech_fraud_lab_class</code>와 <code>stock_data</code>가 보인다. ② ERD의 테이블이 생성되어 있다. ③ Import 직후 Buffer Pool을 다시 4GB로 복구했다. ④ <code>stock_data.stock_prices</code> 등의 데이터가 정상인지 검증했다.</div>
+</section>
+
+<section id="model">
+<h2>1. 첨부 ERD 구조부터 이해하기</h2>
+<p class="lead">첨부된 Workbench 모델에는 실제 실습에 사용하는 두 개의 주요 스키마가 정의되어 있습니다. 모델을 먼저 이해하면 Forward Engineering 화면에서 무엇을 선택해야 하는지 헷갈리지 않습니다.</p>
+
+<div class="model-overview">
+  <div class="schema-card primary">
+    <h3>fintech_fraud_lab_class</h3>
+    <p><b>39개 테이블</b>로 구성된 금융 AI 통합 실습 스키마입니다.</p>
+    <div class="group-box"><b>고객·계좌·거래</b><span class="tiny-chip">customers</span><span class="tiny-chip">accounts</span><span class="tiny-chip">transactions</span><span class="tiny-chip">cards</span><span class="tiny-chip">card_payments</span><span class="tiny-chip">loans</span><span class="tiny-chip">repayment_schedules</span><span class="tiny-chip">merchants</span><span class="tiny-chip">devices</span><span class="tiny-chip">login_events</span></div><div class="group-box"><b>FDS·모델운영</b><span class="tiny-chip">fraud_alerts</span><span class="tiny-chip">fraud_cases</span><span class="tiny-chip">model_predictions</span><span class="tiny-chip">model_registry</span><span class="tiny-chip">model_drift_metrics</span><span class="tiny-chip">mlops_pipeline_runs</span><span class="tiny-chip">api_request_logs</span><span class="tiny-chip">access_logs</span></div><div class="group-box"><b>신용·마이데이터</b><span class="tiny-chip">bureau_reports</span><span class="tiny-chip">loan_applications</span><span class="tiny-chip">consent_records</span><span class="tiny-chip">campaign_experiments</span><span class="tiny-chip">customer_inquiries</span><span class="tiny-chip">product_documents</span></div><div class="group-box"><b>시장·문서·RAG</b><span class="tiny-chip">market_prices</span><span class="tiny-chip">macro_indicators</span><span class="tiny-chip">fx_rates</span><span class="tiny-chip">interest_rate_curve</span><span class="tiny-chip">news_documents</span><span class="tiny-chip">financial_policy_docs</span><span class="tiny-chip">kind_disclosures</span><span class="tiny-chip">kind_disclosure_chunks</span><span class="tiny-chip">kind_theme_companies</span><span class="tiny-chip">kind_collection_runs</span></div><div class="group-box"><b>데이터 거버넌스·공공데이터</b><span class="tiny-chip">data_assets</span><span class="tiny-chip">data_lineage_edges</span><span class="tiny-chip">external_raw_records</span><span class="tiny-chip">public_card_spend_agg</span><span class="tiny-chip">public_merchants</span></div>
+  </div>
+  <div class="schema-card stock">
+    <h3>stock_data</h3>
+    <p><b>3개 테이블</b>로 구성된 주식 학습 데이터 스키마입니다.</p>
+    <span class="tiny-chip">stock_collection_log</span><span class="tiny-chip">stock_prices</span><span class="tiny-chip">stocks</span>
+    <div class="callout green" style="margin-bottom:0"><b>finance_stock.sql의 주 대상</b><br>이 강의안에서는 주식 데이터가 <code>stock_data</code>에 적재되는 흐름으로 진행합니다.</div>
+  </div>
+</div>
+
+<div class="callout warn"><b>mydb가 보이는 이유</b><br>첨부 모델에는 내용이 없는 <code>mydb</code> 스키마도 있습니다. Workbench가 새 모델에 기본으로 넣는 빈 스키마 성격이므로 이번 실습에서는 생성 대상에서 제외합니다.</div>
+
+<h3>stock_data의 세 테이블</h3>
+<div class="schema-grid">
+  
+    <div class="schema-table">
+      <h4>stock_collection_log</h4>
+      <div class="table-wrap compact"><table>
+        <thead><tr><th>컬럼</th><th>형식</th><th>제약</th></tr></thead>
+        <tbody><tr><td><code>log_id</code></td><td>BIGINT</td><td>NOT NULL</td></tr><tr><td><code>stock_code</code></td><td>VARCHAR</td><td>NOT NULL</td></tr><tr><td><code>requested_start</code></td><td>DATE</td><td>NOT NULL</td></tr><tr><td><code>requested_end</code></td><td>DATE</td><td>NOT NULL</td></tr><tr><td><code>status</code></td><td>VARCHAR</td><td>NOT NULL</td></tr><tr><td><code>row_count</code></td><td>INT</td><td>NOT NULL</td></tr><tr><td><code>data_source</code></td><td>VARCHAR</td><td></td></tr><tr><td><code>error_message</code></td><td>TEXT</td><td></td></tr><tr><td><code>collected_at</code></td><td>TIMESTAMP</td><td>NOT NULL</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="schema-table">
+      <h4>stock_prices</h4>
+      <div class="table-wrap compact"><table>
+        <thead><tr><th>컬럼</th><th>형식</th><th>제약</th></tr></thead>
+        <tbody><tr><td><code>stock_code</code></td><td>VARCHAR</td><td>NOT NULL</td></tr><tr><td><code>trade_date</code></td><td>DATE</td><td>NOT NULL</td></tr><tr><td><code>open_price</code></td><td>BIGINT</td><td></td></tr><tr><td><code>high_price</code></td><td>BIGINT</td><td></td></tr><tr><td><code>low_price</code></td><td>BIGINT</td><td></td></tr><tr><td><code>close_price</code></td><td>BIGINT</td><td></td></tr><tr><td><code>volume</code></td><td>BIGINT</td><td></td></tr><tr><td><code>change_rate</code></td><td>DECIMAL</td><td></td></tr><tr><td><code>data_source</code></td><td>VARCHAR</td><td>NOT NULL</td></tr><tr><td><code>created_at</code></td><td>TIMESTAMP</td><td>NOT NULL</td></tr><tr><td><code>updated_at</code></td><td>TIMESTAMP</td><td>NOT NULL</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="schema-table">
+      <h4>stocks</h4>
+      <div class="table-wrap compact"><table>
+        <thead><tr><th>컬럼</th><th>형식</th><th>제약</th></tr></thead>
+        <tbody><tr><td><code>stock_code</code></td><td>VARCHAR</td><td>NOT NULL</td></tr><tr><td><code>company_name</code></td><td>VARCHAR</td><td>NOT NULL</td></tr><tr><td><code>market</code></td><td>VARCHAR</td><td></td></tr><tr><td><code>industry</code></td><td>VARCHAR</td><td></td></tr><tr><td><code>major_product</code></td><td>TEXT</td><td></td></tr><tr><td><code>listing_date</code></td><td>DATE</td><td></td></tr><tr><td><code>homepage</code></td><td>VARCHAR</td><td></td></tr><tr><td><code>region</code></td><td>VARCHAR</td><td></td></tr><tr><td><code>updated_at</code></td><td>TIMESTAMP</td><td>NOT NULL</td></tr></tbody>
+      </table></div>
+    </div>
+</div>
+
+<div class="viz">
+  <div class="viz-head">stock_data의 핵심 관계</div>
+  <div class="viz-body">
+    <div class="grid3">
+      <div class="card soft"><h4>stocks</h4><p>종목 마스터. 종목코드, 회사명, 시장, 업종, 상장일 등을 보관합니다.</p></div>
+      <div class="card soft"><h4>stock_prices</h4><p>일별 가격 시계열. <code>stock_code + trade_date</code>를 중심으로 가격·거래량을 저장합니다.</p></div>
+      <div class="card soft"><h4>stock_collection_log</h4><p>수집 시작일·종료일·성공 여부·수집 건수 등 데이터 수집 이력을 기록합니다.</p></div>
+    </div>
+    <div class="callout"><b>FK 관계</b><br><code>stock_prices.stock_code → stocks.stock_code</code> 관계가 정의되어 있습니다. 즉 가격 데이터는 반드시 종목 마스터와 연결되는 구조입니다.</div>
+  </div>
+</div>
+</section>
+
+<section id="open">
+<h2>2. MySQL Workbench에서 ERD(.mwb) 열기</h2>
+
+<div class="step-card">
+<h3>Step 1. Workbench 실행</h3>
+<p>Windows 시작 메뉴에서 <b>MySQL Workbench 8.0 CE</b>를 실행합니다.</p>
+<div class="clickpath"><span>Windows 시작</span><i>→</i><span>MySQL Workbench 8.0 CE</span></div>
+</div>
+
+<div class="step-card">
+<h3>Step 2. 첨부 모델 파일 열기</h3>
+<div class="clickpath"><span>File</span><i>→</i><span>Open Model...</span><i>→</i><span>fintech_ai_campus_db.mwb</span></div>
+<p>파일을 선택하면 SQL Editor가 아니라 <b>Model 화면</b>이 열립니다. 모델 화면은 서버의 실제 데이터가 아니라 DB의 구조를 설계하는 공간입니다.</p>
+</div>
+
+<div class="viz">
+  <div class="viz-head">Workbench에서 모델을 열었을 때 찾아야 하는 위치</div>
+  <div class="viz-body">
+    <div class="wb-window">
+      <div class="wb-title">MySQL Workbench — fintech_ai_campus_db.mwb</div>
+      <div class="wb-menu"><span>File</span><span>Edit</span><span>View</span><span>Arrange</span><span>Model</span><span>Database</span><span>Tools</span></div>
+      <div class="wb-body">
+        <div class="wb-side">
+          <div class="active">Physical Schemas</div>
+          <div>▸ fintech_fraud_lab_class</div>
+          <div>▸ stock_data</div>
+          <div>▸ mydb (빈 스키마)</div>
+          <div style="margin-top:12px" class="active">EER Diagrams</div>
+          <div>▸ EER Diagram</div>
+        </div>
+        <div class="wb-main">
+          <span class="fake-tab">EER Diagram</span>
+          <div class="fake-canvas">
+            <div class="fake-schema"><b>fintech_fraud_lab_class</b><br><span class="small">customers · accounts · transactions · FDS · MyData · RAG · MLOps ...</span></div>
+            <div class="fake-schema"><b>stock_data</b><br><span class="small">stocks · stock_prices · stock_collection_log</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="viz-caption">실제 Workbench의 세부 위치는 버전에 따라 조금 달라질 수 있지만, Physical Schemas와 EER Diagram을 확인하면 됩니다.</div>
+</div>
+
+<div class="callout"><b>ERD가 너무 작게 보이면</b><br>마우스 휠/Zoom 컨트롤로 확대하고, 왼쪽 Physical Schemas에서 테이블명을 직접 확인하세요. 테이블을 더블클릭하면 Columns, Indexes, Foreign Keys를 확인할 수 있습니다.</div>
+</section>
+
+<section id="precheck">
+<h2>3. 실제 MySQL Server 상태를 먼저 확인하기</h2>
+<p class="lead">ERD를 서버에 생성하기 전에 <b>접속 대상 서버가 맞는지, 동일 이름의 DB가 이미 있는지</b>를 먼저 확인해야 합니다.</p>
+
+<div class="step-card">
+<h3>Step 1. Local MySQL 연결 열기</h3>
+<p>Workbench 홈 화면의 <b>MySQL Connections</b>에서 수업용 연결을 엽니다. 기본 예시는 다음과 같습니다.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>항목</th><th>예시</th><th>의미</th></tr></thead>
+<tbody>
+<tr><td>Hostname</td><td><code>127.0.0.1</code></td><td>내 PC의 MySQL Server</td></tr>
+<tr><td>Port</td><td><code>3306</code></td><td>MySQL 기본 포트</td></tr>
+<tr><td>Username</td><td><code>root</code></td><td>로컬 실습 관리자 계정 예시</td></tr>
+</tbody></table></div>
+</div>
+
+<div class="step-card">
+<h3>Step 2. 서버와 기존 스키마 확인</h3>
+<div class="code">SELECT VERSION() AS mysql_version;
+
+SHOW DATABASES;
+
+SELECT
+    schema_name
+FROM information_schema.schemata
+WHERE schema_name IN ('fintech_fraud_lab_class', 'stock_data');</div>
+<p>결과가 0행이면 두 DB가 아직 없습니다. 이미 존재한다면 <b>기존 수업 데이터가 필요한지 먼저 확인</b>하고 진행합니다.</p>
+</div>
+
+<div class="callout danger"><b>DROP DATABASE를 바로 실행하지 마세요.</b><br>같은 이름의 DB가 이미 있다면 이전 수업 데이터가 들어 있을 수 있습니다. 초기화가 확실히 필요한 경우에만 백업 후 삭제합니다. 학생 실습에서는 “모르면 삭제하지 않는다”가 원칙입니다.</div>
+</section>
+
+<section id="forward">
+<h2>4. ERD를 실제 Database로 만들기 — Forward Engineering</h2>
+<p class="lead"><b>Forward Engineering</b>은 Workbench 모델에 그려진 Schema·Table·PK·FK·Index를 실제 MySQL Server에 생성하는 기능입니다. 테이블을 하나씩 손으로 CREATE할 필요가 없습니다.</p>
+
+<div class="viz">
+  <div class="viz-head">Forward Engineering에서 화면이 진행되는 순서</div>
+  <div class="viz-body">
+    <div class="pipeline">
+      <div class="pipe"><span class="num">1</span><b>Connection</b>어느 MySQL Server에 만들지 선택</div>
+      <div class="pipe"><span class="num">2</span><b>Options</b>생성 SQL 옵션 확인</div>
+      <div class="pipe"><span class="num">3</span><b>Select Objects</b>Schema/Table 등 생성 대상 선택</div>
+      <div class="pipe"><span class="num">4</span><b>Review SQL</b>CREATE DATABASE/TABLE SQL 확인</div>
+      <div class="pipe"><span class="num">5</span><b>Execute</b>실제 서버에 DDL 실행</div>
+    </div>
+  </div>
+</div>
+
+<div class="step-card">
+<h3>Step 1. 모델 탭에서 Forward Engineer 실행</h3>
+<div class="clickpath"><span>Database</span><i>→</i><span>Forward Engineer...</span></div>
+<p>반드시 <b>.mwb 모델 탭이 열린 상태</b>에서 실행합니다. SQL Editor 탭에서 찾으면 원하는 메뉴 흐름과 다르게 느껴질 수 있습니다.</p>
+</div>
+
+<div class="step-card">
+<h3>Step 2. Connection Options</h3>
+<p>앞에서 테스트한 Local MySQL 연결을 선택하고 <b>Next</b>를 누릅니다.</p>
+</div>
+
+<figure class="screen">
+<img loading="lazy" src="https://dev.mysql.com/doc/workbench/en/images/wb-forward-engineering-to-database-wizard-connect.png"
+alt="MySQL Workbench Forward Engineer Connection Options"
+onerror="this.outerHTML='<div class=&quot;img-fallback&quot;>Forward Engineer Connection Options: 저장된 MySQL 연결을 선택하고 Next를 누르는 화면</div>'">
+<figcaption>Forward Engineer의 DBMS 연결 단계 예시.</figcaption>
+</figure>
+
+<div class="step-card">
+<h3>Step 3. Options 화면</h3>
+<p>초보자 실습에서는 특별한 이유가 없다면 기본값을 유지합니다.</p>
+<div class="grid2">
+<div class="card soft"><h4>Generate DROP Statements</h4><p>기존 객체 삭제문을 만들 수 있는 옵션입니다. <b>새 DB 생성 실습에서는 불필요</b>하며 기존 데이터가 있을 때 위험할 수 있습니다.</p></div>
+<div class="card soft"><h4>Generate INSERT / 기타 옵션</h4><p>이번 단계의 목적은 구조 생성이므로 CREATE TABLE과 FK가 정상 생성되는지가 핵심입니다.</p></div>
+</div>
+</div>
+
+<div class="step-card">
+<h3>Step 4. Select Objects</h3>
+<p>테이블·View·Routine·Trigger 등 Forward Engineering 대상 객체를 선택합니다.</p>
+<div class="callout green"><b>이번 모델에서 확인할 핵심</b><br>
+<code>fintech_fraud_lab_class</code>의 39개 테이블과 <code>stock_data</code>의 3개 테이블이 생성 대상에 포함되어야 합니다.
+ 빈 <code>mydb</code>는 이번 실습 대상이 아니므로 제외합니다.
+</div>
+</div>
+
+<figure class="screen">
+<img loading="lazy" src="https://dev.mysql.com/doc/workbench/en/images/wb-forward-engineering-to-database-wizard-select-objects.png"
+alt="MySQL Workbench Select Objects to Forward Engineer"
+onerror="this.outerHTML='<div class=&quot;img-fallback&quot;>Select Objects: Tables / Views / Routines / Triggers 중 서버에 생성할 객체를 확인하는 화면</div>'">
+<figcaption>Select Objects 단계에서는 생성할 객체 범위를 확인합니다.</figcaption>
+</figure>
+
+<div class="step-card">
+<h3>Step 5. Review SQL Script</h3>
+<p>Workbench가 ERD를 바탕으로 자동 생성한 DDL을 보여줍니다. 아래 문자열이 있는지 검색해 보세요.</p>
+<div class="code">CREATE SCHEMA IF NOT EXISTS `fintech_fraud_lab_class`
+CREATE SCHEMA IF NOT EXISTS `stock_data`
+
+CREATE TABLE ... `customers`
+CREATE TABLE ... `transactions`
+CREATE TABLE ... `stocks`
+CREATE TABLE ... `stock_prices`</div>
+<p>DDL을 읽어보는 습관이 중요합니다. 이 단계에서 “내가 예상한 DB와 테이블을 만드는 SQL이 맞는가?”를 확인합니다.</p>
+</div>
+
+<figure class="screen">
+<img loading="lazy" src="https://dev.mysql.com/doc/workbench/en/images/wb-forward-engineering-to-database-wizard-review-script.png"
+alt="MySQL Workbench Review SQL Script"
+onerror="this.outerHTML='<div class=&quot;img-fallback&quot;>Review SQL Script: Workbench가 ERD에서 자동 생성한 CREATE SCHEMA / CREATE TABLE SQL을 검토하는 화면</div>'">
+<figcaption>Review SQL Script 단계. 실제 실행 전에 CREATE 문을 확인합니다.</figcaption>
+</figure>
+
+<div class="step-card">
+<h3>Step 6. Execute / Next</h3>
+<p>SQL이 맞다면 <b>Next</b>로 진행하여 서버에 실제로 실행합니다. Progress 화면에서 각 작업이 성공했는지 확인하고 <b>Finish</b>합니다.</p>
+</div>
+
+<figure class="screen">
+<img loading="lazy" src="https://dev.mysql.com/doc/workbench/en/images/wb-forward-engineering-to-database-wizard-progress.png"
+alt="MySQL Workbench Forward Engineering Progress"
+onerror="this.outerHTML='<div class=&quot;img-fallback&quot;>Forward Engineering Progress: CREATE SQL 실행 결과와 오류 여부를 확인하는 화면</div>'">
+<figcaption>Forward Engineering Progress에서 오류 없이 완료되었는지 확인합니다.</figcaption>
+</figure>
+</section>
+
+<section id="verify-schema">
+<h2>4-1. Database와 테이블이 실제로 생겼는지 확인</h2>
+<p>Workbench 왼쪽 <b>SCHEMAS</b> 영역에서 Refresh 아이콘을 누르거나, 빈 공간에서 <b>Refresh All</b>을 선택합니다.</p>
+
+<div class="code">SHOW DATABASES LIKE 'fintech_fraud_lab_class';
+SHOW DATABASES LIKE 'stock_data';
+
+SELECT table_schema, COUNT(*) AS table_count
+FROM information_schema.tables
+WHERE table_schema IN ('fintech_fraud_lab_class', 'stock_data')
+  AND table_type = 'BASE TABLE'
+GROUP BY table_schema
+ORDER BY table_schema;</div>
+
+<div class="grid2">
+<div class="card green"><h4>기대값 ①</h4><p><code>fintech_fraud_lab_class</code> → <b>39개 테이블</b></p></div>
+<div class="card green"><h4>기대값 ②</h4><p><code>stock_data</code> → <b>3개 테이블</b></p></div>
+</div>
+
+<div class="code">SHOW TABLES FROM stock_data;
+
+-- stock_data 안에서 기대하는 세 테이블
+-- stocks
+-- stock_prices
+-- stock_collection_log</div>
+
+<div class="callout"><b>테이블 개수가 맞지 않으면 데이터를 넣지 말고 먼저 구조를 고칩니다.</b><br>Import부터 해버리면 “테이블이 없어서 실패한 것인지, 데이터가 잘못된 것인지” 원인을 구분하기 어려워집니다.</div>
+</section>
+
+<section id="buffer16">
+<h2>5. 대량 데이터 적재 직전, InnoDB Buffer Pool을 16GB로 임시 확대</h2>
+<p class="lead">Buffer Pool은 InnoDB가 테이블·인덱스 페이지를 메모리에 캐시하는 공간입니다. 이번 실습에서는 데이터 적재 전에 일시적으로 16GB로 늘리고, <b>데이터 적재가 끝나는 즉시 4GB로 다시 줄인 뒤 데이터 검증을 진행</b>합니다.</p>
+
+<div class="callout danger"><b>16GB를 설정하기 전에 PC 메모리를 확인하세요.</b><br>
+이 설정은 MySQL 프로세스가 사용할 수 있는 메모리 규모를 크게 늘립니다. Windows와 Workbench, 브라우저, Python 등이 사용할 여유 RAM이 남아 있어야 합니다. 물리 메모리가 충분하지 않은 PC에서는 16GB로 올리지 말고 더 낮은 값을 사용해야 합니다.</div>
+
+<h3>5-1. 현재 값 확인</h3>
+<div class="code">SELECT
+    VERSION() AS mysql_version,
+    ROUND(@@GLOBAL.innodb_buffer_pool_size / 1024 / 1024 / 1024, 2) AS buffer_pool_gb,
+    ROUND(@@GLOBAL.innodb_buffer_pool_chunk_size / 1024 / 1024, 0) AS chunk_mb;</div>
+
+<h3>5-2. 16GB로 변경</h3>
+<div class="code">-- 16 GiB = 17,179,869,184 bytes
+SET GLOBAL innodb_buffer_pool_size = 17179869184;</div>
+
+<div class="callout warn"><b>SET GLOBAL을 사용하는 이유</b><br>이번 실습에서는 재시작 후에도 유지되는 영구 설정이 아니라 <b>현재 실행 중인 MySQL Server에만 임시 적용</b>합니다. 따라서 <code>my.ini</code>나 <code>SET PERSIST</code>를 수정하지 않습니다.</div>
+
+<h3>5-3. resize 완료 확인</h3>
+<div class="code">SELECT
+    ROUND(@@GLOBAL.innodb_buffer_pool_size / 1024 / 1024 / 1024, 2) AS buffer_pool_gb;
+
+SELECT variable_name, variable_value
+FROM performance_schema.global_status
+WHERE LOWER(variable_name) LIKE 'innodb_buffer_pool_resize%';</div>
+
+<div class="memory-meter">
+<div class="mem-card"><span class="small">일반 실습 상태</span><strong>4GB</strong>평상시 Buffer Pool</div>
+<div class="mem-card hot"><span class="small">대량 적재 직전</span><strong>16GB</strong>임시 확대</div>
+<div class="mem-card safe"><span class="small">적재 완료 직후</span><strong>4GB</strong>검증 전에 반드시 복구</div>
+</div>
+
+<div class="callout"><b>표시값이 정확히 16.00이 아닐 수도 있습니다.</b><br>MySQL은 Buffer Pool을 내부 chunk 단위에 맞춰 조정할 수 있습니다. 변경 후 실제 값을 다시 조회하는 것이 중요합니다.</div>
+</section>
+
+<section id="import">
+<h2>6. finance_stock.sql을 Workbench로 Import하기</h2>
+<p class="lead"><code>finance_stock.sql</code>이 큰 학습 데이터 SQL 파일이라면 SQL Editor에서 전체 파일을 직접 열기보다 <b>Server → Data Import</b>를 이용하는 방식이 편리합니다.</p>
+
+<div class="callout warn"><b>파일을 간단한 경로에 두는 것을 권장합니다.</b><br>예: <code>C:\fintech_data\finance_stock.sql</code>. 파일 경로가 너무 길거나 동기화 폴더 안에 있으면 실습 환경에 따라 불필요한 변수가 생길 수 있습니다.</div>
+
+<div class="step-card">
+<h3>Step 1. Data Import 화면 열기</h3>
+<div class="clickpath"><span>Server</span><i>→</i><span>Data Import</span></div>
+</div>
+
+<figure class="screen">
+<img loading="lazy" src="https://dev.mysql.com/doc/workbench/en/images/wb-navigator-data-import-from-disk.png"
+alt="MySQL Workbench Data Import"
+onerror="this.outerHTML='<div class=&quot;img-fallback&quot;>Data Import 화면: Import from Self-Contained File을 선택하고 SQL 파일과 Target Schema를 지정하는 화면</div>'">
+<figcaption>Data Import / Restore 화면 예시.</figcaption>
+</figure>
+
+<div class="step-card">
+<h3>Step 2. Import from Self-Contained File 선택</h3>
+<ol>
+<li><b>Import from Self-Contained File</b>을 선택합니다.</li>
+<li>오른쪽 <b>...</b> 버튼으로 <code>finance_stock.sql</code>을 선택합니다.</li>
+<li><b>Default Target Schema</b>에서 <code>stock_data</code>를 선택합니다.</li>
+<li>Target Schema가 목록에 없다면 앞 단계의 Forward Engineering이 정상 완료되었는지 먼저 확인합니다.</li>
+</ol>
+</div>
+
+<div class="step-card">
+<h3>Step 3. SQL 파일이 어느 Schema를 사용하는지 확인</h3>
+<p>SQL 파일 자체에 아래와 같은 문장이 들어 있으면 파일이 스키마를 직접 지정합니다.</p>
+<div class="code">USE `stock_data`;
+-- 또는
+INSERT INTO `stock_data`.`stock_prices` (...)</div>
+<p>반대로 <code>INSERT INTO stock_prices</code>처럼 스키마명이 생략되어 있으면 Workbench의 <b>Default Target Schema = stock_data</b> 설정이 중요합니다.</p>
+</div>
+
+<div class="step-card">
+<h3>Step 4. Start Import</h3>
+<ol>
+<li><b>Start Import</b>를 클릭합니다.</li>
+<li><b>Import Progress</b> 탭으로 이동합니다.</li>
+<li>중간에 Error가 나오지 않는지 확인합니다.</li>
+<li>완료 메시지가 나타날 때까지 Workbench를 종료하지 않습니다.</li>
+</ol>
+</div>
+
+<div class="viz">
+<div class="viz-head">Import 중에는 무엇이 일어날까?</div>
+<div class="viz-body">
+<div class="pipeline">
+<div class="pipe"><span class="num">1</span><b>SQL 읽기</b>finance_stock.sql의 INSERT/DDL 문을 읽음</div>
+<div class="pipe"><span class="num">2</span><b>MySQL 전송</b>Local MySQL Server로 문장을 전달</div>
+<div class="pipe"><span class="num">3</span><b>InnoDB 기록</b>데이터·인덱스 페이지 갱신</div>
+<div class="pipe"><span class="num">4</span><b>FK/PK 검사</b>중복키·참조무결성 확인</div>
+<div class="pipe"><span class="num">5</span><b>Commit</b>트랜잭션 단위로 데이터를 확정</div>
+</div>
+</div>
+</div>
+</section>
+
+<section id="import-alt">
+<h2>6-1. Data Import가 맞지 않을 때 — SQL Editor 방식</h2>
+<p>finance_stock.sql이 mysqldump 형태가 아니라 일반 SQL 스크립트이거나 Data Import에서 오류가 날 경우에는 Workbench SQL Editor에서 실행할 수 있습니다.</p>
+
+<div class="clickpath"><span>File</span><i>→</i><span>Open SQL Script...</span><i>→</i><span>finance_stock.sql</span></div>
+<ol>
+<li>SQL Editor에서 파일을 엽니다.</li>
+<li>왼쪽 SCHEMAS에서 <code>stock_data</code>를 <b>더블클릭</b>해 굵게 표시되는지 확인합니다.</li>
+<li>스크립트 상단의 <code>USE</code>, <code>CREATE DATABASE</code>, <code>INSERT INTO</code> 문을 먼저 확인합니다.</li>
+<li>전체 실행 버튼(번개 아이콘)을 사용합니다.</li>
+</ol>
+
+<div class="callout warn"><b>파일이 매우 크면</b><br>SQL Editor가 파일 전체를 메모리에 열기 때문에 느려질 수 있습니다. 대용량 dump는 Data Import 방식이 더 적합합니다.</div>
+
+<h3>명령행은 마지막 대안</h3>
+<p>Workbench UI에서 계속 실패하지만 SQL 파일 자체가 정상인 경우, Windows CMD에서 다음 방식으로 적재할 수도 있습니다.</p>
+<div class="code">mysql -u root -p stock_data &lt; C:\fintech_data\finance_stock.sql</div>
+<p class="small">이 방법은 Workbench 실습의 보조 수단이며, MySQL <code>bin</code> 경로가 PATH에 등록되어 있어야 합니다.</p>
+</section>
+
+
+<section id="buffer4">
+<h2>7. 데이터 적재가 끝나면, 데이터 확인 전에 Buffer Pool을 4GB로 다시 줄이기</h2>
+<p>16GB 설정은 <b>대량 적재 작업을 위한 임시 설정</b>입니다. Import가 완료되면 데이터를 조회·검증하기 전에 같은 SQL Editor에서 먼저 4GB로 되돌립니다.</p>
+
+<div class="code">-- 4 GiB = 4,294,967,296 bytes
+SET GLOBAL innodb_buffer_pool_size = 4294967296;
+
+SELECT
+    ROUND(@@GLOBAL.innodb_buffer_pool_size / 1024 / 1024 / 1024, 2) AS buffer_pool_gb;</div>
+
+<div class="callout green"><b>복구 확인</b><br>결과가 약 <b>4GB</b>인지 확인한 뒤 다음 단계의 데이터 검증 SQL을 실행합니다.</div>
+
+<div class="viz">
+<div class="viz-head">작업 전후 메모리 운영 원칙</div>
+<div class="viz-body">
+<div class="timeline">
+<div class="phase"><b>평상시</b>4GB</div>
+<div class="phase"><b>ERD 생성</b>4GB 그대로 가능</div>
+<div class="phase"><b>적재 직전</b>16GB 확대</div>
+<div class="phase"><b>SQL Import</b>16GB 사용</div>
+<div class="phase"><b>Import 완료</b>4GB 복구</div>
+</div>
+</div>
+<div class="viz-caption">대량 적재가 끝나면 Buffer Pool을 4GB로 원복하고, 그 상태에서 데이터 건수·기간·무결성을 확인합니다.</div>
+</div>
+</section>
+
+<section id="verify-data">
+<h2>8. Buffer Pool을 4GB로 복구한 뒤 데이터 검증</h2>
+<p class="lead">앞 단계에서 Buffer Pool이 4GB로 복구된 것을 확인했다면 이제 데이터를 검증합니다. <b>실제 행이 들어왔는지, 기간이 정상인지, 종목 마스터와 가격 데이터가 연결되는지</b>를 확인해야 적재가 완료된 것입니다.</p>
+
+<h3>7-1. 테이블별 행 수</h3>
+<div class="code">SELECT 'stocks' AS table_name, COUNT(*) AS row_count
+FROM stock_data.stocks
+UNION ALL
+SELECT 'stock_prices', COUNT(*)
+FROM stock_data.stock_prices
+UNION ALL
+SELECT 'stock_collection_log', COUNT(*)
+FROM stock_data.stock_collection_log;</div>
+
+<h3>7-2. 주가 데이터 기간과 종목 수</h3>
+<div class="code">SELECT
+    COUNT(*) AS price_rows,
+    COUNT(DISTINCT stock_code) AS stock_count,
+    MIN(trade_date) AS first_trade_date,
+    MAX(trade_date) AS last_trade_date
+FROM stock_data.stock_prices;</div>
+
+<h3>7-3. 실제 데이터 20건 보기</h3>
+<div class="code">SELECT
+    p.stock_code,
+    s.company_name,
+    p.trade_date,
+    p.open_price,
+    p.high_price,
+    p.low_price,
+    p.close_price,
+    p.volume,
+    p.change_rate
+FROM stock_data.stock_prices AS p
+JOIN stock_data.stocks AS s
+  ON s.stock_code = p.stock_code
+ORDER BY p.trade_date DESC, p.stock_code
+LIMIT 20;</div>
+
+<h3>7-4. 종목 마스터에 없는 가격 데이터가 있는지</h3>
+<div class="code">SELECT COUNT(*) AS orphan_price_rows
+FROM stock_data.stock_prices AS p
+LEFT JOIN stock_data.stocks AS s
+  ON s.stock_code = p.stock_code
+WHERE s.stock_code IS NULL;</div>
+
+<div class="callout green"><b>정상 기대</b><br><code>orphan_price_rows = 0</code>이면 가격 데이터의 종목코드가 모두 종목 마스터와 연결된 것입니다.</div>
+
+<h3>7-5. 학습에 바로 쓸 수 있는 간단한 조회</h3>
+<div class="code">SELECT
+    s.company_name,
+    p.trade_date,
+    p.close_price,
+    p.volume
+FROM stock_data.stock_prices AS p
+JOIN stock_data.stocks AS s
+  ON s.stock_code = p.stock_code
+WHERE p.trade_date >= DATE_SUB(
+      (SELECT MAX(trade_date) FROM stock_data.stock_prices),
+      INTERVAL 30 DAY
+)
+ORDER BY s.company_name, p.trade_date;</div>
+</section>
+
+
+<section id="trouble">
+<h2>9. 실습 중 자주 발생하는 오류</h2>
+
+<div class="auto-grid">
+<div class="card"><h4>Forward Engineer에서 schema exists</h4><p>동일 스키마가 이미 존재합니다. 기존 데이터를 지울지 판단하지 못했다면 DROP하지 말고 현재 DB를 먼저 확인합니다.</p></div>
+<div class="card"><h4>Access denied</h4><p>Forward Engineering이나 <code>SET GLOBAL</code> 권한이 부족합니다. 로컬 실습에서는 root 또는 필요한 관리 권한이 있는 계정을 사용합니다.</p></div>
+<div class="card"><h4>SET GLOBAL 후 16GB가 안 됨</h4><p>메모리 부족, chunk 단위 조정, 권한 문제를 확인합니다. 실제 값과 resize status를 다시 조회합니다.</p></div>
+<div class="card"><h4>Start Import 버튼이 비활성</h4><p>Self-Contained File이 선택되었는지, SQL 파일 경로가 올바른지, 연결이 살아 있는지 확인합니다.</p></div>
+<div class="card"><h4>Table doesn't exist</h4><p>데이터 Import 전에 Forward Engineering이 끝나지 않았거나 Target Schema가 잘못되었습니다.</p></div>
+<div class="card"><h4>Duplicate entry</h4><p>이미 동일 PK 데이터가 들어 있을 수 있습니다. 같은 SQL을 두 번 적재한 것은 아닌지 먼저 확인합니다.</p></div>
+<div class="card"><h4>Cannot add/update child row</h4><p>FK가 가리키는 부모 데이터가 먼저 존재해야 합니다. <code>stocks</code>와 <code>stock_prices</code> 적재 순서를 확인합니다.</p></div>
+<div class="card"><h4>Lost connection during query</h4><p>대용량 SQL 실행 중 연결이 끊겼다면 Import Progress의 마지막 오류를 확인하고, 서버 상태·패킷 크기·타임아웃을 원인별로 점검합니다.</p></div>
+</div>
+
+<h3>Buffer Pool resize 상태 확인</h3>
+<div class="code">SELECT variable_name, variable_value
+FROM performance_schema.global_status
+WHERE LOWER(variable_name) LIKE 'innodb_buffer_pool_resize%';</div>
+</section>
+
+<section id="check">
+<h2>10. 최종 실습 체크리스트</h2>
+<div class="check-grid">
+<div class="check-item">Workbench에서 <code>fintech_ai_campus_db.mwb</code>를 열었다.</div>
+<div class="check-item">EER Diagram과 Physical Schemas를 확인했다.</div>
+<div class="check-item"><code>fintech_fraud_lab_class</code>가 생성되었다.</div>
+<div class="check-item"><code>stock_data</code>가 생성되었다.</div>
+<div class="check-item">테이블 수가 39개 / 3개로 확인되었다.</div>
+<div class="check-item">Import 전 Buffer Pool을 16GB로 확대했다.</div>
+<div class="check-item"><code>finance_stock.sql</code> Import가 오류 없이 완료되었다.</div>
+<div class="check-item">Import 직후 Buffer Pool을 4GB로 복구했다.</div>
+<div class="check-item"><code>stock_prices</code>의 행 수와 날짜 범위를 확인했다.</div>
+<div class="check-item">종목 마스터와 가격 데이터 JOIN이 정상 작동했다.</div>
+<div class="check-item"><code>orphan_price_rows = 0</code>을 확인했다.</div>
+<div class="check-item">Workbench SCHEMAS Refresh 후 테이블과 데이터가 보인다.</div>
+</div>
+
+<div class="callout green"><b>여기까지 완료하면</b><br>학생들은 단순히 준비된 DB를 사용하는 것이 아니라, <b>ERD → DDL → 실제 DB → 데이터 적재 → 무결성 검증</b>이라는 데이터 엔지니어링의 기본 흐름을 직접 경험한 상태가 됩니다.</div>
+</section>
+
+<section>
+<h2>공식 참고자료</h2>
+<ul class="ref-list">
+<li><a href="https://dev.mysql.com/doc/workbench/en/wb-forward-engineering-live-server.html" target="_blank" rel="noopener">MySQL Workbench — Forward Engineering to a Live Server</a></li>
+<li><a href="https://dev.mysql.com/doc/workbench/en/wb-admin-export-import-management.html" target="_blank" rel="noopener">MySQL Workbench — SQL Data Export and Import Wizard</a></li>
+<li><a href="https://dev.mysql.com/doc/refman/8.0/en/innodb-buffer-pool-resize.html" target="_blank" rel="noopener">MySQL 8.0 — Configuring InnoDB Buffer Pool Size</a></li>
+</ul>
+</section>
+
+</main>
+</div>
+<footer class="footer">Workbench ERD → Database 생성 → finance_stock.sql 적재 실습</footer>
+</div>
+</body>
+</html>

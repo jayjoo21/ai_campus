@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>서브쿼리와 CTE — 복잡한 금융 SQL을 단계별로 설계하기</title>
+<style>
+:root{
+  --bg:#f4f7fb;--paper:#fff;--ink:#182335;--muted:#5b6878;--line:#d9e3ee;
+  --navy:#102c49;--blue:#2463a8;--blue2:#1f4f7b;--cyan:#1689a9;
+  --green:#19724f;--greenbg:#eef9f4;--amber:#9b650d;--amberbg:#fff7e8;
+  --red:#ae3939;--redbg:#fff2f2;--purple:#6550b1;--purplebg:#f5f2ff;
+  --code:#0d1825;--soft:#f8fbfe;--shadow:0 9px 28px rgba(15,35,55,.06);
+}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Malgun Gothic","맑은 고딕","Noto Sans KR","Apple SD Gothic Neo","Segoe UI",Arial,sans-serif;
+  line-height:1.72;word-break:keep-all;overflow-wrap:anywhere;
+}
+.wrap{max-width:1240px;margin:auto}
+.hero{
+  padding:55px 24px 46px;color:#fff;
+  background:
+    radial-gradient(circle at 82% 14%,rgba(32,191,222,.22),transparent 27%),
+    linear-gradient(135deg,#0c1d30,#103d67 58%,#0b657c);
+}
+.eyebrow{font-size:.78rem;letter-spacing:.14em;font-weight:900;color:#cae8ff}
+.hero h1{font-size:clamp(2rem,4.6vw,3.25rem);line-height:1.15;letter-spacing:-.045em;margin:9px 0 14px}
+.hero p{max-width:1000px;margin:0;color:#e3f1fb;font-size:1.04rem}
+.hero-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-top:22px}
+.hero-card{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);border-radius:14px;padding:13px 14px}
+.hero-card b{display:block;font-size:1.05rem;margin-bottom:2px}
+.hero-card span{font-size:.78rem;color:#d8e8f5}
+nav{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:7px;overflow-x:auto;padding:9px 16px;-webkit-overflow-scrolling:touch}
+nav a{white-space:nowrap;text-decoration:none;background:#eef5ff;border:1px solid #d6e4f3;color:#225781;padding:6px 10px;border-radius:999px;font-size:.76rem;font-weight:800}
+main{padding:30px 18px 74px}
+section{margin:0 0 31px;scroll-margin-top:74px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:27px;box-shadow:var(--shadow)}
+h2{font-size:clamp(1.55rem,2.5vw,1.95rem);line-height:1.36;color:var(--navy);letter-spacing:-.026em;margin:0 0 14px}
+h3{font-size:1.2rem;line-height:1.45;color:#174e80;margin:27px 0 9px}
+h4{font-size:1rem;color:#284d6c;margin:0 0 6px}
+p{margin:7px 0 12px;color:var(--muted)}
+.lead{font-size:1.055rem;color:#354556}
+.grid2,.grid3,.grid4,.auto-grid,.term-grid,.compare-grid,.query-meta,.check-grid{display:grid;gap:13px;margin:14px 0;align-items:stretch}
+.grid2,.compare-grid,.query-meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.auto-grid{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.term-grid{grid-template-columns:repeat(auto-fit,minmax(225px,1fr))}
+.check-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card,.term,.callout,.query-box,.step,.mini{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fff}
+.card.soft,.mini{background:linear-gradient(180deg,#fcfdff,#f6f9fc)}
+.term b,.step b,.mini b{display:block;color:#153f6a;margin-bottom:4px}
+.term .en{display:block;font-family:Consolas,monospace;color:#654aa8;font-size:.84rem;margin-bottom:4px}
+.callout{margin:15px 0}
+.callout.info{border-left:5px solid var(--blue);background:#eef5ff}
+.callout.good{border-left:5px solid var(--green);background:var(--greenbg)}
+.callout.warn{border-left:5px solid #d18a1b;background:var(--amberbg)}
+.callout.danger{border-left:5px solid var(--red);background:var(--redbg)}
+.callout.purple{border-left:5px solid var(--purple);background:var(--purplebg)}
+.callout b,.query-box b{color:#123f69}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#edf4fa;color:#315f84;font-size:.72rem;font-weight:850;margin:2px 3px 2px 0}
+.figure{margin:18px 0;border:1px solid #dbe5ef;border-radius:17px;overflow:hidden;background:#fff;box-shadow:var(--shadow)}
+.figure-title{padding:13px 16px;background:#fafcff;border-bottom:1px solid #e4eaf0;color:#113a65;font-weight:900}
+.figure-body{padding:18px}
+.figure-caption{padding:9px 13px;border-top:1px solid #e4eaf0;background:#fafcff;color:#667586;font-size:.82rem}
+.pipeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:stretch}
+.node{border:1px solid #cfe0ee;border-radius:12px;padding:13px;background:#f8fbff;text-align:center}
+.node b{display:block;color:#163f69}
+.node small{display:block;color:#6b7988;margin-top:3px}
+.arrow{display:flex;align-items:center;justify-content:center;color:#31709e;font-weight:900;font-size:1.25rem}
+.nesting{display:grid;place-items:center;padding:8px}
+.layer{width:min(100%,760px);border:2px solid #bdd7ea;border-radius:16px;padding:16px;background:#f8fbff}
+.layer .layer{width:92%;margin:13px auto 0;border-color:#9bc3df;background:#f0f7fd}
+.layer .layer .layer{width:90%;border-color:#71a8cf;background:#e7f2fb}
+.layer-title{font-weight:900;color:#174a75}
+.cte-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cte-col{border:1px solid #d7e2ed;border-radius:13px;background:#fff;padding:14px;position:relative}
+.cte-col:not(:last-child)::after{content:"→";position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-weight:900;color:#3976a4;font-size:1.25rem;z-index:2}
+.cte-col b{display:block;color:#174a75;margin-bottom:5px}
+.timeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.time-card{border:1px solid #d7e2ed;border-radius:12px;padding:12px;background:#fff}
+.time-card b{display:block;color:#17476e}
+.time-card.ok{background:#eef8f4;border-color:#cde6da}
+.time-card.future{background:#fff1f1;border-color:#efcccc}
+.fanout-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.fanout-box{border:1px solid #d8e2ec;border-radius:12px;padding:13px;background:#fff}
+.fanout-box b{display:block;color:#174a75}
+.table-wrap{width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:13px 0 18px;background:#fff;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:700px}
+th{background:#edf5ff;color:#174d80;text-align:left;padding:10px 11px;border-bottom:1px solid #cfe0ef}
+td{padding:10px 11px;border-bottom:1px solid #e7edf3;vertical-align:top}
+tr:last-child td{border-bottom:none}
+pre{margin:12px 0 16px;background:var(--code);color:#dcecff;border-radius:12px;padding:15px 16px;overflow:auto;max-width:100%;font-size:.82rem;line-height:1.57;white-space:pre}
+code{font-family:Consolas,"SFMono-Regular",Menlo,monospace}
+.inline{background:#e8eef5;color:#153a5f;border-radius:5px;padding:2px 5px}
+.query-box{background:#fbfdff}
+.kv{display:grid;grid-template-columns:170px 1fr;gap:8px 12px;margin:11px 0}
+.kv div:nth-child(odd){font-weight:850;color:#244f73}
+details{border:1px solid var(--line);border-radius:12px;background:#fff;margin:10px 0;overflow:hidden}
+summary{cursor:pointer;padding:12px 14px;font-weight:850;color:#184d7e;background:#fbfdff}
+details>div{padding:0 14px 14px}
+.check{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#fbfdff}
+.check:before{content:"✓";display:inline-grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#e6f5ee;color:#146b4c;font-weight:900;margin-right:7px}
+footer{padding:24px 20px;text-align:center;background:#0d1d2f;color:#cbd7e5;font-size:.8rem}
+@media(max-width:960px){
+  .hero-grid,.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cte-columns{grid-template-columns:1fr}
+  .cte-col:not(:last-child)::after{content:"↓";right:auto;left:50%;top:auto;bottom:-28px;transform:translateX(-50%)}
+}
+@media(max-width:720px){
+  .hero{padding:40px 18px 34px}
+  main{padding:24px 14px 58px}
+  .panel{padding:19px}
+  .grid2,.grid3,.grid4,.compare-grid,.query-meta,.hero-grid,.fanout-grid{grid-template-columns:1fr}
+  .pipeline{grid-template-columns:1fr}
+  .arrow{transform:rotate(90deg)}
+  .kv{grid-template-columns:1fr}
+  table{min-width:620px}
+}
+@media(max-width:420px){
+  .panel{padding:16px}
+  .figure-body{padding:13px}
+  .hero h1{font-size:1.83rem}
+  .hero p{font-size:.94rem}
+  table{min-width:560px}
+}
+@media print{
+  nav{display:none}body{background:#fff}.panel,.figure{box-shadow:none;break-inside:avoid}
+  main{max-width:none;padding:0}.hero{background:#fff;color:#111;border-bottom:2px solid #234}
+  .hero p,.hero .eyebrow{color:#333}
+}
+
+.lesson-goal{
+  margin:16px 0 18px;
+  border:1px solid #cfe0ee;
+  border-radius:14px;
+  background:linear-gradient(180deg,#f8fbff,#f2f7fc);
+  overflow:hidden;
+}
+.lesson-goal .goal-head{
+  padding:11px 15px;
+  background:#eaf3fb;
+  border-bottom:1px solid #cfe0ee;
+  color:#153f69;
+  font-weight:900;
+}
+.lesson-goal .goal-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0;
+}
+.lesson-goal .goal-item{
+  padding:13px 15px;
+  border-bottom:1px solid #e1e9f1;
+}
+.lesson-goal .goal-item:nth-child(odd){
+  border-right:1px solid #e1e9f1;
+}
+.lesson-goal .goal-item b{
+  display:block;
+  color:#174d80;
+  margin-bottom:4px;
+}
+.lesson-goal .goal-item p{
+  margin:0;
+}
+.lesson-goal .goal-item code{
+  word-break:break-word;
+}
+@media(max-width:720px){
+  .lesson-goal .goal-grid{grid-template-columns:1fr}
+  .lesson-goal .goal-item:nth-child(odd){border-right:none}
+}
+</style>
+</head>
+<body>
+<header class="hero">
+<div class="wrap">
+<div class="eyebrow">SQL · SUBQUERY · CTE · PRE-AGGREGATION · POINT-IN-TIME</div>
+<h1>서브쿼리에서 CTE까지 — 복잡한 금융 SQL을 단계별로 설계하기</h1>
+<p>서브쿼리가 필요한 이유와 작성 방법부터 시작해, 쿼리가 복잡해질수록 CTE가 왜 필요한지 이해하고, 실제 금융·주가 테이블에서 필터링·집계·Fan-out 방지·시점 Snapshot을 단계적으로 구성합니다.</p>
+<div class="hero-grid">
+<div class="hero-card"><b>Subquery</b><span>쿼리 안의 쿼리</span></div>
+<div class="hero-card"><b>CTE</b><span>이름 붙인 중간 결과</span></div>
+<div class="hero-card"><b>Grain</b><span>한 행의 의미</span></div>
+<div class="hero-card"><b>Snapshot</b><span>기준시점의 상태</span></div>
+</div>
+</div>
+</header>
+<nav><div class="wrap">
+<a href="#why-subquery">서브쿼리 필요성</a>
+<a href="#subquery-how">서브쿼리 작성법</a>
+<a href="#why-cte">왜 CTE인가</a>
+<a href="#terms">핵심 용어</a>
+<a href="#cte-basic">CTE 기본</a>
+<a href="#filter">필터 CTE</a>
+<a href="#aggregate">집계 CTE</a>
+<a href="#multi">다중 CTE</a>
+<a href="#fanout">Fan-out</a>
+<a href="#snapshot">Snapshot</a>
+<a href="#consent">동의 시점</a>
+<a href="#full">전체형</a>
+<a href="#validation">검증</a>
+<a href="#practice">확인 문제</a>
+</div></nav>
+<main class="wrap">
+<section id="why-subquery"><div class="panel">
+<h2>1. 왜 서브쿼리가 필요한가?</h2>
+<p class="lead">SQL을 작성하다 보면 단순한 <code>SELECT → FROM → WHERE</code>만으로는 표현하기 어려운 요구가 생깁니다. 먼저 어떤 데이터를 계산하거나 골라낸 뒤, 그 결과를 다시 다른 조회의 조건이나 입력으로 사용해야 하기 때문입니다.</p><div class="lesson-goal"><div class="goal-head">이 주제에서 확인할 것</div><div class="goal-grid"><div class="goal-item"><b>무엇을 만들려는가?</b><p>한 번의 SELECT만으로는 바로 만들기 어려운 결과를, <strong>먼저 중간 결과를 구한 뒤 다시 사용하는 방식</strong>으로 해결합니다.</p></div><div class="goal-item"><b>왜 필요한가?</b><p>실제 분석에서는 ‘조건에 맞는 고객을 먼저 찾고, 그 고객의 상세정보를 다시 조회’하는 식의 2단계 사고가 자주 필요합니다.</p></div><div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>customers</code>, <code>card_payments</code></p></div><div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>고액 승인결제가 있는 고객만 골라 지역·신용점수와 함께 조회되는 결과를 확인합니다.</p></div><div class="goal-item"><b>최종 Grain</b><p>최종 결과는 <code>customer_id</code> 기준 고객 1명 = 1행</p></div></div></div>
+<div class="figure">
+<div class="figure-title">단일 SELECT에서 서브쿼리로 넘어가는 이유</div>
+<div class="figure-body">
+<div class="pipeline">
+<div class="node"><b>원천 데이터</b><small>card_payments</small></div>
+<div class="arrow">→</div>
+<div class="node"><b>중간 판단</b><small>고액 승인결제 고객 찾기</small></div>
+<div class="arrow">→</div>
+<div class="node"><b>최종 조회</b><small>해당 고객의 지역·신용점수 보기</small></div>
+</div>
+</div>
+<div class="figure-caption">한 번의 SELECT 안에서 “먼저 찾고 → 그 결과를 다시 사용”해야 할 때 서브쿼리가 자연스럽게 등장합니다.</div>
+</div>
+<div class="grid3">
+<div class="card soft"><h4>조건을 먼저 계산할 때</h4><p>특정 조건을 만족하는 고객 ID를 먼저 구하고, 그 고객만 다시 조회할 수 있습니다.</p></div>
+<div class="card soft"><h4>집계 결과를 다시 필터링할 때</h4><p>고객별 결제건수를 만든 다음 일정 건수 이상인 고객만 남길 수 있습니다.</p></div>
+<div class="card soft"><h4>행마다 계산값을 붙일 때</h4><p>고객 한 행에 승인결제 건수처럼 별도로 계산한 값을 붙일 수 있습니다.</p></div>
+</div>
+<h3>1-1. WHERE 안의 서브쿼리</h3>
+<pre><code>USE fintech_fraud_lab_class;
+
+SELECT
+    customer_id,
+    region,
+    credit_score
+FROM customers
+WHERE customer_id IN (
+    SELECT DISTINCT customer_id
+    FROM card_payments
+    WHERE is_approved = 1
+      AND amount &gt;= 500000
+);</code></pre>
+<div class="query-meta">
+<div class="query-box"><b>안쪽 쿼리</b>50만원 이상 승인결제가 있는 고객 ID를 찾습니다.</div>
+<div class="query-box"><b>바깥 쿼리</b>그 고객들의 지역과 신용점수를 조회합니다.</div>
+</div>
+<div class="callout info"><b>서브쿼리를 읽는 기본 원칙</b><br/>겉에서부터 읽기보다 <strong>가장 안쪽 SELECT가 무엇을 반환하는지</strong> 먼저 확인하면 이해가 쉽습니다.</div>
+</div></section>
+<section id="subquery-how"><div class="panel">
+<h2>2. 서브쿼리는 어떻게 작성하는가?</h2>
+<p>서브쿼리는 <strong>SELECT 문 안에 들어 있는 또 다른 SELECT 문</strong>입니다. 괄호 <code>( ... )</code>로 감싸고, 위치에 따라 역할이 달라집니다.</p><div class="lesson-goal"><div class="goal-head">이 주제에서 확인할 것</div><div class="goal-grid"><div class="goal-item"><b>무엇을 만들려는가?</b><p>서브쿼리가 들어가는 위치에 따라 <strong>WHERE용, FROM용, SELECT용</strong>으로 역할이 달라지는 것을 구분합니다.</p></div><div class="goal-item"><b>왜 필요한가?</b><p>서브쿼리는 단순히 괄호 안에 SELECT를 넣는 문법이 아니라, ‘중간 결과를 어디에서 사용할 것인가’를 결정하는 구조입니다.</p></div><div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code>, <code>customers</code></p></div><div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>WHERE에서는 고객 목록, FROM에서는 고객별 집계표, SELECT에서는 행마다 붙는 단일 계산값이 만들어지는 차이를 확인합니다.</p></div><div class="goal-item"><b>최종 Grain</b><p>서브쿼리 위치에 따라 Grain이 달라지므로 각 예제에서 별도로 확인</p></div></div></div>
+<div class="term-grid">
+<div class="term"><b>WHERE 서브쿼리</b><span class="en">Filtering Subquery</span><p>조건에 사용할 값이나 목록을 만듭니다. <code>IN</code>, <code>EXISTS</code>, 비교연산자와 함께 자주 사용합니다.</p></div>
+<div class="term"><b>FROM 서브쿼리</b><span class="en">Derived Table</span><p>서브쿼리 결과를 임시 테이블처럼 사용합니다. 반드시 별칭을 붙이는 방식이 일반적입니다.</p></div>
+<div class="term"><b>SELECT 서브쿼리</b><span class="en">Scalar Subquery</span><p>각 행에 하나의 계산값을 붙입니다. 반드시 한 행·한 값으로 귀결되어야 합니다.</p></div>
+</div>
+<h3>2-1. FROM 안의 서브쿼리</h3>
+<pre><code>USE fintech_fraud_lab_class;
+
+SELECT
+    customer_id,
+    payment_count,
+    total_amount
+FROM (
+    SELECT
+        customer_id,
+        COUNT(*) AS payment_count,
+        SUM(amount) AS total_amount
+    FROM card_payments
+    WHERE is_approved = 1
+    GROUP BY customer_id
+) AS payment_summary
+WHERE payment_count &gt;= 10
+ORDER BY total_amount DESC;</code></pre>
+<div class="callout purple"><b>Derived Table</b><br/><code>FROM (SELECT ... ) AS payment_summary</code>처럼 FROM 안에서 만든 임시 결과를 파생 테이블이라고 합니다.</div>
+<h3>2-2. SELECT 안의 서브쿼리</h3>
+<pre><code>USE fintech_fraud_lab_class;
+
+SELECT
+    customer_id,
+    region,
+    credit_score,
+    (
+        SELECT COUNT(*)
+        FROM card_payments AS cp
+        WHERE cp.customer_id = c.customer_id
+          AND cp.is_approved = 1
+    ) AS approved_payment_count
+FROM customers AS c
+LIMIT 20;</code></pre>
+<div class="callout warn"><b>주의</b><br/>SELECT 서브쿼리가 여러 행을 반환하면 오류가 발생할 수 있습니다. 또한 바깥 행마다 반복 실행되는 형태는 데이터가 클 때 부담이 커질 수 있습니다.</div>
+<div class="figure">
+<div class="figure-title">중첩 서브쿼리의 구조</div>
+<div class="figure-body nesting">
+<div class="layer"><div class="layer-title">바깥 SELECT — 최종 결과</div>
+<div class="layer"><div class="layer-title">중간 SELECT — 고객별 집계</div>
+<div class="layer"><div class="layer-title">안쪽 SELECT — 승인·기간 필터</div></div>
+</div></div>
+</div>
+<div class="figure-caption">괄호가 깊어질수록 데이터가 어느 단계에서 어떻게 바뀌는지 추적하기 어려워집니다.</div>
+</div>
+</div></section>
+<section id="why-cte"><div class="panel">
+<h2>3. 서브쿼리만으로도 되는데 왜 CTE가 더 필요한가?</h2>
+<p class="lead">서브쿼리는 매우 유용하지만 단계가 많아지면 괄호가 깊어지고, 같은 계산을 여러 곳에서 반복하기 쉬우며, 중간 결과의 의미를 이름으로 표현하기 어렵습니다. CTE는 이 문제를 <strong>“단계를 위에서 아래로 이름 붙여 펼치는 방식”</strong>으로 해결합니다.</p><div class="lesson-goal"><div class="goal-head">이 주제에서 확인할 것</div><div class="goal-grid"><div class="goal-item"><b>무엇을 만들려는가?</b><p>같은 다단계 처리를 <strong>중첩 서브쿼리와 CTE</strong>로 각각 작성해 보고, CTE가 왜 읽기 쉽고 관리하기 좋은지 비교합니다.</p></div><div class="goal-item"><b>왜 필요한가?</b><p>단계가 많아질수록 중첩 괄호는 데이터 흐름과 Grain 변화를 추적하기 어렵게 만듭니다. CTE는 각 단계에 이름을 붙여 위에서 아래로 읽게 해 줍니다.</p></div><div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code></p></div><div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>두 방식이 논리적으로 같은 결과를 만들 수 있지만, CTE 쪽에서는 <code>filtered_payments → customer_summary → 최종 SELECT</code> 흐름이 더 분명하게 보입니다.</p></div><div class="goal-item"><b>최종 Grain</b><p>최종 결과는 <code>customer_id</code> 기준 고객 1명 = 1행</p></div></div></div>
+<div class="compare-grid">
+<div class="card">
+<h3 style="margin-top:0">중첩 서브쿼리</h3>
+<pre><code>SELECT
+    customer_id,
+    payment_count,
+    total_amount
+FROM (
+    SELECT
+        customer_id,
+        COUNT(*) AS payment_count,
+        SUM(amount) AS total_amount
+    FROM (
+        SELECT
+            customer_id,
+            amount
+        FROM card_payments
+        WHERE is_approved = 1
+          AND payment_at &gt;= '2026-01-01'
+          AND payment_at &lt;  '2026-08-01'
+    ) AS filtered_payments
+    GROUP BY customer_id
+) AS customer_summary
+WHERE payment_count &gt;= 10
+ORDER BY total_amount DESC;</code></pre>
+</div>
+<div class="card">
+<h3 style="margin-top:0">같은 흐름을 CTE로</h3>
+<pre><code>WITH filtered_payments AS (
+    SELECT
+        customer_id,
+        amount
+    FROM card_payments
+    WHERE is_approved = 1
+      AND payment_at &gt;= '2026-01-01'
+      AND payment_at &lt;  '2026-08-01'
+),
+customer_summary AS (
+    SELECT
+        customer_id,
+        COUNT(*) AS payment_count,
+        SUM(amount) AS total_amount
+    FROM filtered_payments
+    GROUP BY customer_id
+)
+SELECT
+    customer_id,
+    payment_count,
+    total_amount
+FROM customer_summary
+WHERE payment_count &gt;= 10
+ORDER BY total_amount DESC;</code></pre>
+</div>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>비교 항목</th><th>중첩 서브쿼리</th><th>CTE</th></tr></thead>
+<tbody>
+<tr><td>읽는 방향</td><td>안쪽 → 바깥쪽으로 추적</td><td>위 → 아래 단계 순서</td></tr>
+<tr><td>중간 결과 이름</td><td>별칭은 가능하지만 구조가 깊어짐</td><td><code>filtered_payments</code>, <code>customer_summary</code>처럼 역할을 이름으로 표현</td></tr>
+<tr><td>재사용</td><td>같은 논리를 다시 적기 쉬움</td><td>같은 CTE를 뒤 단계에서 여러 번 참조 가능</td></tr>
+<tr><td>디버깅</td><td>중간 결과만 떼어 확인하기 불편</td><td>각 CTE의 SELECT를 따로 실행해 확인하기 쉬움</td></tr>
+<tr><td>Grain 추적</td><td>단계가 깊으면 놓치기 쉬움</td><td>각 CTE마다 Grain을 명시하기 쉬움</td></tr>
+<tr><td>긴 Snapshot SQL</td><td>괄호 구조가 복잡해짐</td><td>계좌·대출·거래·동의 등을 역할별 CTE로 분리 가능</td></tr>
+</tbody>
+</table>
+</div>
+<div class="figure">
+<div class="figure-title">CTE가 복잡한 SQL을 정리하는 방식</div>
+<div class="figure-body">
+<div class="cte-columns">
+<div class="cte-col"><b>CTE 1 · 필터</b>필요한 기간과 대상만 남김</div>
+<div class="cte-col"><b>CTE 2 · 집계</b>원하는 Grain으로 요약</div>
+<div class="cte-col"><b>최종 SELECT</b>필요한 결과만 조합</div>
+</div>
+</div>
+<div class="figure-caption">CTE의 핵심은 무조건 성능을 높이는 것이 아니라, 복잡한 SQL의 데이터 흐름과 중간 결과를 명확하게 표현하는 데 있습니다.</div>
+</div>
+<div class="callout danger"><b>CTE = 자동 성능 향상 기능은 아닙니다.</b><br/>DBMS와 쿼리 형태에 따라 실행계획은 달라질 수 있습니다. CTE를 사용하는 가장 확실한 이유는 <strong>가독성, 단계 분리, 재사용, Grain 관리, 검증 용이성</strong>입니다.</div>
+</div></section>
+<section id="terms"><div class="panel">
+<h2>4. CTE 단원에서 자주 등장하는 용어</h2>
+<div class="term-grid">
+<div class="term"><b>CTE</b><span class="en">Common Table Expression</span><p>한 SQL 문 안에서 이름을 붙여 사용하는 중간 결과입니다.</p></div>
+<div class="term"><b>Grain</b><span class="en">한 행의 단위</span><p>결과 한 행이 정확히 무엇을 의미하는지 나타냅니다. 예: 결제 1건, 고객 1명, 실험 배정 1건.</p></div>
+<div class="term"><b>Aggregation</b><span class="en">집계</span><p>여러 행을 <code>COUNT</code>, <code>SUM</code>, <code>AVG</code> 등으로 요약하는 작업입니다.</p></div>
+<div class="term"><b>Pre-aggregation</b><span class="en">사전 집계</span><p>JOIN 전에 N쪽 데이터를 원하는 Grain으로 먼저 집계하는 방법입니다.</p></div>
+<div class="term"><b>Fan-out</b><span class="en">행 증폭</span><p>여러 1:N 테이블을 동시에 JOIN하면서 조합 수만큼 행이 복제되는 현상입니다.</p></div>
+<div class="term"><b>Snapshot</b><span class="en">시점 상태값</span><p>특정 기준시점에 존재했던 고객·계좌·대출 등의 상태를 한 행에 정리한 데이터입니다.</p></div>
+<div class="term"><b>Point-in-Time</b><span class="en">시점 정합성</span><p>판단 시점 이후에 생긴 미래 정보를 사용하지 않는 원칙입니다.</p></div>
+<div class="term"><b>Data Leakage</b><span class="en">정보 누수</span><p>예측 시점에는 알 수 없었던 미래·사후 정보를 학습 데이터에 포함하는 오류입니다.</p></div>
+<div class="term"><b>COALESCE</b><span class="en">NULL 대체</span><p>여러 값 중 첫 번째 NULL이 아닌 값을 반환합니다. 예: <code>COALESCE(account_count,0)</code>.</p></div>
+</div>
+</div></section>
+<section id="cte-basic"><div class="panel">
+<h2>5. CTE 기본 문법 — WITH → AS → 최종 SELECT</h2>
+<p class="lead"><strong>CTE(Common Table Expression)</strong>는 한 SQL 문에서 사용할 이름 붙은 중간 결과입니다. 실제 테이블을 새로 생성하는 것이 아니라 현재 SQL 문 안에서만 사용할 논리적 결과입니다.</p><div class="lesson-goal"><div class="goal-head">이 주제에서 확인할 것</div><div class="goal-grid"><div class="goal-item"><b>무엇을 만들려는가?</b><p>CTE의 가장 기본적인 형태인 <strong>WITH → AS (...) → 최종 SELECT</strong> 구조를 익힙니다.</p></div><div class="goal-item"><b>왜 필요한가?</b><p>긴 SQL을 여러 단계로 나누기 전에, 우선 하나의 중간 결과에 이름을 붙이고 다시 조회하는 가장 단순한 패턴을 이해해야 합니다.</p></div><div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>stock_data.stock_prices</code></p></div><div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>삼성전자(<code>005930</code>)의 거래일별 종가가 날짜순으로 조회되고, CTE를 사용하지 않았을 때와 결과 자체는 같음을 확인합니다.</p></div><div class="goal-item"><b>최종 Grain</b><p><code>stock_code × trade_date</code> 1행</p></div></div></div>
+<pre><code>-- CTE의 가장 기본적인 문법 형태
+WITH cte_name AS (               -- ① cte_name이라는 중간 결과에 이름을 붙입니다.
+    SELECT ...                   -- ② 필요한 컬럼을 선택합니다.
+    FROM ...                     -- ③ 원천 테이블을 지정합니다.
+    WHERE ...                    -- ④ 필요한 행만 필터링합니다.
+)
+SELECT ...                       -- ⑤ CTE에서 최종적으로 반환할 컬럼을 선택합니다.
+FROM cte_name;                   -- ⑥ CTE를 일반 테이블처럼 조회합니다.</code></pre>
+<div class="figure">
+<div class="figure-title">CTE의 데이터 흐름</div>
+<div class="figure-body"><div class="pipeline">
+<div class="node"><b>원천 Table</b><small>card_payments</small></div><div class="arrow">→</div>
+<div class="node"><b>CTE 1</b><small>필터링</small></div><div class="arrow">→</div>
+<div class="node"><b>CTE 2</b><small>집계</small></div><div class="arrow">→</div>
+<div class="node"><b>최종 SELECT</b><small>결과 반환</small></div>
+</div></div></div>
+<div class="callout info"><b>긴 CTE 실행 시</b><br/><code>WITH</code>부터 마지막 <code>SELECT ... ;</code>까지 전체가 하나의 SQL 문장입니다. 중간 CTE 정의만 따로 남겨 두면 완전한 문장이 아닐 수 있습니다.</div>
+<h3>5-1. 가장 짧은 CTE</h3>
+<pre><code>USE stock_data;  -- 실제 주가 테이블이 있는 DB를 선택합니다.
+--
+-- ① 삼성전자 주가만 담은 가장 단순한 CTE를 만듭니다.
+WITH samsung_prices AS (
+    SELECT
+        stock_code,              -- 종목코드
+        trade_date,              -- 거래일
+        close_price              -- 종가
+    FROM stock_prices            -- 일별 OHLCV가 저장된 원천 테이블
+    WHERE stock_code = '005930'  -- 삼성전자(005930)만 남깁니다.
+)
+-- ② 위에서 만든 CTE를 일반 테이블처럼 조회합니다.
+SELECT
+    stock_code,
+    trade_date,
+    close_price
+FROM samsung_prices
+ORDER BY trade_date              -- 과거 → 최신 순서로 정렬합니다.
+LIMIT 10;                        -- 결과를 10행만 확인합니다.</code></pre>
+<div class="query-meta">
+<div class="query-box"><b>중간 결과</b><code>samsung_prices</code>라는 이름으로 삼성전자 행만 준비합니다.</div>
+<div class="query-box"><b>Grain</b><code>stock_code × trade_date</code> 1행입니다. CTE를 쓴다고 Grain이 자동으로 바뀌지 않습니다.</div>
+</div>
+</div></section>
+<section id="filter"><div class="panel">
+<h2>6. 필터 CTE — 필요한 행을 먼저 줄이기</h2>
+<p>뒤에서 JOIN이나 집계를 하기 전에 기간·승인여부처럼 명확한 조건을 먼저 적용하면 다음 단계가 단순해집니다.</p><div class="lesson-goal"><div class="goal-head">이 주제에서 확인할 것</div><div class="goal-grid"><div class="goal-item"><b>무엇을 만들려는가?</b><p>승인된 결제 중 특정 기간에 해당하는 행만 먼저 골라 <strong>다음 단계에서 사용할 정리된 원천 데이터</strong>를 만듭니다.</p></div><div class="goal-item"><b>왜 필요한가?</b><p>뒤에서 JOIN이나 GROUP BY를 하기 전에 분석 대상이 아닌 행을 먼저 줄이면 쿼리의 의미가 명확해지고 다음 단계가 단순해집니다.</p></div><div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>fintech_fraud_lab_class.card_payments</code></p></div><div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>승인된 결제 중 2026-01-01 이상, 2026-08-01 미만의 결제만 시간순으로 보입니다.</p></div><div class="goal-item"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div></div></div>
+<pre><code>USE fintech_fraud_lab_class;  -- FDS·CSS·개인화 데이터가 있는 금융 DB를 선택합니다.
+--
+-- ① 먼저 분석 대상이 되는 결제만 남기는 필터 CTE를 만듭니다.
+WITH recent_approved_payments AS (
+    SELECT
+        payment_id,              -- 결제 1건을 구분하는 PK
+        customer_id,             -- 결제 고객 ID
+        payment_at,              -- 결제 발생 시각
+        amount,                  -- 결제 금액
+        fraud_label              -- 정상/사기 Target. 모델 Feature로 쓰지 않습니다.
+    FROM card_payments           -- FDS의 기준 Grain이 되는 결제 원천 테이블
+    WHERE is_approved = 1        -- 승인된 결제만 학습 후보로 남깁니다.
+      AND payment_at &gt;= '2026-01-01'  -- 분석 시작시점 포함
+      AND payment_at &lt;  '2026-08-01'  -- 분석 종료시점 미포함: [시작, 종료) 방식
+)
+-- ② 필터된 CTE 결과를 시간순으로 확인합니다.
+SELECT
+    payment_id,
+    customer_id,
+    payment_at,
+    amount,
+    fraud_label
+FROM recent_approved_payments
+ORDER BY payment_at              -- 결제 발생 순서대로 확인합니다.
+LIMIT 100;                       -- 결과를 100행만 확인합니다.</code></pre>
+<div class="callout purple"><b>Grain 변화 없음</b><br/>필터는 행의 개수만 줄일 뿐 한 행이 “결제 1건”이라는 의미는 그대로 유지됩니다.</div>
+<div class="figure">
+<div class="figure-title">필터 CTE의 역할</div>
+<div class="figure-body"><div class="pipeline">
+<div class="node"><b>전체 결제</b><small>많은 행</small></div><div class="arrow">→</div>
+<div class="node"><b>승인 여부</b><small>is_approved = 1</small></div><div class="arrow">→</div>
+<div class="node"><b>기간</b><small>[시작, 종료)</small></div><div class="arrow">→</div>
+<div class="node"><b>정리된 원천</b><small>다음 CTE 입력</small></div>
+</div></div></div>
+</div></section>
+<section id="aggregate"><div class="panel">
+<h2>7. 집계 CTE — 여러 결제를 고객 1행으로 바꾸기</h2>
+<p class="lead">첫 CTE가 결제 1건 Grain이라면, 두 번째 CTE에서 <code>GROUP BY customer_id</code>를 사용해 고객 1명 Grain으로 바꿀 수 있습니다.</p><div class="lesson-goal"><div class="goal-head">이 주제에서 확인할 것</div><div class="goal-grid"><div class="goal-item"><b>무엇을 만들려는가?</b><p>결제 1건 단위 데이터를 고객별로 묶어 <strong>고객 1명당 결제 건수·합계·평균·최근 결제시각</strong>을 만듭니다.</p></div><div class="goal-item"><b>왜 필요한가?</b><p>모델이나 고객 단위 분석에는 거래 수천 행을 그대로 쓰기보다 고객별 요약값이 필요합니다. 이때 GROUP BY가 Grain을 바꿉니다.</p></div><div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>recent_approved_payments</code> CTE</p></div><div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>고객별로 한 행이 나오고, 결제 건수·총 결제금액·평균 결제금액·최근 결제시각이 함께 표시됩니다.</p></div><div class="goal-item"><b>최종 Grain</b><p><code>payment_id</code> Grain → <code>customer_id</code> Grain으로 변경</p></div></div></div>
+<pre><code>USE fintech_fraud_lab_class;  -- 금융 AI 실습 DB 선택
+--
+-- ① 1단계: 승인된 결제 중 필요한 기간만 먼저 줄입니다.
+WITH recent_approved_payments AS (
+    SELECT
+        payment_id,              -- 결제 식별자
+        customer_id,             -- 고객 식별자
+        payment_at,              -- 결제 시각
+        amount,                  -- 결제 금액
+        fraud_label              -- Target 확인용 컬럼
+    FROM card_payments
+    WHERE is_approved = 1
+      AND payment_at &gt;= '2026-01-01'
+      AND payment_at &lt;  '2026-08-01'
+),
+-- ② 2단계: 1단계 결과를 고객별 1행으로 집계합니다.
+customer_summary AS (
+    SELECT
+        customer_id,                         -- GROUP BY 기준: 고객 1명
+        COUNT(*) AS `payment_count`,         -- 고객별 승인 결제 건수
+        SUM(amount) AS `total_amount`,       -- 고객별 총 결제금액
+        AVG(amount) AS `avg_amount`,         -- 고객별 평균 결제금액
+        MAX(payment_at) AS `latest_payment_at` -- 고객의 가장 최근 결제시각
+    FROM recent_approved_payments            -- 원본이 아니라 1단계 CTE를 입력으로 사용
+    GROUP BY customer_id                     -- 결과 Grain을 고객 1명 = 1행으로 변경
+)
+-- ③ 최종적으로 고객별 요약 결과를 조회합니다.
+SELECT
+    customer_id,
+    payment_count,
+    total_amount,
+    avg_amount,
+    latest_payment_at
+FROM customer_summary
+ORDER BY payment_count DESC      -- 결제 건수가 많은 고객부터 확인
+LIMIT 20;                        -- 상위 20명만 출력</code></pre>
+<div class="figure">
+<div class="figure-title">GROUP BY가 Grain을 바꾸는 과정</div>
+<div class="figure-body"><div class="pipeline">
+<div class="node"><b>payment_id</b><small>결제 1건 = 1행</small></div><div class="arrow">→</div>
+<div class="node"><b>GROUP BY</b><small>customer_id</small></div><div class="arrow">→</div>
+<div class="node"><b>customer_id</b><small>고객 1명 = 1행</small></div>
+</div></div></div>
+<div class="callout good"><b>핵심</b><br/>CTE를 읽을 때는 각 단계마다 <strong>입력 Grain → 처리 → 출력 Grain</strong>을 확인하면 긴 SQL도 구조가 보입니다.</div>
+</div></section>
+<section id="multi"><div class="panel">
+<h2>8. 다중 CTE — 역할별로 나누고 마지막에 결합하기</h2>
+<p>CTE가 여러 개일 때는 각 CTE에 한 가지 역할을 부여합니다. 원천 선택, 집계, 마스터 준비, 최종 JOIN처럼 단계가 분리되면 수정 지점도 명확해집니다.</p><div class="lesson-goal"><div class="goal-head">이 주제에서 확인할 것</div><div class="goal-grid"><div class="goal-item"><b>무엇을 만들려는가?</b><p>하나의 긴 SQL을 <strong>결제 필터 → 고객별 집계 → 고객 마스터 → 최종 JOIN</strong>으로 역할별 분리합니다.</p></div><div class="goal-item"><b>왜 필요한가?</b><p>업무 로직이 늘어날수록 한 SELECT 안에 모든 처리를 넣으면 수정과 검증이 어렵습니다. CTE별 역할을 하나씩 부여하면 구조가 선명해집니다.</p></div><div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code>, <code>customers</code></p></div><div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>고객 1명당 한 행이 나오고, 지역·소득구간·위험등급과 승인결제 요약값이 한 행에 함께 붙습니다.</p></div><div class="goal-item"><b>최종 Grain</b><p><code>customer_id</code> 1명 = 1행</p></div></div></div>
+<pre><code>USE fintech_fraud_lab_class;  -- 금융 AI 실습 DB 선택
+--
+-- ① 승인된 결제만 남깁니다.
+WITH approved_payments AS (
+    SELECT
+        payment_id,
+        customer_id,
+        merchant_id,
+        amount
+    FROM card_payments
+    WHERE is_approved = 1        -- 승인 결제만 사용
+),
+-- ② 승인 결제를 고객 단위로 먼저 집계합니다.
+customer_payment AS (
+    SELECT
+        customer_id,
+        COUNT(*) AS `payment_count`,   -- 고객별 결제 건수
+        SUM(amount) AS `total_amount`  -- 고객별 총 결제금액
+    FROM approved_payments
+    GROUP BY customer_id               -- 고객 1명 = 1행으로 축약
+),
+-- ③ 고객 마스터에서 설명 변수만 따로 준비합니다.
+customer_master AS (
+    SELECT
+        customer_id,
+        region,
+        income_band,
+        risk_segment
+    FROM customers
+)
+-- ④ 고객 마스터를 기준으로 결제 요약을 붙입니다.
+SELECT
+    c.customer_id,
+    c.region,
+    c.income_band,
+    c.risk_segment,
+    p.payment_count,
+    p.total_amount
+FROM customer_master AS c
+LEFT JOIN customer_payment AS p
+  ON c.customer_id = p.customer_id  -- 동일 고객끼리 연결
+-- LEFT JOIN이므로 결제가 없는 고객도 고객 행 자체는 남을 수 있습니다.
+ORDER BY p.total_amount DESC
+LIMIT 50;</code></pre>
+<div class="grid4">
+<div class="step"><b>1 · approved_payments</b>승인된 결제만 선택</div>
+<div class="step"><b>2 · customer_payment</b>고객별 결제 요약</div>
+<div class="step"><b>3 · customer_master</b>고객 설명정보 준비</div>
+<div class="step"><b>4 · 최종 SELECT</b>고객 기준으로 결합</div>
+</div>
+<div class="callout info"><b>다중 CTE의 좋은 이름</b><br/><code>data1</code>, <code>temp2</code>보다 <code>approved_payments</code>, <code>customer_payment</code>처럼 중간 결과의 의미를 드러내는 이름이 좋습니다.</div>
+</div></section>
+<section id="fanout"><div class="panel">
+<h2>9. CTE가 특히 유용한 이유 — Fan-out을 사전 집계로 막기</h2>
+<p><strong>Fan-out</strong>은 한 고객에게 계좌도 여러 개이고 거래도 여러 건일 때, 두 1:N 테이블을 그대로 붙여 가능한 조합만큼 행이 늘어나는 현상입니다.</p><div class="lesson-goal"><div class="goal-head">이 주제에서 확인할 것</div><div class="goal-grid"><div class="goal-item"><b>무엇을 만들려는가?</b><p>계좌와 거래처럼 고객당 여러 행이 있는 테이블을 그대로 JOIN할 때 발생하는 <strong>Fan-out</strong>을 확인하고, 사전 집계로 해결합니다.</p></div><div class="goal-item"><b>왜 필요한가?</b><p>Fan-out을 이해하지 못하면 거래금액이나 잔액이 중복 합산되어 실제보다 훨씬 큰 값이 만들어질 수 있습니다.</p></div><div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>customers</code>, <code>accounts</code>, <code>transactions</code></p></div><div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>위험한 JOIN에서는 고객 한 명이 여러 행으로 반복되고, 사전 집계 후 JOIN에서는 다시 고객 1명당 1행으로 정리되는 차이를 확인합니다.</p></div><div class="goal-item"><b>최종 Grain</b><p>최종 목표는 <code>customer_id</code> 1명 = 1행</p></div></div></div>
+<div class="figure">
+<div class="figure-title">Fan-out 예</div>
+<div class="figure-body">
+<div class="fanout-grid">
+<div class="fanout-box"><b>고객 1명</b>기준 1행</div>
+<div class="fanout-box"><b>계좌 2개</b>accounts 2행</div>
+<div class="fanout-box"><b>거래 10건</b>transactions 10행</div>
+</div>
+<div class="callout danger" style="margin-bottom:0"><b>직접 JOIN하면</b><br/>계좌 2개 × 거래 10건 = 최대 <strong>20개 조합</strong>이 만들어질 수 있습니다.</div>
+</div></div>
+<h3>9-1. 위험한 JOIN</h3>
+<pre><code>USE fintech_fraud_lab_class;  -- 금융 AI 실습 DB 선택
+--
+-- =========================================================
+-- [의도적으로 위험한 예제]
+-- 고객 한 명에게 계좌가 여러 개이고 거래도 여러 건이면
+-- accounts × transactions 조합만큼 행이 늘어날 수 있습니다.
+-- =========================================================
+SELECT
+    c.customer_id,               -- 기준 고객
+    a.account_id,                -- 고객이 가진 계좌
+    t.transaction_id             -- 고객의 거래
+FROM customers AS c              -- 고객 1행을 기준으로 시작
+LEFT JOIN accounts AS a
+  ON c.customer_id = a.customer_id   -- 고객 1 : 계좌 N
+LEFT JOIN transactions AS t
+  ON c.customer_id = t.customer_id   -- 고객 1 : 거래 N
+WHERE c.customer_id = 1;         -- 고객 1명만 보며 Fan-out을 관찰
+--
+-- 예: 계좌 2개 × 거래 10건이면 최대 20행으로 늘어날 수 있습니다.
+-- 따라서 이 결과를 '고객 1명 = 1행' 데이터로 착각하면 안 됩니다.</code></pre>
+<h3>9-2. 해결: 각 테이블을 먼저 고객 1행으로 집계</h3>
+<pre><code>USE fintech_fraud_lab_class;  -- 금융 AI 실습 DB 선택
+--
+-- ① 계좌 원천을 먼저 고객 단위로 집계합니다.
+--    이렇게 하면 accounts의 여러 행이 고객별 1행으로 축약됩니다.
+WITH account_summary AS (
+    SELECT
+        customer_id,
+        COUNT(*) AS `account_count`,      -- 고객이 가진 계좌 수
+        SUM(balance) AS `total_balance`   -- 고객의 전체 계좌 잔액 합계
+    FROM accounts
+    GROUP BY customer_id                  -- 고객 1명 = 1행
+),
+-- ② 거래 원천도 별도로 고객 단위로 집계합니다.
+transaction_summary AS (
+    SELECT
+        customer_id,
+        COUNT(*) AS `transaction_count`,          -- 고객별 거래 건수
+        SUM(amount) AS `total_transaction_amount` -- 고객별 거래금액 합계
+    FROM transactions
+    GROUP BY customer_id                          -- 고객 1명 = 1행
+)
+-- ③ 두 개의 '고객별 1행' 요약 결과를 고객 마스터에 붙입니다.
+SELECT
+    c.customer_id,
+    c.region,
+    a.account_count,
+    a.total_balance,
+    t.transaction_count,
+    t.total_transaction_amount
+FROM customers AS c
+LEFT JOIN account_summary AS a
+  ON c.customer_id = a.customer_id        -- 고객 1 : 요약 1
+LEFT JOIN transaction_summary AS t
+  ON c.customer_id = t.customer_id        -- 고객 1 : 요약 1
+WHERE c.customer_id = 1;
+--
+-- 핵심: 원천 1:N 테이블끼리 직접 JOIN하지 않고
+--       각각 먼저 집계한 뒤 연결하면 Fan-out을 막을 수 있습니다.</code></pre>
+<div class="figure">
+<div class="figure-title">Pre-aggregation(사전 집계)</div>
+<div class="figure-body"><div class="pipeline">
+<div class="node"><b>accounts N행</b><small>고객별 여러 계좌</small></div><div class="arrow">→</div>
+<div class="node"><b>account_summary</b><small>고객별 1행</small></div><div class="arrow">→</div>
+<div class="node"><b>customers</b><small>N:1로 안전하게 결합</small></div>
+</div></div></div>
+<div class="callout purple"><b>Pre-aggregation</b><br/>JOIN하기 전에 N쪽 원천을 원하는 기준키로 먼저 요약하는 방법입니다. CTE는 이 중간 요약 결과에 이름을 붙이기 좋기 때문에 Fan-out 방지 패턴과 잘 맞습니다.</div>
+</div></section>
+<section id="snapshot"><div class="panel">
+<h2>10. Point-in-Time Snapshot — 배정 시점에 존재했던 정보만 사용하기</h2>
+<p class="lead">캠페인 배정 1건을 기준으로 금융 상태를 만들 때는 현재 계좌나 현재 대출을 그대로 붙이면 안 됩니다. <strong>배정 당시 이미 존재했던 정보</strong>만 사용해야 합니다.</p><div class="lesson-goal"><div class="goal-head">이 주제에서 확인할 것</div><div class="goal-grid"><div class="goal-item"><b>무엇을 만들려는가?</b><p>캠페인을 배정한 바로 그 시점에 고객이 보유하고 있던 계좌 정보를 모아 <strong>배정시점 Customer Snapshot</strong>을 만듭니다.</p></div><div class="goal-item"><b>왜 필요한가?</b><p>개인화 모델은 캠페인 배정 당시 알 수 있었던 정보로만 판단해야 합니다. 배정 이후 새로 생긴 계좌를 포함하면 미래정보 누수가 발생합니다.</p></div><div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>campaign_experiments</code>, <code>accounts</code></p></div><div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>각 <code>experiment_id</code>마다 한 행이 나오고, <code>assigned_at</code> 이전에 개설된 계좌 수와 활성계좌 잔액만 붙습니다.</p></div><div class="goal-item"><b>최종 Grain</b><p><code>experiment_id</code> 1건 = 1행</p></div></div></div>
+<div class="figure">
+<div class="figure-title">Point-in-Time을 시간축으로 이해하기</div>
+<div class="figure-body">
+<div class="timeline">
+<div class="time-card ok"><b>배정 이전</b>계좌 개설<br/><small>사용 가능</small></div>
+<div class="time-card ok"><b>배정 이전</b>거래 발생<br/><small>사용 가능</small></div>
+<div class="time-card"><b>assigned_at</b>캠페인 배정<br/><small>기준시점</small></div>
+<div class="time-card future"><b>배정 이후</b>새 계좌·거래<br/><small>미래 정보 → 제외</small></div>
+</div>
+</div></div>
+<pre><code>USE fintech_fraud_lab_class;  -- 개인화 실습 데이터가 있는 금융 DB 선택
+--
+-- ① ce: 캠페인 배정 이벤트를 기준 데이터로 준비합니다.
+--    최종 Grain은 experiment_id 1건 = 1행입니다.
+WITH ce AS (
+    SELECT
+        experiment_id,            -- 캠페인/실험 배정 건의 PK
+        customer_id,              -- 배정 대상 고객
+        assigned_at,              -- 매우 중요: 이 시점을 기준으로 과거 정보만 사용
+        campaign_name,            -- 어떤 캠페인을 배정했는지
+        converted                 -- 전환 여부(Target/성과 확인용)
+    FROM campaign_experiments
+    ORDER BY assigned_at
+    LIMIT 30000                   -- 처리량을 고려해 최대 3만 건 제한
+),
+-- ② acct: 각 experiment의 배정시점까지 존재했던 계좌만 집계합니다.
+acct AS (
+    SELECT
+        ce.experiment_id,
+        COUNT(DISTINCT a.account_id) AS `account_count`, -- 중복을 피하며 계좌 수 계산
+        SUM(
+            CASE
+                WHEN a.status = 'ACTIVE' THEN a.balance -- 활성계좌 잔액만 합산
+                ELSE 0
+            END
+        ) AS `active_balance`
+    FROM ce
+    LEFT JOIN accounts AS a
+      ON a.customer_id = ce.customer_id   -- 같은 고객의 계좌 연결
+     AND a.opened_at &lt;= ce.assigned_at    -- 배정 이후 개설 계좌는 미래정보이므로 제외
+    GROUP BY ce.experiment_id              -- 다시 experiment 1건 = 1행으로 집계
+)
+-- ③ 기준 ce에 계좌 Snapshot을 붙여 최종 결과를 만듭니다.
+SELECT
+    ce.experiment_id,
+    ce.customer_id,
+    ce.assigned_at,
+    ce.campaign_name,
+    acct.account_count,
+    acct.active_balance,
+    ce.converted
+FROM ce
+LEFT JOIN acct
+  ON acct.experiment_id = ce.experiment_id -- experiment_id로 1:1에 가깝게 결합
+ORDER BY ce.assigned_at;                   -- 배정시간 순서로 확인</code></pre>
+<div class="callout info"><b>Snapshot</b><br/>특정 기준시점의 고객 상태를 한 행으로 정리한 데이터입니다. 여기서는 <code>experiment_id</code> 하나가 최종 한 행의 기준입니다.</div>
+</div></section>
+<section id="consent"><div class="panel">
+<h2>11. 동의정보도 현재 상태가 아니라 기준시점 상태로 보기</h2>
+<p>동의 이력은 단순 현재값이 아닙니다. 배정 시점 이전에 동의가 부여되었고, 그 시점까지 철회되지 않았는지를 함께 확인해야 합니다.</p><div class="lesson-goal"><div class="goal-head">이 주제에서 확인할 것</div><div class="goal-grid"><div class="goal-item"><b>무엇을 만들려는가?</b><p>캠페인 배정 당시 <strong>AI_PROFILING 동의가 실제로 유효했는지</strong>를 실험 건별 0/1 값으로 만듭니다.</p></div><div class="goal-item"><b>왜 필요한가?</b><p>현재 동의 상태만 보면 과거 시점의 적법한 데이터 사용 여부를 판단할 수 없습니다. 부여시점과 철회시점을 배정시점과 함께 비교해야 합니다.</p></div><div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>campaign_experiments</code>, <code>consent_records</code></p></div><div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>각 <code>experiment_id</code>마다 한 행이 나오고, 배정 당시 유효한 동의가 있으면 1, 아니면 0이 표시됩니다.</p></div><div class="goal-item"><b>최종 Grain</b><p><code>experiment_id</code> 1건 = 1행</p></div></div></div>
+<pre><code>USE fintech_fraud_lab_class;  -- 개인화 실습 DB 선택
+--
+-- ① 캠페인 배정 시점을 기준축으로 준비합니다.
+WITH ce AS (
+    SELECT
+        experiment_id,
+        customer_id,
+        assigned_at
+    FROM campaign_experiments
+    ORDER BY assigned_at
+    LIMIT 30000
+),
+-- ② 각 배정시점에 AI_PROFILING 동의가 유효했는지 계산합니다.
+consent AS (
+    SELECT
+        ce.experiment_id,
+        MAX(  -- 동의 레코드가 여러 개여도 하나라도 유효하면 1이 되도록 MAX 사용
+            CASE
+                WHEN cr.consent_type = 'AI_PROFILING'   -- AI Profiling 동의 유형만 확인
+                 AND cr.consent_status = 'GRANTED'      -- 동의 상태가 승인(GRANTED)이고
+                 AND cr.granted_at &lt;= ce.assigned_at    -- 동의 시점이 캠페인 배정보다 빠르며
+                 AND (
+                     cr.revoked_at IS NULL               -- 아직 철회되지 않았거나
+                     OR cr.revoked_at &gt; ce.assigned_at   -- 철회가 배정 이후라면 당시에는 유효
+                 )
+                THEN 1                                   -- 배정 당시 유효한 동의
+                ELSE 0                                   -- 유효한 동의가 아님
+            END
+        ) AS `ai_profiling_granted`
+    FROM ce
+    LEFT JOIN consent_records AS cr
+      ON cr.customer_id = ce.customer_id  -- 같은 고객의 동의 이력 전체를 후보로 연결
+    GROUP BY ce.experiment_id             -- experiment 1건당 동의 상태 1개로 축약
+)
+-- ③ 각 실험별 동의 여부를 확인합니다.
+SELECT
+    experiment_id,
+    ai_profiling_granted
+FROM consent
+ORDER BY experiment_id;</code></pre>
+<div class="figure">
+<div class="figure-title">동의 유효성 판단</div>
+<div class="figure-body"><div class="pipeline">
+<div class="node"><b>granted_at</b><small>배정 이전이어야 함</small></div><div class="arrow">→</div>
+<div class="node"><b>assigned_at</b><small>판단 기준</small></div><div class="arrow">→</div>
+<div class="node"><b>revoked_at</b><small>없거나 배정 이후</small></div>
+</div></div></div>
+<div class="callout good"><b><code>MAX(CASE ...)</code>의 의미</b><br/>동의 이력이 여러 건이어도 배정 시점에 유효한 기록이 하나라도 있으면 1로 요약하기 위한 패턴입니다.</div>
+</div></section>
+<section id="full"><div class="panel">
+<h2>12. 전체형 CTE — 캠페인 배정시점 Customer 360 Snapshot</h2>
+<p class="lead">이 쿼리는 여러 테이블의 데이터를 단순히 한 번에 조회하기 위한 것이 아니라, <strong>캠페인을 배정한 당시의 고객 금융상태를 다시 재현해 실험 1건당 한 행으로 만드는 것</strong>이 핵심입니다. 따라서 먼저 최종 결과에서 무엇을 얻으려는지 확인한 뒤, 각 CTE가 그 결과의 어느 부분을 만드는지 순서대로 읽습니다.</p><div class="lesson-goal"><div class="goal-head">이 쿼리를 작성하는 목적</div><div class="goal-grid"><div class="goal-item"><b>무엇을 만들려는가?</b><p><strong>캠페인 배정 1건마다, 그 배정 시점에 실제로 알 수 있었던 고객의 금융상태를 한 행으로 모은 Customer 360 Snapshot</strong>을 만드는 것이 목적입니다. 이 결과가 이후 개인화 추천·Propensity Model·Next-Best-Action 모델에 들어갈 수 있는 학습용 원천 데이터가 됩니다.</p></div><div class="goal-item"><b>왜 필요한가?</b><p>캠페인을 받은 고객의 현재 상태를 쓰는 것이 아니라, <strong>배정 당시 상태</strong>를 재현해야 공정한 모델 학습이 가능합니다. 계좌·대출·최근 거래·동의정보가 서로 다른 테이블에 흩어져 있으므로, 각 영역을 CTE로 따로 계산한 뒤 <code>experiment_id</code>를 기준으로 한 행에 결합합니다.</p></div><div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>campaign_experiments</code>를 기준축으로 사용하고, <code>accounts</code>, <code>loans</code>, <code>transactions</code>, <code>consent_records</code>를 연결합니다.</p></div><div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>최종 결과 한 행에는 캠페인 정보와 함께 계좌 수·활성잔액·대출 수·활성 대출원금·최대 연체일수·최근 90일 유입/유출금액·AI 프로파일링 동의 여부가 함께 표시되어야 합니다. 또한 모든 값은 <code>assigned_at</code> 시점 이후의 정보를 포함하지 않아야 합니다.</p></div><div class="goal-item"><b>최종 Grain</b><p><code>experiment_id</code> 1건 = 1행</p></div></div></div>
+<pre><code>USE fintech_fraud_lab_class;  -- 개인화/Customer 360 실습 DB 선택
+--
+-- =========================================================
+-- [최종형] 캠페인 배정시점 기준 Customer 360 Snapshot
+-- 핵심 원칙: assigned_at 이후의 정보는 절대 사용하지 않습니다.
+-- 최종 Grain: experiment_id 1건 = 1행
+-- =========================================================
+--
+-- ① ce: 캠페인 배정 이벤트를 기준축으로 준비합니다.
+WITH ce AS (
+    SELECT
+        experiment_id,            -- 실험 배정 건의 PK
+        customer_id,              -- 고객 ID
+        campaign_name,            -- 캠페인명
+        group_name,               -- 실험군/대조군 등 그룹
+        assigned_at,              -- Point-in-Time 기준시점
+        exposed,                  -- 노출 여부
+        clicked,                  -- 클릭 여부
+        converted,                -- 전환 여부: 이후 모델의 Target 후보
+        revenue_amount            -- 전환 후 매출 성과
+    FROM campaign_experiments
+    ORDER BY assigned_at
+    LIMIT 30000                   -- 처리량을 제한
+),
+--
+-- ② acct: 배정시점까지 개설된 계좌를 experiment 단위로 집계합니다.
+acct AS (
+    SELECT
+        ce.experiment_id,
+        COUNT(DISTINCT a.account_id) AS `account_count`,
+        SUM(
+            CASE
+                WHEN a.status = 'ACTIVE' THEN a.balance -- 현재 활성계좌 잔액만 합산
+                ELSE 0
+            END
+        ) AS `active_balance`
+    FROM ce
+    LEFT JOIN accounts AS a
+      ON a.customer_id = ce.customer_id
+     AND a.opened_at &lt;= ce.assigned_at      -- 미래에 개설된 계좌는 제외
+    GROUP BY ce.experiment_id
+),
+--
+-- ③ loan: 배정시점까지 실행된 대출을 experiment 단위로 집계합니다.
+loan AS (
+    SELECT
+        ce.experiment_id,
+        COUNT(DISTINCT l.loan_id) AS `loan_count`,
+        SUM(
+            CASE
+                WHEN l.status IN ('ACTIVE', 'RESTRUCTURED')
+                THEN l.principal                  -- 활성/재조정 대출 원금만 합산
+                ELSE 0
+            END
+        ) AS `active_loan_principal`,
+        MAX(
+            CASE
+                WHEN l.overdue_days &gt; 0 THEN l.overdue_days
+                ELSE 0
+            END
+        ) AS `max_overdue_days`                    -- 가장 큰 연체일수
+    FROM ce
+    LEFT JOIN loans AS l
+      ON l.customer_id = ce.customer_id
+     AND l.opened_at &lt;= ce.assigned_at             -- 배정 이후 대출은 제외
+    GROUP BY ce.experiment_id
+),
+--
+-- ④ txn: 배정 직전 90일 거래만 집계합니다.
+txn AS (
+    SELECT
+        ce.experiment_id,
+        COUNT(t.transaction_id) AS `txn_90d`,       -- 최근 90일 거래 건수
+        SUM(
+            CASE
+                WHEN t.transaction_type IN ('DEPOSIT', 'TRANSFER_IN', 'INTEREST')
+                THEN t.amount                       -- 유입 거래금액
+                ELSE 0
+            END
+        ) AS `inflow_90d`,
+        SUM(
+            CASE
+                WHEN t.transaction_type IN ('WITHDRAWAL', 'TRANSFER_OUT', 'FEE')
+                THEN t.amount                       -- 유출 거래금액
+                ELSE 0
+            END
+        ) AS `outflow_90d`
+    FROM ce
+    LEFT JOIN transactions AS t
+      ON t.customer_id = ce.customer_id
+     AND t.transaction_at &lt; ce.assigned_at         -- 배정시점 이후 거래는 미래정보이므로 제외
+     AND t.transaction_at &gt;= DATE_SUB(
+         ce.assigned_at, INTERVAL 90 DAY            -- 배정시점에서 정확히 90일 전부터
+     )
+    GROUP BY ce.experiment_id
+),
+--
+-- ⑤ consent: 배정 당시 AI_PROFILING 동의가 유효했는지 확인합니다.
+consent AS (
+    SELECT
+        ce.experiment_id,
+        MAX(
+            CASE
+                WHEN cr.consent_type = 'AI_PROFILING'
+                 AND cr.consent_status = 'GRANTED'
+                 AND cr.granted_at &lt;= ce.assigned_at
+                 AND (
+                     cr.revoked_at IS NULL
+                     OR cr.revoked_at &gt; ce.assigned_at
+                 )
+                THEN 1
+                ELSE 0
+            END
+        ) AS `ai_profiling_granted`
+    FROM ce
+    LEFT JOIN consent_records AS cr
+      ON cr.customer_id = ce.customer_id
+    GROUP BY ce.experiment_id
+)
+--
+-- ⑥ 최종 SELECT: 모든 Snapshot을 experiment_id 기준으로 결합합니다.
+SELECT
+    ce.experiment_id,
+    ce.customer_id,
+    ce.campaign_name,
+    ce.group_name,
+    ce.assigned_at,
+    ce.exposed,
+    ce.clicked,
+    ce.converted,
+    ce.revenue_amount,
+--
+    -- LEFT JOIN 결과가 NULL이면 해당 정보가 없었다는 뜻이므로 0으로 보정합니다.
+    COALESCE(acct.account_count, 0) AS `account_count`,
+    COALESCE(acct.active_balance, 0) AS `active_balance`,
+    COALESCE(loan.loan_count, 0) AS `loan_count`,
+    COALESCE(loan.active_loan_principal, 0) AS `active_loan_principal`,
+    COALESCE(loan.max_overdue_days, 0) AS `max_overdue_days`,
+    COALESCE(txn.txn_90d, 0) AS `txn_90d`,
+    COALESCE(txn.inflow_90d, 0) AS `inflow_90d`,
+    COALESCE(txn.outflow_90d, 0) AS `outflow_90d`,
+    COALESCE(consent.ai_profiling_granted, 0) AS `ai_profiling_granted`
+FROM ce
+LEFT JOIN acct
+  ON acct.experiment_id = ce.experiment_id
+LEFT JOIN loan
+  ON loan.experiment_id = ce.experiment_id
+LEFT JOIN txn
+  ON txn.experiment_id = ce.experiment_id
+LEFT JOIN consent
+  ON consent.experiment_id = ce.experiment_id
+ORDER BY ce.assigned_at;  -- 배정시점 순서로 최종 결과를 확인합니다.</code></pre>
+<div class="table-wrap">
+<table>
+<thead><tr><th>단계</th><th>중간 결과</th><th>핵심 처리</th><th>출력 Grain</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>ce</code></td><td>캠페인 배정 이벤트 선택</td><td>experiment_id</td></tr>
+<tr><td>2</td><td><code>acct</code></td><td>배정시점 계좌 집계</td><td>experiment_id</td></tr>
+<tr><td>3</td><td><code>loan</code></td><td>배정시점 대출 집계</td><td>experiment_id</td></tr>
+<tr><td>4</td><td><code>txn</code></td><td>배정 직전 90일 거래 집계</td><td>experiment_id</td></tr>
+<tr><td>5</td><td><code>consent</code></td><td>배정시점 동의 유효성</td><td>experiment_id</td></tr>
+<tr><td>6</td><td>최종 SELECT</td><td>모든 CTE 결합</td><td>experiment_id</td></tr>
+</tbody>
+</table>
+</div>
+<div class="figure">
+<div class="figure-title">전체 Snapshot 조립 구조</div>
+<div class="figure-body"><div class="pipeline">
+<div class="node"><b>ce</b><small>배정 기준축</small></div>
+<div class="node"><b>acct</b><small>계좌 요약</small></div>
+<div class="node"><b>loan</b><small>대출 요약</small></div>
+<div class="node"><b>txn</b><small>90일 거래</small></div>
+<div class="node"><b>consent</b><small>동의 상태</small></div>
+<div class="node"><b>최종 행</b><small>experiment_id 1행</small></div>
+</div></div></div>
+</div></section>
+<section id="validation"><div class="panel">
+<h2>13. CTE 결과를 검증하는 방법</h2>
+<p>쿼리가 실행된다는 것과 데이터가 올바르다는 것은 다릅니다. 특히 집계와 JOIN이 포함된 CTE는 Grain과 행 수를 반드시 확인합니다.</p><div class="lesson-goal"><div class="goal-head">이 주제에서 확인할 것</div><div class="goal-grid"><div class="goal-item"><b>무엇을 만들려는가?</b><p>CTE가 실행됐다는 사실만으로 끝내지 않고, <strong>중간 결과와 최종 Grain이 실제로 올바른지 검증</strong>합니다.</p></div><div class="goal-item"><b>왜 필요한가?</b><p>SQL 문법 오류보다 더 위험한 것은 조용히 잘못된 데이터가 만들어지는 경우입니다. 키 중복, Fan-out, 미래정보 포함 여부를 숫자로 확인해야 합니다.</p></div><div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p>각 CTE의 결과와 최종 결과</p></div><div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>전체 행 수와 고유 키 수가 기대대로 맞고, 최종 키가 중복되지 않으며, 기준시점 이후 데이터가 섞이지 않았음을 확인합니다.</p></div><div class="goal-item"><b>최종 Grain</b><p>검증 대상에 따라 <code>customer_id</code> 또는 <code>experiment_id</code> Grain 유지 여부 확인</p></div></div></div>
+<div class="check-grid">
+<div class="check">각 CTE의 한 행이 무엇인지 말할 수 있는가?</div>
+<div class="check">GROUP BY 전후 Grain 변화가 예상과 같은가?</div>
+<div class="check">최종 키가 중복되지 않는가?</div>
+<div class="check">JOIN 후 행 수가 예상보다 증가하지 않았는가?</div>
+<div class="check">기준시점 이후의 미래 데이터가 섞이지 않았는가?</div>
+<div class="check">NULL을 0으로 바꿔도 의미상 맞는 컬럼인가?</div>
+</div>
+<h3>13-1. 고객 요약 CTE의 유일성 확인</h3>
+<pre><code>WITH approved AS (
+    SELECT
+        payment_id,
+        customer_id,
+        amount
+    FROM card_payments
+    WHERE is_approved = 1
+),
+customer_summary AS (
+    SELECT
+        customer_id,
+        COUNT(*) AS payment_count,
+        SUM(amount) AS total_amount
+    FROM approved
+    GROUP BY customer_id
+)
+SELECT
+    COUNT(*) AS customer_rows,
+    COUNT(DISTINCT customer_id) AS distinct_customers,
+    SUM(payment_count) AS summed_payment_count
+FROM customer_summary;</code></pre>
+<div class="callout purple"><b>검증 해석</b><br/><code>customer_rows</code>와 <code>distinct_customers</code>가 같다면 고객 1명 = 1행 Grain이 유지되고 있다는 뜻입니다.</div>
+<div class="callout info"><b>디버깅 방법</b><br/>긴 CTE에 문제가 있으면 마지막 SELECT만 보지 말고, 각 CTE 정의 안의 SELECT를 독립 쿼리로 복사해 행 수·키 중복·NULL을 차례로 확인합니다.</div>
+</div></section>
+<section id="practice"><div class="panel">
+<h2>14. 확인 문제</h2>
+<details><summary>문제 1 — 서브쿼리와 CTE의 가장 큰 구조적 차이는 무엇인가?</summary><div><p><strong>답:</strong> 서브쿼리는 다른 SQL 내부에 중첩되는 반면, CTE는 WITH 절에서 중간 결과를 이름 붙여 위에서 아래로 단계화합니다.</p></div></details>
+<details><summary>문제 2 — CTE를 사용하면 항상 더 빠른가?</summary><div><p><strong>답:</strong> 아닙니다. 성능은 DBMS와 실행계획에 따라 달라집니다. CTE의 대표 장점은 가독성·단계 분리·재사용·Grain 관리·검증 편의성입니다.</p></div></details>
+<details><summary>문제 3 — GROUP BY customer_id 전후의 Grain은 어떻게 달라지는가?</summary><div><p><strong>답:</strong> 결제 원천에서는 payment_id 1건이 한 행이지만, 고객별 집계 후에는 customer_id 1명이 한 행이 됩니다.</p></div></details>
+<details><summary>문제 4 — accounts와 transactions를 customers에 그대로 동시에 JOIN할 때 Fan-out이 발생하는 이유는?</summary><div><p><strong>답:</strong> 두 테이블 모두 고객 기준 1:N이므로 계좌와 거래의 가능한 조합이 생성되어 고객 행이 여러 번 복제될 수 있기 때문입니다.</p></div></details>
+<details><summary>문제 5 — assigned_at 이후의 거래를 Snapshot에 포함하면 왜 문제가 되는가?</summary><div><p><strong>답:</strong> 배정 당시 알 수 없던 미래 정보가 들어가므로 Point-in-Time 원칙을 위반하고 Data Leakage가 발생할 수 있습니다.</p></div></details>
+<details><summary>문제 6 — 긴 CTE를 읽을 때 가장 먼저 확인할 것은?</summary><div><p><strong>답:</strong> 기준 CTE와 최종 Grain을 먼저 찾고, 각 CTE의 입력 → 처리 → 출력 Grain을 순서대로 확인합니다.</p></div></details>
+</div></section>
+</main>
+<footer>Subquery · CTE · Grain · Pre-aggregation · Fan-out · Point-in-Time · Snapshot</footer>
+</body>
+</html>

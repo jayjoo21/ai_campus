@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>02. ERD·JOIN — 관계를 읽고 Grain을 지키는 금융 데이터 연결</title>
+<style>
+:root{
+  --bg:#f4f7fb; --paper:#ffffff; --ink:#172033; --muted:#5b6778; --line:#d8e2ee;
+  --navy:#112b49; --navy2:#183e68; --blue:#2563eb; --bluebg:#eef5ff; --cyan:#0d8fb3;
+  --green:#16724f; --greenbg:#eef9f4; --amber:#a76608; --amberbg:#fff7e8;
+  --red:#b53a3a; --redbg:#fff2f2; --purple:#6652b8; --purplebg:#f5f2ff; --code:#0e1825;
+  --shadow:0 9px 28px rgba(15,34,55,.06);
+}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic","Segoe UI",Arial,sans-serif;
+  line-height:1.72;word-break:keep-all;overflow-wrap:anywhere;
+}
+a{color:inherit}
+.wrap{max-width:1240px;margin:auto}
+.hero{
+  background:
+    radial-gradient(circle at 83% 18%,rgba(35,189,224,.22),transparent 25%),
+    linear-gradient(135deg,#0b1b2e,#123f68 58%,#0e607b);
+  color:#fff;padding:54px 24px 46px
+}
+.hero .eyebrow{font-size:.77rem;font-weight:900;letter-spacing:.14em;color:#cce8ff}
+.hero h1{font-size:clamp(2rem,4.6vw,3.15rem);line-height:1.16;letter-spacing:-.045em;margin:9px 0 13px}
+.hero p{font-size:1.05rem;color:#e4f1fb;max-width:980px;margin:0}
+.hero-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-top:22px}
+.hero-stat{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);border-radius:14px;padding:13px 14px}
+.hero-stat b{display:block;font-size:1.08rem;margin-bottom:2px}
+.hero-stat span{font-size:.78rem;color:#d8e7f3}
+nav{
+  position:sticky;top:0;z-index:20;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line)
+}
+nav .wrap{display:flex;gap:7px;overflow-x:auto;padding:9px 16px;-webkit-overflow-scrolling:touch}
+nav a{
+  white-space:nowrap;text-decoration:none;background:#eef5ff;border:1px solid #d4e4f7;color:#235789;
+  padding:6px 10px;border-radius:999px;font-size:.76rem;font-weight:850
+}
+main{padding:30px 18px 76px}
+section{scroll-margin-top:74px;margin:0 0 32px}
+.panel{
+  background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:26px;
+  box-shadow:var(--shadow)
+}
+h2{font-size:clamp(1.55rem,2.4vw,1.95rem);line-height:1.35;color:var(--navy);letter-spacing:-.025em;margin:0 0 14px}
+h3{font-size:1.22rem;line-height:1.42;color:#174d80;margin:27px 0 9px}
+h4{font-size:1rem;color:#274866;margin:0 0 6px}
+p{margin:7px 0 12px;color:var(--muted)}
+.lead{font-size:1.06rem;color:#354456}
+.grid2,.grid3,.grid4,.auto-grid,.term-grid,.scenario-grid{
+  display:grid;gap:13px;margin:14px 0;align-items:stretch
+}
+.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.auto-grid{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.term-grid{grid-template-columns:repeat(auto-fit,minmax(225px,1fr))}
+.scenario-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.card,.term,.callout,.query-box,.step,.mini-card{
+  border:1px solid var(--line);border-radius:13px;padding:15px;background:#fff
+}
+.card.soft{background:linear-gradient(180deg,#fcfdff,#f6f9fc)}
+.term b{display:block;color:#153f6a;margin-bottom:4px}
+.term .en{font-family:Consolas,monospace;color:#6347a4;font-size:.86rem}
+.callout{margin:15px 0}
+.callout.info{border-left:5px solid var(--blue);background:var(--bluebg)}
+.callout.good{border-left:5px solid var(--green);background:var(--greenbg)}
+.callout.warn{border-left:5px solid #d58a16;background:var(--amberbg)}
+.callout.danger{border-left:5px solid var(--red);background:var(--redbg)}
+.callout.purple{border-left:5px solid var(--purple);background:var(--purplebg)}
+.callout b{color:#123d68}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#eef4fa;color:#315f83;font-size:.72rem;font-weight:850;margin:2px 3px 2px 0}
+.figure{margin:18px 0;border:1px solid #dbe5ef;border-radius:17px;overflow:hidden;background:#fff;box-shadow:var(--shadow)}
+.figure-title{padding:13px 16px;background:#fafcff;border-bottom:1px solid #e4eaf0;color:#113a65;font-weight:900}
+.figure-body{padding:17px}
+.figure-caption{padding:9px 13px;border-top:1px solid #e4eaf0;background:#fafcff;color:#657486;font-size:.82rem}
+.flow-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:stretch}
+.flow-node{border:1px solid #cfe0ef;border-radius:12px;padding:13px;background:#f8fbff;text-align:center}
+.flow-node b{display:block;color:#153f6b}
+.flow-node small{display:block;color:#6b7a8c;margin-top:3px}
+.flow-arrow{display:flex;align-items:center;justify-content:center;font-weight:900;color:#336d9c;font-size:1.25rem}
+.relation-row{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:10px 0}
+.entity{border:1px solid #cbdbe8;border-radius:12px;background:#fff;padding:14px}
+.entity strong{display:block;color:#174b78}
+.rel-mark{text-align:center;color:#1b5b8e;font-weight:900}
+.join-compare{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.join-box{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}
+.join-visual{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;justify-items:center;min-height:110px}
+.circle{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;border:2px solid #4e8ac0;background:rgba(69,137,195,.12);font-weight:900;color:#184e7b}
+.circle.right{border-color:#4da47b;background:rgba(77,164,123,.12);color:#146447}
+.join-mid{font-size:1.25rem;font-weight:900;color:#5b6b7e}
+.timeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;align-items:stretch}
+.time-card{border:1px solid #d9e3ec;border-radius:12px;padding:12px;background:#fff}
+.time-card b{display:block;color:#173f6b;margin-bottom:4px}
+.time-card.future{background:#fff1f1;border-color:#efcaca}
+.time-card.ok{background:#edf8f3;border-color:#cde7da}
+.fanout{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.fanout-col{border:1px solid #d9e3ec;border-radius:12px;padding:12px;background:#fff}
+.fanout-col b{display:block;color:#153f6b;margin-bottom:5px}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:11px}
+.metric{border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center;background:#fff}
+.metric strong{display:block;font-size:1.42rem;color:#184c79}
+.table-wrap{width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:13px 0 18px;background:#fff;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:690px}
+th{background:#eef5ff;color:#174d80;text-align:left;padding:10px 11px;border-bottom:1px solid #cfe0ef}
+td{padding:10px 11px;border-bottom:1px solid #e7edf3;vertical-align:top}
+tr:last-child td{border-bottom:none}
+pre{
+  margin:12px 0 16px;background:var(--code);color:#dcecff;border-radius:12px;padding:15px 16px;
+  overflow:auto;max-width:100%;font-size:.83rem;line-height:1.58;white-space:pre
+}
+code{font-family:Consolas,"SFMono-Regular",Menlo,monospace}
+.inline{background:#e8eef5;color:#153a5f;border-radius:5px;padding:2px 5px}
+.query-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.query-box b{display:block;color:#164976;margin-bottom:5px}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:8px 12px;margin:10px 0}
+.kv div:nth-child(odd){font-weight:850;color:#244f73}
+details{border:1px solid var(--line);border-radius:12px;background:#fff;margin:10px 0;overflow:hidden}
+summary{cursor:pointer;padding:12px 14px;font-weight:850;color:#184d7e;background:#fbfdff}
+details>div{padding:0 14px 14px}
+.checklist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.check{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#fbfdff}
+.check:before{content:"✓";display:inline-grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#e6f5ee;color:#146b4c;font-weight:900;margin-right:7px}
+footer{padding:25px 20px;text-align:center;background:#0d1d2f;color:#cbd7e5;font-size:.8rem}
+@media(max-width:920px){
+  .hero-stats,.grid3,.grid4,.fanout{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .query-meta{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .hero{padding:40px 18px 34px}
+  main{padding:24px 14px 60px}
+  .panel{padding:19px}
+  .grid2,.grid3,.grid4,.join-compare,.checklist,.hero-stats,.fanout{grid-template-columns:1fr}
+  .relation-row{grid-template-columns:1fr}
+  .rel-mark{transform:rotate(90deg)}
+  .flow-grid{grid-template-columns:1fr}
+  .flow-arrow{transform:rotate(90deg)}
+  .kv{grid-template-columns:1fr}
+  table{min-width:620px}
+}
+@media(max-width:420px){
+  .hero h1{font-size:1.86rem}
+  .hero p{font-size:.94rem}
+  .panel{padding:16px}
+  .figure-body{padding:13px}
+  table{min-width:560px}
+}
+@media print{
+  nav{display:none}body{background:#fff}.panel,.figure{box-shadow:none;break-inside:avoid}
+  main{max-width:none;padding:0}.hero{background:#fff;color:#111;border-bottom:2px solid #234}
+  .hero p,.hero .eyebrow{color:#333}
+}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">MODULE 02 · ERD · PK/FK · JOIN · GRAIN</div>
+    <h1>ERD·JOIN — 관계를 읽고 Grain을 지키는 금융 데이터 연결</h1>
+    <p>테이블 관계를 그림으로 읽는 방법부터 PK·FK·Cardinality·Grain, INNER JOIN과 LEFT JOIN, 다중 JOIN, Fan-out, Point-in-Time, JOIN 검증까지 실제 금융·주가 데이터 구조를 이용해 단계적으로 설명합니다.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><b>ERD</b><span>테이블 관계 읽기</span></div>
+      <div class="hero-stat"><b>PK / FK</b><span>연결키 이해</span></div>
+      <div class="hero-stat"><b>Grain</b><span>한 행의 의미</span></div>
+      <div class="hero-stat"><b>Validation</b><span>JOIN 결과 검증</span></div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="wrap">
+    <a href="#overview">큰 그림</a>
+    <a href="#terms">핵심 용어</a>
+    <a href="#erd">ERD 읽기</a>
+    <a href="#grain">Grain</a>
+    <a href="#joinbasic">JOIN 기본</a>
+    <a href="#innerleft">INNER / LEFT</a>
+    <a href="#cardinality">관계 유형</a>
+    <a href="#stock">주가 JOIN</a>
+    <a href="#fds">FDS JOIN</a>
+    <a href="#css">Point-in-Time</a>
+    <a href="#fanout">Fan-out</a>
+    <a href="#aggregate">사전 집계</a>
+    <a href="#validate">검증</a>
+    <a href="#pandas">pandas 대응</a>
+    <a href="#practice">확인 문제</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section id="overview">
+<div class="panel">
+<h2>1. JOIN을 배우기 전에 전체 구조부터 보기</h2>
+<p class="lead">관계형 데이터베이스는 고객, 계좌, 거래, 카드, 결제, 대출처럼 성격이 다른 데이터를 여러 테이블로 나눠 저장합니다. JOIN은 이처럼 나눠진 정보를 <strong>공통된 키</strong>를 기준으로 다시 연결해서 하나의 조회 결과로 만드는 기능입니다.</p>
+
+<div class="figure">
+  <div class="figure-title">금융 데이터는 왜 여러 테이블로 나뉘어 있을까?</div>
+  <div class="figure-body">
+    <div class="flow-grid">
+      <div class="flow-node"><b>customers</b><small>고객 1명 = 1행</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><b>accounts</b><small>계좌 1개 = 1행</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><b>transactions</b><small>거래 1건 = 1행</small></div>
+    </div>
+    <div style="height:10px"></div>
+    <div class="flow-grid">
+      <div class="flow-node"><b>customers</b><small>고객 1명 = 1행</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><b>cards</b><small>카드 1개 = 1행</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><b>card_payments</b><small>결제 1건 = 1행</small></div>
+    </div>
+  </div>
+  <div class="figure-caption">고객 정보를 거래마다 반복 저장하지 않고, 고객·계좌·거래처럼 역할에 따라 나눈 뒤 ID로 연결합니다.</div>
+</div>
+
+<div class="grid3">
+  <div class="card soft"><h4>중복 감소</h4><p>고객 이름과 지역을 거래 수천 건마다 반복 저장하지 않아도 됩니다.</p></div>
+  <div class="card soft"><h4>일관성 유지</h4><p>고객 정보가 바뀌면 고객 마스터 한 곳만 수정하면 됩니다.</p></div>
+  <div class="card soft"><h4>업무 분리</h4><p>거래, 카드, 대출, 모델 예측 등 서로 다른 업무 데이터를 독립적으로 관리할 수 있습니다.</p></div>
+</div>
+
+<div class="callout info"><b>JOIN을 한 문장으로</b><br>“기준 테이블의 한 행에 필요한 정보를 다른 테이블에서 찾아 옆으로 붙이는 작업”이라고 이해하면 됩니다.</div>
+</div>
+</section>
+
+<section id="terms">
+<div class="panel">
+<h2>2. ERD·JOIN에서 자주 만나는 핵심 용어</h2>
+<p class="lead">문법보다 먼저 용어를 이해하면 ERD와 JOIN이 훨씬 쉽게 읽힙니다. 아래 용어는 이후 데이터 분석·FDS·CSS·마이데이터에서도 계속 등장합니다.</p>
+
+<div class="term-grid">
+  <div class="term"><b>ERD</b><span class="en">Entity Relationship Diagram</span><p>테이블과 테이블 사이 관계를 그림으로 표현한 설계도입니다.</p></div>
+  <div class="term"><b>Entity</b><span class="en">엔터티</span><p>관리하려는 대상입니다. 고객, 계좌, 거래, 카드처럼 테이블로 표현되는 경우가 많습니다.</p></div>
+  <div class="term"><b>Attribute</b><span class="en">속성</span><p>대상을 설명하는 값입니다. 고객의 지역, 결제의 금액, 거래일 등이 컬럼으로 표현됩니다.</p></div>
+  <div class="term"><b>PK</b><span class="en">Primary Key</span><p>각 행을 유일하게 구분하는 키입니다. 같은 PK 값이 두 행에 존재하면 안 됩니다.</p></div>
+  <div class="term"><b>FK</b><span class="en">Foreign Key</span><p>다른 테이블의 PK를 참조해 두 테이블의 관계를 만드는 키입니다.</p></div>
+  <div class="term"><b>Cardinality</b><span class="en">카디널리티</span><p>한쪽 행 하나가 다른 쪽 행 몇 개와 연결되는지 나타냅니다. 1:1, 1:N, N:M 등으로 표현합니다.</p></div>
+  <div class="term"><b>Grain</b><span class="en">그레인</span><p><strong>한 행이 정확히 무엇을 의미하는지</strong>를 뜻합니다. 예: 고객 1명, 결제 1건, 종목×거래일 1건.</p></div>
+  <div class="term"><b>Referential Integrity</b><span class="en">참조 무결성</span><p>FK가 가리키는 부모 행이 실제로 존재하도록 관계의 일관성을 유지하는 원칙입니다.</p></div>
+  <div class="term"><b>Orphan Record</b><span class="en">고아 레코드</span><p>FK 값은 있는데 연결되는 부모 행이 없는 데이터입니다. 적재 누락이나 데이터 품질 문제를 의심합니다.</p></div>
+  <div class="term"><b>Fan-out</b><span class="en">팬아웃</span><p>1:N 관계를 여러 개 동시에 JOIN하면서 기준 행이 조합 수만큼 복제되는 현상입니다.</p></div>
+  <div class="term"><b>Point-in-Time</b><span class="en">시점 정합성</span><p>예측·판단 시점에 실제로 알 수 있었던 데이터만 사용하도록 맞추는 원칙입니다.</p></div>
+  <div class="term"><b>Master / Event</b><span class="en">마스터 / 이벤트</span><p>고객·가맹점처럼 비교적 안정적인 기준정보와, 결제·로그인처럼 시간에 따라 발생하는 사건 데이터를 구분하는 개념입니다.</p></div>
+</div>
+
+<div class="callout purple"><b>Grain을 확인하는 가장 쉬운 질문</b><br>
+SQL을 작성하기 전에는 <strong>“기준 테이블의 한 행은 무엇인가?”</strong>, JOIN이나 GROUP BY 후에는 <strong>“최종 결과의 한 행은 무엇인가?”</strong>라고 확인합니다.</div>
+</div>
+</section>
+
+<section id="erd">
+<div class="panel">
+<h2>3. ERD를 읽는 순서</h2>
+<p class="lead">ERD를 처음부터 모든 선과 컬럼을 한꺼번에 보려고 하면 복잡해집니다. 아래 순서로 읽으면 관계를 훨씬 쉽게 파악할 수 있습니다.</p>
+
+<div class="grid4">
+  <div class="step"><span class="badge">1</span><h4>기준 테이블 찾기</h4><p>분석하고 싶은 사건이 어디에 저장되어 있는지 찾습니다. FDS라면 <code>card_payments</code>가 기준이 될 수 있습니다.</p></div>
+  <div class="step"><span class="badge">2</span><h4>PK 확인</h4><p>그 테이블에서 한 행을 유일하게 구분하는 키가 무엇인지 확인합니다.</p></div>
+  <div class="step"><span class="badge">3</span><h4>FK 확인</h4><p>어떤 컬럼이 다른 테이블을 가리키는지 확인합니다.</p></div>
+  <div class="step"><span class="badge">4</span><h4>관계 방향 확인</h4><p>1:1인지, 1:N인지 확인하고 JOIN 후 행 수가 어떻게 바뀔지 예상합니다.</p></div>
+</div>
+
+<div class="figure">
+  <div class="figure-title">예: card_payments에서 주변 마스터로 연결되는 구조</div>
+  <div class="figure-body">
+    <div class="relation-row">
+      <div class="entity"><strong>customers</strong><span class="badge">PK customer_id</span><p>고객 지역·신용점수·위험등급</p></div>
+      <div class="rel-mark">1 ← N</div>
+      <div class="entity"><strong>card_payments</strong><span class="badge">PK payment_id</span><span class="badge">FK customer_id</span><p>결제금액·시각·채널·사기라벨</p></div>
+    </div>
+    <div class="relation-row">
+      <div class="entity"><strong>merchants</strong><span class="badge">PK merchant_id</span><p>가맹점 업종·위험등급</p></div>
+      <div class="rel-mark">1 ← N</div>
+      <div class="entity"><strong>card_payments</strong><span class="badge">FK merchant_id</span><p>결제마다 가맹점 하나를 참조</p></div>
+    </div>
+    <div class="relation-row">
+      <div class="entity"><strong>devices</strong><span class="badge">PK device_id</span><p>기기유형·OS·신뢰여부</p></div>
+      <div class="rel-mark">1 ← N</div>
+      <div class="entity"><strong>card_payments</strong><span class="badge">FK device_id</span><p>기기 정보가 없으면 NULL 가능</p></div>
+    </div>
+  </div>
+  <div class="figure-caption">결제 N건이 하나의 고객·가맹점·기기를 참조하므로 결제 기준으로 보면 N:1 관계입니다.</div>
+</div>
+
+<h3>3-1. 관계의 종류</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>관계</th><th>뜻</th><th>예</th><th>JOIN 시 예상</th></tr></thead>
+<tbody>
+<tr><td><b>1:1</b></td><td>한 행당 상대 행도 최대 한 행</td><td>특정 ID별 단일 프로필</td><td>대체로 Grain 유지</td></tr>
+<tr><td><b>1:N</b></td><td>한 행이 상대 테이블 여러 행과 연결</td><td>고객 1명 : 거래 여러 건</td><td>1쪽 기준에서 N쪽을 붙이면 행 증가 가능</td></tr>
+<tr><td><b>N:1</b></td><td>여러 행이 상대 테이블 한 행 참조</td><td>결제 여러 건 : 가맹점 1곳</td><td>N쪽을 기준으로 하면 보통 Grain 유지</td></tr>
+<tr><td><b>N:M</b></td><td>양쪽 모두 여러 행과 연결</td><td>상품 여러 개 : 캠페인 여러 개</td><td>보통 연결 테이블이 필요하며 직접 JOIN은 주의</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+<section id="grain">
+<div class="panel">
+<h2>4. JOIN 전에 Grain부터 정하기</h2>
+<p class="lead"><strong>Grain</strong>은 “한 행이 무엇을 뜻하는가?”라는 정의입니다. JOIN 오류의 상당수는 문법이 틀려서가 아니라, 기준 Grain을 정하지 않은 상태에서 여러 테이블을 붙여 발생합니다.</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>업무</th><th>기준 테이블</th><th>기준 Grain</th><th>한 행의 의미</th></tr></thead>
+<tbody>
+<tr><td>주가 분석</td><td><code>stock_prices</code></td><td><code>stock_code × trade_date</code></td><td>특정 종목의 특정 거래일 가격 1건</td></tr>
+<tr><td>FDS</td><td><code>card_payments</code></td><td><code>payment_id</code></td><td>카드 결제 1건</td></tr>
+<tr><td>CSS</td><td><code>loan_applications</code></td><td><code>application_id</code></td><td>대출 신청 1건</td></tr>
+<tr><td>마이데이터 추천</td><td><code>campaign_experiments</code></td><td><code>experiment_id</code></td><td>특정 제안·실험 1건</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="figure">
+  <div class="figure-title">Grain이 깨졌는지 확인하는 방법</div>
+  <div class="figure-body">
+    <div class="metric-grid">
+      <div class="metric"><span>JOIN 전</span><strong>100,000</strong><small>payment_id 100,000개</small></div>
+      <div class="metric"><span>N:1 JOIN 후</span><strong>100,000</strong><small>정상적으로 Grain 유지</small></div>
+      <div class="metric"><span>잘못된 1:N JOIN 후</span><strong>126,420</strong><small>같은 payment_id가 반복</small></div>
+    </div>
+  </div>
+  <div class="figure-caption">결제 1건 = 1행이 목적이라면 JOIN 후에도 고유 payment_id 수와 전체 행 수가 같아야 합니다.</div>
+</div>
+
+<div class="callout danger"><b>중요</b><br>행이 늘어났다고 정보가 더 풍부해진 것이 아닙니다. 같은 사건이 여러 번 복제된 것일 수 있으므로 SUM·AVG·COUNT 결과도 왜곡될 수 있습니다.</div>
+</div>
+</section>
+
+<section id="joinbasic">
+<div class="panel">
+<h2>5. JOIN 문법을 구조로 이해하기</h2>
+<p class="lead">JOIN은 “어떤 테이블을 기준으로 시작해서, 어느 테이블의 어떤 정보를, 어떤 키로 붙일 것인가?”를 SQL로 표현한 것입니다.</p>
+
+<pre><code>SELECT
+    기준테이블.컬럼,
+    연결테이블.컬럼
+FROM 기준테이블
+JOIN 연결테이블
+  ON 기준테이블.연결키 = 연결테이블.연결키
+WHERE 조건;</code></pre>
+
+<div class="figure">
+  <div class="figure-title">JOIN SQL을 읽는 순서</div>
+  <div class="figure-body">
+    <div class="flow-grid">
+      <div class="flow-node"><b>FROM</b><small>기준 테이블</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><b>JOIN</b><small>정보를 붙일 테이블</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><b>ON</b><small>연결 조건</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><b>WHERE</b><small>필요 행 필터</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><b>SELECT</b><small>최종 컬럼</small></div>
+    </div>
+  </div>
+</div>
+
+<h3>5-1. 가장 단순한 고객 JOIN</h3>
+<pre><code>USE fintech_fraud_lab_class;
+
+SELECT
+    cp.payment_id,
+    cp.customer_id,
+    c.region
+FROM card_payments AS cp
+JOIN customers AS c
+  ON cp.customer_id = c.customer_id
+LIMIT 20;</code></pre>
+
+<div class="query-meta">
+  <div class="query-box"><b>무엇을 하는가?</b>결제 데이터에 고객 지역 정보를 붙입니다.</div>
+  <div class="query-box"><b>결과 Grain</b><code>payment_id</code> 1건 = 1행입니다.</div>
+</div>
+
+<h3>5-2. Alias(별칭)는 왜 사용할까?</h3>
+<p><code>card_payments AS cp</code>처럼 긴 테이블명에 짧은 이름을 붙이는 것을 <strong>Alias</strong>라고 합니다. 원본 테이블 이름을 바꾸는 것이 아니라 현재 쿼리 안에서만 사용할 별명입니다.</p>
+
+<div class="grid2">
+  <div class="card"><h4><code>cp.payment_id</code></h4><p>어느 테이블의 <code>payment_id</code>인지 명확하게 알 수 있습니다.</p></div>
+  <div class="card"><h4><code>c.region</code></h4><p><code>customers</code>에서 가져온 지역 정보라는 뜻입니다.</p></div>
+</div>
+</div>
+</section>
+
+<section id="innerleft">
+<div class="panel">
+<h2>6. INNER JOIN과 LEFT JOIN</h2>
+<p class="lead">둘의 핵심 차이는 <strong>오른쪽 테이블에 연결되는 행이 없을 때 왼쪽 기준 행을 남길 것인가</strong>입니다.</p>
+
+<div class="join-compare">
+  <div class="join-box">
+    <h3 style="margin-top:0">INNER JOIN</h3>
+    <div class="join-visual"><div class="circle">왼쪽</div><div class="join-mid">∩</div><div class="circle right">오른쪽</div></div>
+    <p><strong>양쪽 모두 매칭되는 행만</strong> 남깁니다. 매칭되지 않는 기준 행은 결과에서 사라집니다.</p>
+  </div>
+  <div class="join-box">
+    <h3 style="margin-top:0">LEFT JOIN</h3>
+    <div class="join-visual"><div class="circle">왼쪽<br>전체</div><div class="join-mid">+</div><div class="circle right">매칭값</div></div>
+    <p><strong>왼쪽 기준 행은 모두 유지</strong>하고, 오른쪽에 매칭이 없으면 오른쪽 컬럼을 NULL로 표시합니다.</p>
+  </div>
+</div>
+
+<h3>6-1. INNER JOIN 예</h3>
+<pre><code>SELECT
+    cp.payment_id,
+    cp.customer_id,
+    c.region,
+    c.risk_segment
+FROM card_payments AS cp
+INNER JOIN customers AS c
+  ON cp.customer_id = c.customer_id
+ORDER BY cp.payment_at
+LIMIT 100;</code></pre>
+
+<h3>6-2. LEFT JOIN 예</h3>
+<pre><code>SELECT
+    cp.payment_id,
+    cp.device_id,
+    d.device_type,
+    d.is_trusted
+FROM card_payments AS cp
+LEFT JOIN devices AS d
+  ON cp.device_id = d.device_id
+ORDER BY cp.payment_at
+LIMIT 100;</code></pre>
+
+<div class="callout warn"><b>LEFT JOIN에서 자주 발생하는 실수</b><br>
+아래처럼 오른쪽 테이블 컬럼을 WHERE에서 직접 제한하면 NULL 행이 제거되어 LEFT JOIN의 의미가 약해집니다.</div>
+
+<pre><code>-- 주의: 오른쪽에 매칭되지 않은 행이 제거됨
+SELECT ...
+FROM card_payments AS cp
+LEFT JOIN devices AS d
+  ON cp.device_id = d.device_id
+WHERE d.is_trusted = 1;</code></pre>
+
+<div class="callout info"><b>판단 기준</b><br>
+“오른쪽 정보가 없어도 기준 행을 남겨야 하는가?”가 YES라면 LEFT JOIN을 먼저 고려합니다.</div>
+</div>
+</section>
+
+<section id="cardinality">
+<div class="panel">
+<h2>7. Cardinality가 JOIN 결과 행 수를 결정한다</h2>
+<p><strong>Cardinality</strong>는 테이블 사이에서 한 행이 상대 테이블 몇 행과 연결되는지를 뜻합니다. JOIN 전에 관계 유형을 예상하면 행 수 변화도 예상할 수 있습니다.</p>
+
+<div class="figure">
+  <div class="figure-title">1:N과 N:1을 방향으로 이해하기</div>
+  <div class="figure-body">
+    <div class="relation-row">
+      <div class="entity"><strong>customers</strong><p>고객 1명</p></div>
+      <div class="rel-mark">1 → N</div>
+      <div class="entity"><strong>card_payments</strong><p>결제 여러 건</p></div>
+    </div>
+    <div class="relation-row">
+      <div class="entity"><strong>card_payments</strong><p>결제 여러 건</p></div>
+      <div class="rel-mark">N → 1</div>
+      <div class="entity"><strong>merchants</strong><p>가맹점 1곳</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="card"><h4>고객을 기준으로 결제를 붙이면</h4><p>고객 1명이 결제 수만큼 여러 행으로 늘어납니다. 고객 Grain은 유지되지 않습니다.</p></div>
+  <div class="card"><h4>결제를 기준으로 고객을 붙이면</h4><p>각 결제에 고객 정보 한 행이 붙으므로 결제 Grain은 보통 그대로 유지됩니다.</p></div>
+</div>
+</div>
+</section>
+
+<section id="stock">
+<div class="panel">
+<h2>8. 실제 주가 JOIN — stocks 1 : N stock_prices</h2>
+<p class="lead"><code>stocks</code>는 종목 마스터이고, <code>stock_prices</code>는 종목별 거래일마다 여러 행이 존재하는 시계열 테이블입니다.</p>
+
+<div class="figure">
+  <div class="figure-title">주가 테이블 관계</div>
+  <div class="figure-body">
+    <div class="relation-row">
+      <div class="entity"><strong>stocks</strong><span class="badge">PK stock_code</span><p>회사명·시장·업종</p></div>
+      <div class="rel-mark">1 → N</div>
+      <div class="entity"><strong>stock_prices</strong><span class="badge">stock_code × trade_date</span><p>일별 OHLCV·거래량·등락률</p></div>
+    </div>
+  </div>
+</div>
+
+<pre><code>USE stock_data;
+
+SELECT
+    p.stock_code,
+    s.company_name,
+    s.market,
+    s.industry,
+    p.trade_date,
+    p.open_price,
+    p.high_price,
+    p.low_price,
+    p.close_price,
+    p.volume,
+    p.change_rate
+FROM stock_prices AS p
+INNER JOIN stocks AS s
+  ON p.stock_code = s.stock_code
+WHERE p.stock_code = '005930'
+ORDER BY p.trade_date;</code></pre>
+
+<div class="query-meta">
+  <div class="query-box"><b>결과 Grain</b><code>stock_code × trade_date</code> 1건 = 1행</div>
+  <div class="query-box"><b>행 수가 늘지 않는 이유</b><code>stocks.stock_code</code>가 종목당 1행인 마스터이기 때문입니다.</div>
+</div>
+
+<h3>8-1. JOIN 전후 행 수 검증</h3>
+<pre><code>SELECT COUNT(*) AS rows_before
+FROM stock_prices
+WHERE stock_code = '005930';
+
+SELECT COUNT(*) AS rows_after
+FROM stock_prices AS p
+JOIN stocks AS s
+  ON p.stock_code = s.stock_code
+WHERE p.stock_code = '005930';</code></pre>
+
+<div class="callout good"><b>정상 기대</b><br><code>rows_before = rows_after</code>라면 종목 마스터를 붙여도 가격 Grain이 유지된 것입니다.</div>
+</div>
+</section>
+
+<section id="fds">
+<div class="panel">
+<h2>9. FDS 다중 JOIN — 결제 1건에 고객·가맹점·기기 정보 붙이기</h2>
+<p class="lead">FDS에서 결제 사건 자체는 <code>card_payments</code>에 있고, 고객·가맹점·기기는 결제를 설명하는 마스터 정보입니다.</p>
+
+<div class="figure">
+  <div class="figure-title">FDS 조회 구조</div>
+  <div class="figure-body">
+    <div class="flow-grid">
+      <div class="flow-node"><b>customers</b><small>신용·위험·소득</small></div>
+      <div class="flow-node"><b>merchants</b><small>업종·위험등급</small></div>
+      <div class="flow-node"><b>devices</b><small>기기유형·신뢰여부</small></div>
+      <div class="flow-node" style="background:#eaf4ff;border-color:#88b9e2"><b>card_payments</b><small>기준 Grain: payment_id</small></div>
+    </div>
+  </div>
+  <div class="figure-caption">기준은 결제 1건입니다. 주변 정보는 결제 한 행을 설명하기 위해 옆으로 붙습니다.</div>
+</div>
+
+<pre><code>USE fintech_fraud_lab_class;
+
+SELECT
+    cp.payment_id,
+    cp.customer_id,
+    cp.payment_at,
+    cp.amount,
+    cp.payment_channel,
+    cp.auth_method,
+    cp.country,
+    cp.ip_country,
+    cp.is_overseas,
+    cp.is_online,
+    cp.fraud_label,
+    m.merchant_category,
+    m.risk_level AS merchant_risk_level,
+    m.avg_ticket_size,
+    d.is_trusted,
+    d.device_type,
+    d.os_type,
+    c.credit_score,
+    c.risk_segment,
+    c.income_band
+FROM card_payments AS cp
+LEFT JOIN merchants AS m
+  ON cp.merchant_id = m.merchant_id
+LEFT JOIN devices AS d
+  ON cp.device_id = d.device_id
+LEFT JOIN customers AS c
+  ON cp.customer_id = c.customer_id
+WHERE cp.payment_at >= '2026-01-01'
+  AND cp.payment_at <  '2026-08-01'
+ORDER BY cp.payment_at
+LIMIT 500;</code></pre>
+
+<div class="callout purple"><b>결과 Grain</b><br><code>payment_id</code> 1건 = 1행이어야 합니다. 마스터 테이블의 연결키가 유일하면 N:1 JOIN이므로 결제 행 수가 증가하지 않습니다.</div>
+
+<div class="callout danger"><b>모델 입력과 정답을 구분</b><br>
+<code>fraud_label</code>은 예측해야 하는 정답(Target)이고, 사후에 만들어지는 정보나 정답과 거의 같은 컬럼은 Feature에 넣으면 안 됩니다.</div>
+</div>
+</section>
+
+<section id="css">
+<div class="panel">
+<h2>10. CSS와 Point-in-Time — 같은 고객의 여러 과거 보고서 중 무엇을 붙일까?</h2>
+<p class="lead">대출 신청과 외부 신용보고서는 단순히 고객 ID만 같다고 JOIN하면 안 됩니다. 한 고객에게 시간에 따라 여러 보고서가 존재하기 때문입니다.</p>
+
+<div class="figure">
+  <div class="figure-title">Point-in-Time 개념</div>
+  <div class="figure-body">
+    <div class="timeline">
+      <div class="time-card ok"><b>2025-01-10</b>신용보고서 A<br><small>신청 전에 존재</small></div>
+      <div class="time-card ok"><b>2025-04-02</b>신용보고서 B<br><small>신청 전에 존재</small></div>
+      <div class="time-card"><b>2025-05-15</b>대출 신청<br><small>판단 기준시점</small></div>
+      <div class="time-card future"><b>2025-06-20</b>신용보고서 C<br><small>미래 정보 → 사용 금지</small></div>
+    </div>
+  </div>
+  <div class="figure-caption">신청일 이전의 보고서만 후보이고, 그중 가장 최신 1건을 선택하는 것이 일반적인 Point-in-Time 원칙입니다.</div>
+</div>
+
+<h3>10-1. 고객 ID만으로 JOIN하면</h3>
+<pre><code>SELECT
+    la.application_id,
+    la.customer_id,
+    la.application_at,
+    br.report_id,
+    br.report_date,
+    br.external_credit_score
+FROM loan_applications AS la
+LEFT JOIN bureau_reports AS br
+  ON la.customer_id = br.customer_id
+WHERE la.customer_id = 1
+ORDER BY la.application_at, br.report_date;</code></pre>
+
+<div class="callout warn"><b>문제</b><br>같은 <code>application_id</code>가 과거·미래의 여러 보고서와 연결되어 여러 행으로 반복될 수 있습니다.</div>
+
+<h3>10-2. 미래 보고서를 차단하면</h3>
+<pre><code>SELECT
+    la.application_id,
+    la.application_at,
+    br.report_id,
+    br.report_date,
+    br.external_credit_score
+FROM loan_applications AS la
+LEFT JOIN bureau_reports AS br
+  ON la.customer_id = br.customer_id
+ AND br.report_date <= DATE(la.application_at)
+WHERE la.customer_id = 1
+ORDER BY la.application_at, br.report_date DESC;</code></pre>
+
+<div class="callout info"><b>아직 남은 문제</b><br>신청일 이전 보고서가 여러 건이면 여전히 같은 신청이 여러 행으로 나옵니다. 최종적으로는 신청 시점 이전의 <strong>가장 최신 보고서 1건</strong>을 선택해야 Grain이 다시 <code>application_id</code> 1행으로 돌아옵니다.</div>
+</div>
+</section>
+
+<section id="fanout">
+<div class="panel">
+<h2>11. Fan-out — 여러 1:N 테이블을 한꺼번에 붙일 때 행이 폭증하는 이유</h2>
+<p><strong>Fan-out</strong>은 하나의 기준 행에 여러 자식 테이블을 동시에 JOIN하면서 가능한 조합이 만들어져 행이 크게 늘어나는 현상입니다.</p>
+
+<div class="figure">
+  <div class="figure-title">고객 1명에게 여러 자식 데이터가 있을 때</div>
+  <div class="figure-body">
+    <div class="fanout">
+      <div class="fanout-col"><b>accounts</b>계좌 2개</div>
+      <div class="fanout-col"><b>transactions</b>거래 10건</div>
+      <div class="fanout-col"><b>cards</b>카드 3개</div>
+    </div>
+    <div class="callout danger" style="margin-bottom:0"><b>가능한 조합 수</b><br>2 × 10 × 3 = <strong>60행</strong>. 단순 합인 15행이 아닙니다.</div>
+  </div>
+</div>
+
+<pre><code>SELECT
+    c.customer_id,
+    a.account_id,
+    t.transaction_id,
+    ca.card_id
+FROM customers AS c
+LEFT JOIN accounts AS a
+  ON c.customer_id = a.customer_id
+LEFT JOIN transactions AS t
+  ON c.customer_id = t.customer_id
+LEFT JOIN cards AS ca
+  ON c.customer_id = ca.customer_id
+WHERE c.customer_id = 1;</code></pre>
+
+<div class="callout warn"><b>왜 위험할까?</b><br>
+같은 거래가 계좌·카드 조합에 따라 반복되므로 <code>SUM(t.amount)</code>를 계산하면 실제보다 훨씬 크게 합산될 수 있습니다.</div>
+</div>
+</section>
+
+<section id="aggregate">
+<div class="panel">
+<h2>12. Fan-out을 막는 가장 기본적인 방법 — 먼저 집계한 뒤 JOIN</h2>
+<p class="lead">최종 Grain이 고객 1명이라면 거래 테이블을 그대로 붙이지 말고, 고객별로 먼저 요약해서 1행으로 만든 뒤 고객 테이블에 붙이는 방식이 안전합니다.</p>
+
+<div class="figure">
+  <div class="figure-title">사전 집계(Pre-aggregation) 구조</div>
+  <div class="figure-body">
+    <div class="flow-grid">
+      <div class="flow-node"><b>transactions</b><small>고객별 여러 거래</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><b>GROUP BY customer_id</b><small>고객별 1행 요약</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><b>customers</b><small>N:1 형태로 안전하게 JOIN</small></div>
+    </div>
+  </div>
+</div>
+
+<pre><code>SELECT
+    c.customer_id,
+    c.region,
+    tx.transaction_count,
+    tx.total_amount
+FROM customers AS c
+LEFT JOIN (
+    SELECT
+        customer_id,
+        COUNT(*) AS transaction_count,
+        SUM(amount) AS total_amount
+    FROM transactions
+    GROUP BY customer_id
+) AS tx
+  ON c.customer_id = tx.customer_id;</code></pre>
+
+<div class="callout good"><b>결과 Grain</b><br>고객 1명 = 1행. 거래 여러 건은 JOIN 전에 고객 단위로 먼저 요약되었습니다.</div>
+</div>
+</section>
+
+<section id="validate">
+<div class="panel">
+<h2>13. JOIN 결과를 반드시 검증하는 방법</h2>
+<p class="lead">SQL이 오류 없이 실행되었다고 JOIN이 올바른 것은 아닙니다. 문법 검증과 데이터 의미 검증은 별개입니다.</p>
+
+<div class="checklist">
+  <div class="check">JOIN 전 기준 행 수를 알고 있는가?</div>
+  <div class="check">JOIN 후 전체 행 수가 예상과 맞는가?</div>
+  <div class="check">기준 PK의 고유 개수가 유지되는가?</div>
+  <div class="check">오른쪽 연결키가 실제로 유일한가?</div>
+  <div class="check">매칭되지 않은 FK가 얼마나 되는가?</div>
+  <div class="check">NULL이 생긴 이유를 설명할 수 있는가?</div>
+</div>
+
+<h3>13-1. 전체 행 수와 고유 payment_id 비교</h3>
+<pre><code>SELECT
+    COUNT(*) AS joined_rows,
+    COUNT(DISTINCT cp.payment_id) AS distinct_payments
+FROM card_payments AS cp
+LEFT JOIN merchants AS m
+  ON cp.merchant_id = m.merchant_id
+LEFT JOIN devices AS d
+  ON cp.device_id = d.device_id
+LEFT JOIN customers AS c
+  ON cp.customer_id = c.customer_id;</code></pre>
+
+<div class="callout good"><b>결제 Grain을 유지한다면</b><br><code>joined_rows = distinct_payments</code>가 되어야 합니다.</div>
+
+<h3>13-2. 마스터 키 중복 확인</h3>
+<pre><code>SELECT
+    merchant_id,
+    COUNT(*) AS rows
+FROM merchants
+GROUP BY merchant_id
+HAVING COUNT(*) > 1;</code></pre>
+
+<h3>13-3. 연결되지 않는 FK 찾기</h3>
+<pre><code>SELECT COUNT(*) AS unmatched_merchants
+FROM card_payments AS cp
+LEFT JOIN merchants AS m
+  ON cp.merchant_id = m.merchant_id
+WHERE m.merchant_id IS NULL;</code></pre>
+
+<div class="callout info"><b>Orphan Record</b><br>
+위 결과가 0보다 크면 결제에는 <code>merchant_id</code>가 있지만 <code>merchants</code>에 대응되는 행이 없는 데이터가 존재한다는 뜻입니다.</div>
+</div>
+</section>
+
+<section id="pandas">
+<div class="panel">
+<h2>14. SQL JOIN과 pandas merge를 연결해서 이해하기</h2>
+<p>SQL과 pandas는 표현 방식이 다르지만 관계를 연결하는 핵심 원리는 같습니다.</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>개념</th><th>SQL</th><th>pandas</th><th>의미</th></tr></thead>
+<tbody>
+<tr><td>INNER JOIN</td><td><code>INNER JOIN</code></td><td><code>merge(how="inner")</code></td><td>양쪽에 존재하는 키만 유지</td></tr>
+<tr><td>LEFT JOIN</td><td><code>LEFT JOIN</code></td><td><code>merge(how="left")</code></td><td>왼쪽 기준 행 모두 유지</td></tr>
+<tr><td>N:1 검증</td><td>PK 중복·행 수 확인</td><td><code>validate="many_to_one"</code></td><td>오른쪽 연결키가 1건인지 검증</td></tr>
+<tr><td>Point-in-Time</td><td>시점 조건 + 최신 1건 선택</td><td><code>merge_asof(..., direction="backward")</code></td><td>기준시점 이전 최신정보 연결</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout purple"><b>핵심</b><br>도구가 SQL이든 pandas이든 먼저 Grain과 Cardinality를 정의해야 안전하게 데이터를 연결할 수 있습니다.</div>
+</div>
+</section>
+
+<section id="practice">
+<div class="panel">
+<h2>15. 확인 문제</h2>
+
+<details>
+  <summary>문제 1 — stock_prices에 stocks 정보를 붙였을 때 결과 Grain은 무엇인가?</summary>
+  <div><p><strong>답:</strong> <code>stock_code × trade_date</code>입니다. <code>stocks</code>가 종목당 1행이면 주가 행 수는 늘어나지 않습니다.</p></div>
+</details>
+
+<details>
+  <summary>문제 2 — card_payments를 기준으로 customers를 붙이는 관계는 결제 관점에서 N:1인가, 1:N인가?</summary>
+  <div><p><strong>답:</strong> N:1입니다. 여러 결제 행이 고객 한 행을 참조합니다.</p></div>
+</details>
+
+<details>
+  <summary>문제 3 — LEFT JOIN 후 오른쪽 컬럼이 NULL인 것은 항상 데이터 오류인가?</summary>
+  <div><p><strong>답:</strong> 아닙니다. 기준 행은 존재하지만 오른쪽에 연결정보가 없을 수 있습니다. nullable FK라면 정상적인 상황일 수도 있습니다.</p></div>
+</details>
+
+<details>
+  <summary>문제 4 — 고객 1명에 계좌 2개, 거래 10건, 카드 3개가 있을 때 세 테이블을 동시에 JOIN하면 왜 60행까지 늘어날 수 있는가?</summary>
+  <div><p><strong>답:</strong> 각 자식 테이블의 가능한 조합이 만들어지는 Fan-out 때문입니다. 2 × 10 × 3 = 60개의 조합이 생성될 수 있습니다.</p></div>
+</details>
+
+<details>
+  <summary>문제 5 — 대출 신청일 이후의 신용보고서를 Feature로 사용하면 왜 문제가 되는가?</summary>
+  <div><p><strong>답:</strong> 신청 당시에는 알 수 없었던 미래 정보이므로 Data Leakage가 됩니다. Point-in-Time 원칙을 적용해야 합니다.</p></div>
+</details>
+
+<details>
+  <summary>문제 6 — joined_rows와 distinct_payments가 다르면 무엇을 의심해야 하는가?</summary>
+  <div><p><strong>답:</strong> 같은 payment_id가 여러 행으로 복제된 것입니다. 오른쪽 테이블 키의 중복 또는 예상하지 못한 1:N 관계를 확인해야 합니다.</p></div>
+</details>
+</div>
+</section>
+
+</main>
+
+<footer>ERD · PK/FK · JOIN · Grain · Cardinality · Fan-out · Point-in-Time · Join Validation</footer>
+</body>
+</html>

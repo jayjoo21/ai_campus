@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>SQL 기초문법 단계별 연습문제 30제</title><style>
+:root{--bg:#f4f7fb;--paper:#fff;--ink:#172335;--muted:#5b6877;--line:#d8e3ee;--navy:#102c49;--blue:#2563a7;--bluebg:#eef5ff;--green:#18704d;--greenbg:#edf8f3;--amber:#a46b0d;--amberbg:#fff7e8;--code:#0d1825;--shadow:0 8px 26px rgba(15,35,55,.06)}
+*{box-sizing:border-box;min-width:0}html{scroll-behavior:smooth;overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","맑은 고딕","Noto Sans KR","Segoe UI",Arial,sans-serif;line-height:1.68;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:1200px;margin:auto}.hero{padding:48px 22px 40px;color:#fff;background:linear-gradient(135deg,#0b1b2e,#123f68 58%,#0e667c)}
+.eyebrow{font-size:.76rem;font-weight:900;letter-spacing:.13em;color:#cbe9ff}.hero h1{font-size:clamp(1.9rem,4vw,3rem);line-height:1.16;letter-spacing:-.04em;margin:8px 0 12px}.hero p{margin:0;max-width:980px;color:#e1eff9}
+.hero-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}.stat{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);border-radius:13px;padding:12px}.stat b{display:block;font-size:1.05rem}.stat small{color:#d5e5f1}
+nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.98);border-bottom:1px solid var(--line)}nav .wrap{display:flex;gap:7px;overflow-x:auto;padding:9px 14px}nav a{white-space:nowrap;text-decoration:none;background:#eef5ff;border:1px solid #d6e4f3;color:#225781;padding:6px 10px;border-radius:999px;font-size:.76rem;font-weight:800}
+main{padding:28px 16px 70px}.intro,.level-section{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow);margin-bottom:26px}
+h2{font-size:clamp(1.45rem,2.2vw,1.85rem);color:var(--navy);margin:0 0 12px}p{color:var(--muted)}
+.level-head{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;margin-bottom:15px}.level-num{width:48px;height:48px;border-radius:14px;background:#eaf3fb;color:#19527e;display:grid;place-items:center;font-weight:900}.level-head p{margin:3px 0 0}
+.progression{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:14px 0}.progression div{padding:10px;border:1px solid var(--line);border-radius:11px;text-align:center;background:#fbfdff;font-size:.78rem}
+.exercise{border:1px solid #d9e4ee;border-radius:15px;background:#fff;margin:12px 0;overflow:hidden}.ex-head{display:flex;gap:11px;align-items:flex-start;padding:16px 17px;background:#fbfdff;border-bottom:1px solid #e4ebf2}.ex-no{flex:0 0 auto;width:38px;height:38px;border-radius:11px;background:#173f68;color:#fff;display:grid;place-items:center;font-weight:900}.ex-title{font-weight:900;color:#153f69;font-size:1.02rem;margin-top:2px}
+.ex-body{padding:16px 17px}.goal{padding:12px 14px;border-left:5px solid var(--blue);background:var(--bluebg);border-radius:10px;margin-bottom:12px}.meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0}.meta-box{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fafcff}.meta-box b{display:block;color:#28567b;font-size:.8rem;margin-bottom:3px}.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.tag{font-size:.72rem;font-weight:800;padding:3px 7px;border-radius:999px;background:#edf4fa;color:#315f84}
+details{border:1px solid var(--line);border-radius:11px;background:#fff;margin:9px 0;overflow:hidden}summary{cursor:pointer;padding:11px 13px;font-weight:850;color:#184d7e;background:#fbfdff}.details-body{padding:12px 13px}details.hint summary{color:#8a5a0b;background:#fff9ec}details.answer summary{color:#176447;background:#f0f9f4}
+pre{margin:10px 0;background:var(--code);color:#dcecff;border-radius:10px;padding:14px;overflow:auto;max-width:100%;font-size:.82rem;line-height:1.56;white-space:pre}code{font-family:Consolas,"SFMono-Regular",Menlo,monospace}.explain{border-left:4px solid var(--green);background:var(--greenbg);padding:11px 13px;border-radius:9px;color:#435c51}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}button{border:1px solid #c9d9e7;background:#fff;color:#23577f;border-radius:9px;padding:8px 11px;font-weight:800;cursor:pointer}.checkline{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:.82rem;color:#607083}.checkline input{width:17px;height:17px}.footer{padding:24px;text-align:center;background:#0d1d2f;color:#cbd7e5;font-size:.8rem}
+@media(max-width:850px){.hero-stats,.progression{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:680px){.hero{padding:36px 16px 30px}.intro,.level-section{padding:17px}.meta{grid-template-columns:1fr}.progression{grid-template-columns:1fr}.ex-head{padding:13px}.ex-body{padding:13px}}
+
+.hint-table-info{margin-bottom:8px;padding:8px 10px;border-radius:8px;background:#fff3d8;border:1px solid #ead29a;color:#62460d}
+.hint-table-info b{color:#704b06}.hint-table-info code{font-weight:800}
+.hint-text{color:#5b6877}
+</style></head><body>
+<header class="hero"><div class="wrap"><div class="eyebrow">SQL PRACTICE · 30 EXERCISES · ANSWERS COLLAPSED</div><h1>SQL 기초문법 단계별 연습문제 30제</h1><p>SELECT·WHERE·ORDER BY·NULL·집계·GROUP BY·HAVING·CASE·날짜 조건을 아주 쉬운 조회부터 FDS·CSS·주가 데이터 추출까지 단계적으로 연습합니다.</p><div class="hero-stats"><div class="stat"><b>30문제</b><small>6단계 × 5</small></div><div class="stat"><b>MySQL</b><small>현재 금융·주가 DB</small></div><div class="stat"><b>힌트</b><small>필요할 때만 펼침</small></div><div class="stat"><b>정답</b><small>기본값은 접힘</small></div></div></div></header>
+<nav><div class="wrap"><a href="#l1">L1 아주 쉬움</a><a href="#l2">L2 기초 응용</a><a href="#l3">L3 중간</a><a href="#l4">L4 실무 준비</a><a href="#l5">L5 프로젝트 응용</a><a href="#l6">L6 프로젝트 수준</a></div></nav><main class="wrap"><section class="intro"><h2>연습 방법</h2><p>기초문법 강의안의 SELECT/FROM, WHERE, ORDER BY/LIMIT, DISTINCT/NULL, 집계함수, GROUP BY/HAVING, CASE, 기간조건, Notebook Handoff 흐름을 기준으로 구성했습니다.</p><p><strong>힌트 표시:</strong> 각 문제의 힌트에는 정답을 보기 전에 어떤 원본 테이블을 사용해야 하는지 <code>스키마.테이블</code> 형식으로 함께 표시합니다.</p><div class="progression"><div><b>L1</b><br/>아주 쉬움<br/><small>1~5번</small></div><div><b>L2</b><br/>기초 응용<br/><small>6~10번</small></div><div><b>L3</b><br/>중간<br/><small>11~15번</small></div><div><b>L4</b><br/>실무 준비<br/><small>16~20번</small></div><div><b>L5</b><br/>프로젝트 응용<br/><small>21~25번</small></div><div><b>L6</b><br/>프로젝트 수준<br/><small>26~30번</small></div></div><div class="controls"><button onclick="toggleAll('.answer',true)">정답 모두 펼치기</button><button onclick="toggleAll('.answer',false)">정답 모두 접기</button><button onclick="toggleAll('.hint',false)">힌트 모두 접기</button><button onclick="resetChecks()">완료 체크 초기화</button></div><p><strong>권장 순서:</strong> 문제 확인 → 직접 SQL 작성 → 실행 결과와 Grain 확인 → 필요할 때 힌트 → 마지막에 정답 비교.</p></section><section class="level-section" id="l1"><div class="level-head"><div class="level-num">L1</div><div><h2>아주 쉬움</h2><p>한 가지 문법을 중심으로 기본 구조를 익히는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">1</div><div><div class="ex-title">customers에서 고객 ID와 지역 조회</div><div class="tags"><span class="tag">SELECT</span><span class="tag">FROM</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>customers에서 customer_id와 region 두 컬럼만 조회하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>두 컬럼만 표시됩니다.</div><div class="meta-box"><b>결과 Grain</b>고객 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">SELECT 뒤에 두 컬럼을 쉼표로 나열합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT customer_id, region
+FROM customers;</code></pre><div class="explain"><b>해설</b><br/>필요한 컬럼만 명시해 조회하는 가장 기본적인 SELECT입니다.</div></div></details>
+<label class="checkline"><input data-q="1" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">2</div><div><div class="ex-title">card_payments에서 결제 기본정보 조회</div><div class="tags"><span class="tag">SELECT</span><span class="tag">FROM</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>payment_id, customer_id, payment_at, amount를 조회하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>결제 기본정보 네 컬럼이 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">card_payments에서 네 컬럼을 선택합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT payment_id, customer_id, payment_at, amount
+FROM card_payments;</code></pre><div class="explain"><b>해설</b><br/>card_payments의 기준 Grain은 결제 1건입니다.</div></div></details>
+<label class="checkline"><input data-q="2" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">3</div><div><div class="ex-title">삼성전자 주가의 필요한 컬럼 조회</div><div class="tags"><span class="tag">SELECT</span><span class="tag">FROM</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>stock_prices에서 stock_code, trade_date, close_price를 조회하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>stock_data</div><div class="meta-box"><b>기대 결과</b>종목코드·거래일·종가가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>종목 × 거래일 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>stock_data.stock_prices</code></div><div class="hint-text">stock_prices에서 세 컬럼을 선택합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE stock_data;
+SELECT stock_code, trade_date, close_price
+FROM stock_prices;</code></pre><div class="explain"><b>해설</b><br/>주가 테이블의 한 행은 종목과 거래일 조합입니다.</div></div></details>
+<label class="checkline"><input data-q="3" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">4</div><div><div class="ex-title">컬럼 별칭 붙이기</div><div class="tags"><span class="tag">AS</span><span class="tag">Alias</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>credit_score를 credit_score_value라는 이름으로 표시하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>결과 컬럼명이 credit_score_value로 보입니다.</div><div class="meta-box"><b>결과 Grain</b>고객 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">AS를 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT customer_id,
+       credit_score AS credit_score_value
+FROM customers;</code></pre><div class="explain"><b>해설</b><br/>Alias는 원본 컬럼명을 바꾸지 않고 결과 표시 이름만 바꿉니다.</div></div></details>
+<label class="checkline"><input data-q="4" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">5</div><div><div class="ex-title">테이블 구조 확인</div><div class="tags"><span class="tag">DESCRIBE</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>card_payments의 실제 컬럼 구조를 확인하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>컬럼명·자료형·NULL 여부·키 정보가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>테이블 구조 정보</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">DESCRIBE 뒤에 테이블명을 적습니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+DESCRIBE card_payments;</code></pre><div class="explain"><b>해설</b><br/>쿼리 작성 전에 실제 컬럼명을 확인하면 존재하지 않는 컬럼을 추측하는 오류를 줄일 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="5" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l2"><div class="level-head"><div class="level-num">L2</div><div><h2>기초 응용</h2><p>두세 가지 문법을 조합하는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">6</div><div><div class="ex-title">50만원 이상 결제 조회</div><div class="tags"><span class="tag">WHERE</span><span class="tag">&gt;=</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>amount가 500000 이상인 결제만 조회하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고액결제만 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">WHERE amount &gt;= 500000을 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT payment_id, customer_id, amount
+FROM card_payments
+WHERE amount &gt;= 500000;</code></pre><div class="explain"><b>해설</b><br/>WHERE는 원본 행에 조건을 적용합니다.</div></div></details>
+<label class="checkline"><input data-q="6" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">7</div><div><div class="ex-title">HIGH 또는 MEDIUM 위험고객 조회</div><div class="tags"><span class="tag">IN</span><span class="tag">WHERE</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>risk_segment가 HIGH 또는 MEDIUM인 고객만 조회하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>두 위험구간의 고객만 보입니다.</div><div class="meta-box"><b>결과 Grain</b>고객 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">IN ('HIGH','MEDIUM')을 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT customer_id, risk_segment
+FROM customers
+WHERE risk_segment IN ('HIGH','MEDIUM');</code></pre><div class="explain"><b>해설</b><br/>IN은 같은 컬럼에 여러 후보값을 간결하게 표현합니다.</div></div></details>
+<label class="checkline"><input data-q="7" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">8</div><div><div class="ex-title">신용점수 600~750 고객 조회</div><div class="tags"><span class="tag">BETWEEN</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>credit_score가 600 이상 750 이하인 고객을 조회하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>해당 범위 고객만 보입니다.</div><div class="meta-box"><b>결과 Grain</b>고객 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">BETWEEN은 양 끝값을 포함합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT customer_id, credit_score
+FROM customers
+WHERE credit_score BETWEEN 600 AND 750;</code></pre><div class="explain"><b>해설</b><br/>BETWEEN 600 AND 750은 두 경계값을 모두 포함합니다.</div></div></details>
+<label class="checkline"><input data-q="8" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">9</div><div><div class="ex-title">회사명에 '전자'가 포함된 종목</div><div class="tags"><span class="tag">LIKE</span><span class="tag">%</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>company_name에 '전자'가 포함된 종목을 찾으세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>stock_data</div><div class="meta-box"><b>기대 결과</b>회사명에 전자가 포함된 종목이 보입니다.</div><div class="meta-box"><b>결과 Grain</b>종목 1개 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>stock_data.stocks</code></div><div class="hint-text">LIKE '%전자%'를 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE stock_data;
+SELECT stock_code, company_name
+FROM stocks
+WHERE company_name LIKE '%전자%';</code></pre><div class="explain"><b>해설</b><br/>LIKE는 문자열 패턴 검색에 사용합니다.</div></div></details>
+<label class="checkline"><input data-q="9" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">10</div><div><div class="ex-title">기기 ID가 없는 결제 조회</div><div class="tags"><span class="tag">NULL</span><span class="tag">IS NULL</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>device_id가 NULL인 결제만 찾으세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>device_id가 없는 결제가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">= NULL이 아니라 IS NULL입니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT payment_id, customer_id, device_id, payment_at
+FROM card_payments
+WHERE device_id IS NULL;</code></pre><div class="explain"><b>해설</b><br/>NULL은 일반 값과 다르므로 IS NULL로 검사합니다.</div></div></details>
+<label class="checkline"><input data-q="10" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l3"><div class="level-head"><div class="level-num">L3</div><div><h2>중간</h2><p>집계·관계·순서를 함께 생각하는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">11</div><div><div class="ex-title">삼성전자 주가 100행 날짜순 조회</div><div class="tags"><span class="tag">WHERE</span><span class="tag">ORDER BY</span><span class="tag">LIMIT</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>005930만 남기고 trade_date 오름차순으로 정렬해 100행만 조회하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>stock_data</div><div class="meta-box"><b>기대 결과</b>삼성전자 주가가 과거→최근 순으로 최대 100행 보입니다.</div><div class="meta-box"><b>결과 Grain</b>종목 × 거래일 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>stock_data.stock_prices</code></div><div class="hint-text">WHERE, ORDER BY ASC, LIMIT를 조합합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE stock_data;
+SELECT stock_code, trade_date, close_price, volume
+FROM stock_prices
+WHERE stock_code = '005930'
+ORDER BY trade_date ASC
+LIMIT 100;</code></pre><div class="explain"><b>해설</b><br/>시계열 데이터는 ORDER BY로 순서를 명시해야 합니다.</div></div></details>
+<label class="checkline"><input data-q="11" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">12</div><div><div class="ex-title">고객별 최신 결제를 먼저 보기</div><div class="tags"><span class="tag">ORDER BY</span><span class="tag">ASC</span><span class="tag">DESC</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>customer_id는 오름차순, 같은 고객 안에서는 payment_at 내림차순으로 정렬하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객별 최신 결제가 먼저 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">ORDER BY에 두 기준을 차례로 적습니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT customer_id, payment_at, amount
+FROM card_payments
+ORDER BY customer_id ASC, payment_at DESC
+LIMIT 100;</code></pre><div class="explain"><b>해설</b><br/>ORDER BY는 왼쪽 기준부터 우선 적용됩니다.</div></div></details>
+<label class="checkline"><input data-q="12" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">13</div><div><div class="ex-title">결제채널 실제 코드값 확인</div><div class="tags"><span class="tag">DISTINCT</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>payment_channel의 실제 저장값을 중복 없이 확인하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>중복 제거된 채널 목록이 보입니다.</div><div class="meta-box"><b>결과 Grain</b>채널 코드 1개 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">SELECT DISTINCT를 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT DISTINCT payment_channel
+FROM card_payments
+ORDER BY payment_channel;</code></pre><div class="explain"><b>해설</b><br/>범주형 조건을 만들기 전에 실제 코드값을 확인하는 습관이 중요합니다.</div></div></details>
+<label class="checkline"><input data-q="13" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">14</div><div><div class="ex-title">전체 결제와 기기정보 보유 결제 수 비교</div><div class="tags"><span class="tag">COUNT(*)</span><span class="tag">COUNT(column)</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>전체 행 수, device_id가 있는 행 수, 없는 행 수를 한 번에 구하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>세 개의 건수가 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>요약 결과 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">COUNT(*)와 COUNT(device_id)의 차이를 이용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT COUNT(*) AS all_rows,
+       COUNT(device_id) AS rows_with_device,
+       COUNT(*) - COUNT(device_id) AS rows_without_device
+FROM card_payments;</code></pre><div class="explain"><b>해설</b><br/>COUNT(column)은 NULL을 제외합니다.</div></div></details>
+<label class="checkline"><input data-q="14" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">15</div><div><div class="ex-title">해외 또는 온라인 고액결제</div><div class="tags"><span class="tag">AND</span><span class="tag">OR</span><span class="tag">괄호</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>50만원 이상이면서 해외 또는 온라인인 결제를 금액 큰 순으로 100건 조회하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>조건을 만족한 고액결제만 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">OR 조건을 괄호로 묶습니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT payment_id, customer_id, amount, is_overseas, is_online
+FROM card_payments
+WHERE amount &gt;= 500000
+  AND (is_overseas = 1 OR is_online = 1)
+ORDER BY amount DESC
+LIMIT 100;</code></pre><div class="explain"><b>해설</b><br/>AND와 OR를 함께 쓸 때 괄호로 의도를 분명히 하는 것이 안전합니다.</div></div></details>
+<label class="checkline"><input data-q="15" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l4"><div class="level-head"><div class="level-num">L4</div><div><h2>실무 준비</h2><p>Grain·NULL·중복·시점을 함께 점검하는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">16</div><div><div class="ex-title">결제 테이블 규모와 기간 요약</div><div class="tags"><span class="tag">COUNT</span><span class="tag">MIN</span><span class="tag">MAX</span><span class="tag">AVG</span><span class="tag">SUM</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>전체 건수, 최초·최종 결제시각, 평균금액, 총금액을 구하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>데이터 규모와 기간·평균·합계가 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>요약 결과 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">집계함수 다섯 개를 SELECT에 나란히 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT COUNT(*) AS row_count,
+       MIN(payment_at) AS min_payment_at,
+       MAX(payment_at) AS max_payment_at,
+       AVG(amount) AS avg_amount,
+       SUM(amount) AS total_amount
+FROM card_payments;</code></pre><div class="explain"><b>해설</b><br/>처음 보는 테이블은 건수·기간·평균·합계를 먼저 확인하면 전체 상태를 빠르게 파악할 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="16" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">17</div><div><div class="ex-title">승인 결제의 사기 라벨 분포</div><div class="tags"><span class="tag">WHERE</span><span class="tag">GROUP BY</span><span class="tag">COUNT</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>승인 결제만 대상으로 fraud_label별 건수를 구하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>fraud_label별 건수가 표시됩니다.</div><div class="meta-box"><b>결과 Grain</b>fraud_label 1개 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">WHERE is_approved=1 후 GROUP BY fraud_label입니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT fraud_label, COUNT(*) AS rows
+FROM card_payments
+WHERE is_approved = 1
+GROUP BY fraud_label
+ORDER BY fraud_label;</code></pre><div class="explain"><b>해설</b><br/>WHERE는 집계 전에 원본 행을 줄이고 GROUP BY는 결과 Grain을 라벨 단위로 바꿉니다.</div></div></details>
+<label class="checkline"><input data-q="17" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">18</div><div><div class="ex-title">결제가 10건 이상인 고객</div><div class="tags"><span class="tag">GROUP BY</span><span class="tag">HAVING</span><span class="tag">AVG</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>승인 결제를 고객별 집계하고 10건 이상인 고객만 남기세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객별 건수·평균금액이 보이고 10건 이상만 남습니다.</div><div class="meta-box"><b>결과 Grain</b>고객 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">집계 후 조건은 HAVING에 둡니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT customer_id,
+       COUNT(*) AS payment_count,
+       AVG(amount) AS avg_amount
+FROM card_payments
+WHERE is_approved = 1
+GROUP BY customer_id
+HAVING COUNT(*) &gt;= 10
+ORDER BY payment_count DESC;</code></pre><div class="explain"><b>해설</b><br/>HAVING은 GROUP BY 이후 만들어진 그룹에 적용합니다.</div></div></details>
+<label class="checkline"><input data-q="18" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">19</div><div><div class="ex-title">신용점수 구간 분류</div><div class="tags"><span class="tag">CASE WHEN</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>credit_score를 VERY_HIGH/HIGH/MID/LOW로 분류하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객별 score_band가 함께 보입니다.</div><div class="meta-box"><b>결과 Grain</b>고객 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.customers</code></div><div class="hint-text">높은 기준부터 아래로 CASE를 작성합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT customer_id,
+       credit_score,
+       CASE
+         WHEN credit_score &gt;= 800 THEN 'VERY_HIGH'
+         WHEN credit_score &gt;= 700 THEN 'HIGH'
+         WHEN credit_score &gt;= 600 THEN 'MID'
+         ELSE 'LOW'
+       END AS score_band
+FROM customers;</code></pre><div class="explain"><b>해설</b><br/>CASE는 위에서 아래로 검사해 처음 참인 분기를 반환합니다.</div></div></details>
+<label class="checkline"><input data-q="19" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">20</div><div><div class="ex-title">월별 결제 건수</div><div class="tags"><span class="tag">YEAR</span><span class="tag">MONTH</span><span class="tag">GROUP BY</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>payment_at에서 연도와 월을 추출해 월별 결제건수를 구하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>연도·월별 건수가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>연도 × 월 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">YEAR(), MONTH()를 SELECT와 GROUP BY에 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT YEAR(payment_at) AS payment_year,
+       MONTH(payment_at) AS payment_month,
+       COUNT(*) AS rows
+FROM card_payments
+GROUP BY YEAR(payment_at), MONTH(payment_at)
+ORDER BY payment_year, payment_month;</code></pre><div class="explain"><b>해설</b><br/>시계열 분포를 월 단위로 먼저 확인하면 데이터 공백이나 집중 시기를 찾기 쉽습니다.</div></div></details>
+<label class="checkline"><input data-q="20" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l5"><div class="level-head"><div class="level-num">L5</div><div><h2>프로젝트 응용</h2><p>금융 AI 데이터 준비 패턴을 연습하는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">21</div><div><div class="ex-title">2026년 1~7월 승인 결제 원천</div><div class="tags"><span class="tag">기간조건</span><span class="tag">FDS</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>FDS 후보가 될 승인결제를 기간조건으로 추출하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>기간 내 승인결제가 시간순으로 보입니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">종료는 &lt; '2026-08-01' 형태로 둡니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT payment_id, customer_id, payment_at, amount,
+       payment_channel, auth_method, country, ip_country,
+       is_overseas, is_online, fraud_label
+FROM card_payments
+WHERE is_approved = 1
+  AND payment_at &gt;= '2026-01-01'
+  AND payment_at &lt;  '2026-08-01'
+ORDER BY payment_at;</code></pre><div class="explain"><b>해설</b><br/>[시작, 종료) 형태는 DATETIME 경계를 명확하게 관리할 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="21" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">22</div><div><div class="ex-title">삼성전자 Notebook 입력 원천</div><div class="tags"><span class="tag">시계열</span><span class="tag">Raw</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>기술지표 계산 전 OHLCV 원천을 날짜순으로 추출하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>stock_data</div><div class="meta-box"><b>기대 결과</b>삼성전자 거래일별 OHLCV가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>stock_code × trade_date = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>stock_data.stock_prices</code></div><div class="hint-text">기술지표는 SQL에서 만들지 말고 원천 컬럼만 선택합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE stock_data;
+SELECT stock_code, trade_date, open_price, high_price,
+       low_price, close_price, volume, change_rate
+FROM stock_prices
+WHERE stock_code = '005930'
+ORDER BY trade_date;</code></pre><div class="explain"><b>해설</b><br/>SQL은 정렬된 원천을 준비하고 수익률·SMA·RSI 등은 Python에서 계산할 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="22" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">23</div><div><div class="ex-title">CSS 대출신청 기준축</div><div class="tags"><span class="tag">CSS</span><span class="tag">Target</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>대출신청 1건 단위 원천과 Target을 시간순으로 추출하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>신청정보와 default_12m_label이 시간순으로 보입니다.</div><div class="meta-box"><b>결과 Grain</b>application_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.loan_applications</code></div><div class="hint-text">loan_applications의 신청정보와 라벨을 선택합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT application_id, customer_id, application_at,
+       product_type, requested_amount, loan_purpose,
+       annual_income, employment_years, debt_to_income,
+       bureau_score, approved, default_12m_label
+FROM loan_applications
+ORDER BY application_at;</code></pre><div class="explain"><b>해설</b><br/>default_12m_label은 Target이며 Feature와 역할을 구분해야 합니다.</div></div></details>
+<label class="checkline"><input data-q="23" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">24</div><div><div class="ex-title">현재 유효 정책문서 유형별 건수</div><div class="tags"><span class="tag">RAG</span><span class="tag">GROUP BY</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>현재 유효한 문서만 doc_type별로 집계하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>문서유형별 현재 문서 건수가 보입니다.</div><div class="meta-box"><b>결과 Grain</b>doc_type 1개 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.financial_policy_docs</code></div><div class="hint-text">is_current=1 필터 후 doc_type으로 그룹화합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT doc_type, COUNT(*) AS rows
+FROM financial_policy_docs
+WHERE is_current = 1
+GROUP BY doc_type
+ORDER BY rows DESC;</code></pre><div class="explain"><b>해설</b><br/>RAG 문서 준비에서도 먼저 현재성·분포를 확인하는 것이 유용합니다.</div></div></details>
+<label class="checkline"><input data-q="24" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">25</div><div><div class="ex-title">고객별 승인 결제 요약</div><div class="tags"><span class="tag">GROUP BY</span><span class="tag">SUM</span><span class="tag">AVG</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>승인 결제를 고객별로 건수·총액·평균·최근시각까지 요약하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객마다 한 행의 결제요약이 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">GROUP BY customer_id 뒤에 집계함수를 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT customer_id,
+       COUNT(*) AS payment_count,
+       SUM(amount) AS total_amount,
+       AVG(amount) AS avg_amount,
+       MAX(payment_at) AS latest_payment_at
+FROM card_payments
+WHERE is_approved = 1
+GROUP BY customer_id
+ORDER BY total_amount DESC;</code></pre><div class="explain"><b>해설</b><br/>GROUP BY로 결과 Grain이 payment_id에서 customer_id로 바뀝니다.</div></div></details>
+<label class="checkline"><input data-q="25" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section><section class="level-section" id="l6"><div class="level-head"><div class="level-num">L6</div><div><h2>프로젝트 수준</h2><p>여러 개념을 결합해 실제 입력 데이터에 가까운 쿼리를 만드는 단계</p></div></div><article class="exercise">
+<div class="ex-head"><div class="ex-no">26</div><div><div class="ex-title">하루 50건 이상 결제 고객</div><div class="tags"><span class="tag">WHERE</span><span class="tag">GROUP BY</span><span class="tag">HAVING</span><span class="tag">LIMIT</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>2026-01-05 하루 동안 50건 이상 결제한 고객을 건수순으로 20명 찾으세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>조건을 만족한 고객이 건수순으로 최대 20명 보입니다.</div><div class="meta-box"><b>결과 Grain</b>고객 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">FROM→WHERE→GROUP BY→HAVING→ORDER BY→LIMIT 흐름으로 생각합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT customer_id, COUNT(*) AS payment_count
+FROM card_payments
+WHERE payment_at &gt;= '2026-01-05'
+  AND payment_at &lt;  '2026-01-06'
+GROUP BY customer_id
+HAVING COUNT(*) &gt;= 50
+ORDER BY payment_count DESC
+LIMIT 20;</code></pre><div class="explain"><b>해설</b><br/>여러 기초문법을 실제 분석 질문 하나에 결합한 형태입니다.</div></div></details>
+<label class="checkline"><input data-q="26" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">27</div><div><div class="ex-title">고객별 고액 승인결제 건수</div><div class="tags"><span class="tag">CASE</span><span class="tag">조건부 집계</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>고객별 전체 승인결제 건수와 50만원 이상 승인결제 건수를 함께 계산하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>고객별 두 건수가 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>customer_id 1명 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">SUM(CASE WHEN amount&gt;=500000 THEN 1 ELSE 0 END)를 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT customer_id,
+       COUNT(*) AS approved_payment_count,
+       SUM(CASE WHEN amount &gt;= 500000 THEN 1 ELSE 0 END) AS high_amount_count
+FROM card_payments
+WHERE is_approved = 1
+GROUP BY customer_id
+ORDER BY high_amount_count DESC;</code></pre><div class="explain"><b>해설</b><br/>조건부 집계는 그룹별 행동 특성을 만들 때 자주 사용하는 패턴입니다.</div></div></details>
+<label class="checkline"><input data-q="27" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">28</div><div><div class="ex-title">FDS Raw 데이터 품질 확인</div><div class="tags"><span class="tag">품질검증</span><span class="tag">NULL</span><span class="tag">집계</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>기간 내 승인결제의 건수·기간·device_id 누락건수를 한 번에 확인하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>건수·시작/종료시각·기기누락건수가 한 행에 보입니다.</div><div class="meta-box"><b>결과 Grain</b>검증 결과 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">COUNT, MIN/MAX, COUNT(*)-COUNT(device_id)를 함께 사용합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT COUNT(*) AS approved_rows,
+       MIN(payment_at) AS min_payment_at,
+       MAX(payment_at) AS max_payment_at,
+       COUNT(*) - COUNT(device_id) AS missing_device_rows
+FROM card_payments
+WHERE is_approved = 1
+  AND payment_at &gt;= '2026-01-01'
+  AND payment_at &lt;  '2026-08-01';</code></pre><div class="explain"><b>해설</b><br/>Notebook으로 넘기기 전 행 수·기간·NULL을 확인하면 뒤 단계 오류를 줄일 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="28" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">29</div><div><div class="ex-title">종목별 데이터 보유기간</div><div class="tags"><span class="tag">COUNT</span><span class="tag">MIN</span><span class="tag">MAX</span><span class="tag">GROUP BY</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>각 종목의 거래일 수와 최초·최종 거래일을 구해 상위 20개를 보세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>stock_data</div><div class="meta-box"><b>기대 결과</b>종목별 데이터 길이와 기간이 보입니다.</div><div class="meta-box"><b>결과 Grain</b>stock_code 1개 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>stock_data.stock_prices</code></div><div class="hint-text">stock_code로 그룹화합니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE stock_data;
+SELECT stock_code,
+       COUNT(*) AS trading_days,
+       MIN(trade_date) AS min_date,
+       MAX(trade_date) AS max_date
+FROM stock_prices
+GROUP BY stock_code
+ORDER BY trading_days DESC
+LIMIT 20;</code></pre><div class="explain"><b>해설</b><br/>시계열 모델 전에 종목별 데이터 길이를 점검하는 용도로 사용할 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="29" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article>
+<article class="exercise">
+<div class="ex-head"><div class="ex-no">30</div><div><div class="ex-title">FDS 프로젝트용 Raw 추출</div><div class="tags"><span class="tag">FDS</span><span class="tag">Raw</span><span class="tag">Filter</span><span class="tag">Target</span></div></div></div>
+<div class="ex-body"><div class="goal"><b>문제</b><br/>결제시점에 사용할 수 있는 원천·Filter·Target을 구분할 수 있게 승인결제를 추출하세요.</div>
+<div class="meta"><div class="meta-box"><b>사용 스키마</b>fintech_fraud_lab_class</div><div class="meta-box"><b>기대 결과</b>승인결제가 시간순으로 나오고 fraud_label이 포함됩니다.</div><div class="meta-box"><b>결과 Grain</b>payment_id 1건 = 1행</div><div class="meta-box"><b>작성 전에 생각할 것</b>어느 테이블에서 시작하고 어떤 조건·그룹·순서를 적용할지 먼저 말로 정리합니다.</div></div>
+<details class="hint"><summary>힌트 보기</summary><div class="details-body"><div class="hint-table-info"><b>사용 테이블:</b> <code>fintech_fraud_lab_class.card_payments</code></div><div class="hint-text">is_approved는 WHERE에 쓰고 fraud_label은 결과에 남깁니다.</div></div></details>
+<details class="answer"><summary>정답과 해설 보기</summary><div class="details-body"><pre><code>USE fintech_fraud_lab_class;
+SELECT payment_id, customer_id, merchant_id, device_id,
+       payment_at, amount, payment_channel, auth_method,
+       country, ip_country, is_overseas, is_online, fraud_label
+FROM card_payments
+WHERE is_approved = 1
+  AND payment_at &gt;= '2026-01-01'
+  AND payment_at &lt;  '2026-08-01'
+ORDER BY payment_at;</code></pre><div class="explain"><b>해설</b><br/>실제 프로젝트에서는 이 Raw를 Python으로 넘겨 시간·위치·금액 Feature를 만들 수 있습니다.</div></div></details>
+<label class="checkline"><input data-q="30" type="checkbox"/> 직접 작성하고 실행 결과까지 확인함</label></div></article></section></main><footer class="footer">SQL 기초문법 단계별 연습문제 30제</footer>
+<script>function toggleAll(s,o){document.querySelectorAll(s).forEach(d=>d.open=o)}const key='sql-practice-'+location.pathname.split('/').pop();const saved=JSON.parse(localStorage.getItem(key)||'{}');document.querySelectorAll('input[data-q]').forEach(c=>{c.checked=!!saved[c.dataset.q];c.addEventListener('change',()=>{saved[c.dataset.q]=c.checked;localStorage.setItem(key,JSON.stringify(saved))})});function resetChecks(){document.querySelectorAll('input[data-q]').forEach(c=>c.checked=false);localStorage.removeItem(key)}</script></body></html>

@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SQL 기초 문법 — 금융 데이터 조회와 Notebook 입력 데이터 준비</title>
+<style>
+:root{
+ --bg:#eef3f8;--paper:#fff;--ink:#172033;--muted:#5c6b7b;--line:#d9e3ed;
+ --navy:#0d2744;--navy2:#163f68;--blue:#2563a8;--cyan:#0b8fab;--green:#18724f;
+ --amber:#9a650d;--red:#a84141;--purple:#6654b7;--soft:#f7faff;--code:#0c1725;
+ --shadow:0 10px 26px rgba(17,38,64,.06)
+}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard","Noto Sans KR","Malgun Gothic","Segoe UI",Arial,sans-serif;line-height:1.72;word-break:keep-all;overflow-wrap:anywhere}
+a{color:#175b96}
+.wrap{max-width:1280px;margin:auto;background:#fff;min-height:100vh}
+.hero{padding:56px 58px 46px;color:#fff;background:radial-gradient(circle at 83% 18%,rgba(39,193,225,.18),transparent 28%),linear-gradient(135deg,#071a2f,#0d365d 62%,#102a47)}
+.hero .eyebrow{font-size:.78rem;letter-spacing:.14em;font-weight:850;color:#bfe8ff}
+.hero h1{font-size:clamp(2rem,4vw,2.8rem);line-height:1.18;margin:9px 0 13px;letter-spacing:-.025em}
+.hero p{max-width:1050px;margin:0;color:#dceaf7;font-size:1.03rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}.chip{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);border-radius:999px;padding:6px 10px;font-size:.76rem}
+.layout{display:block}
+.toc{position:relative;background:#f8fbff;border-bottom:1px solid var(--line);padding:20px 54px 16px}
+.toc h2{font-size:1rem;margin:0 0 11px;color:var(--navy)}
+.toc a{display:inline-block;text-decoration:none;color:#315f89;font-size:.8rem;line-height:1.35;padding:7px 11px;margin:0 7px 8px 0;border:1px solid #d9e5ef;border-radius:999px;background:#fff}
+.toc a:hover{background:#edf6ff;border-color:#bdd4e7}
+.content{padding:0 54px 72px;min-width:0}section{padding:42px 0 24px;border-bottom:1px solid #e8edf3;min-width:0}
+h2{font-size:clamp(1.55rem,2.4vw,1.95rem);line-height:1.34;margin:0 0 15px;color:var(--navy)}
+h3{font-size:1.22rem;line-height:1.4;color:#17466f;margin:28px 0 10px}h4{font-size:1rem;line-height:1.42;color:#173e65;margin:0 0 7px}
+p{margin:0 0 12px}.lead{font-size:1.07rem;color:#344454}.small{font-size:.84rem;color:var(--muted)}
+.grid2,.grid3,.grid4,.auto-grid{display:grid;gap:14px;align-items:stretch;margin:16px 0}.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}.auto-grid{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.card,.term,.example,.mistake,.good,.question{border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px;min-width:0;overflow-wrap:anywhere}.card.soft,.soft{background:linear-gradient(180deg,#fbfdff,#f7faff)}
+.note,.warn,.success,.concept{margin:16px 0;padding:15px 17px;border:1px solid #cbddeb;border-left:5px solid var(--blue);border-radius:12px;background:#edf6ff}.warn{background:#fff7e9;border-color:#ecd6a7;border-left-color:#d49519}.success{background:#edf8f3;border-color:#c8e6d8;border-left-color:#1b805d}.concept{background:#f5f2ff;border-color:#ddd6fb;border-left-color:var(--purple)}
+.note b,.warn b,.success b,.concept b{color:#123f68}.mistake{background:#fff3f3;border-color:#edcaca}.good{background:#eef9f4;border-color:#cce7d9}
+.visual{margin:18px 0;border:1px solid #dae4ed;border-radius:17px;background:#fff;overflow:hidden;box-shadow:var(--shadow)}.visual-head{padding:14px 17px;font-weight:850;color:#0f3157;background:#fafcff;border-bottom:1px solid #e4ebf2}.visual-body{padding:18px;min-width:0}.visual-caption{padding:9px 13px;color:#607080;font-size:.82rem;background:#fafcff;border-top:1px solid #e4eaf0}
+.pipe-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.pipe{border:1px solid #d8e2ec;border-radius:13px;padding:14px;background:#fff;min-width:0}.pipe .n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#e9f3ff;color:#174f82;font-weight:900;margin-bottom:7px}.pipe b{display:block;color:#15466f;margin-bottom:4px}
+.db-stack{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.db-level{border:1px solid #d7e2ec;border-radius:14px;padding:15px;background:#fff;text-align:center}.db-level strong{display:block;color:#174f82;font-size:1.05rem}.db-level .icon{font-size:1.7rem;display:block;margin-bottom:5px}
+.schema-map{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.schema-box{border:1px solid var(--line);border-radius:15px;padding:16px;background:#fff}.schema-box.fin{border-top:4px solid var(--blue)}.schema-box.stock{border-top:4px solid var(--green)}.tiny{display:inline-block;padding:3px 8px;margin:3px 4px 3px 0;border-radius:999px;background:#eef5ff;color:#315f98;font-size:.72rem;font-weight:800}
+.select-anatomy{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.clause{border-radius:13px;padding:14px;border:1px solid #d8e2ec;background:#fff}.clause b{display:block;font-size:1.03rem;color:#173f69}.clause.select{background:#eef5ff}.clause.from{background:#eef9f4}.clause.where{background:#fff8e9}.clause.order{background:#f5f2ff}
+.filter-viz{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;align-items:center}.rows{display:grid;gap:7px}.rowbar{height:auto;border:1px solid #d9e3ed;border-radius:8px;padding:7px 10px;background:#fff;font-size:.82rem}.rowbar.hit{background:#edf8f3;border-color:#bfe0d0}.funnel{border:1px solid #d8e2ec;border-radius:14px;padding:16px;background:#fbfdff;text-align:center}.funnel strong{display:block;color:#17517e;font-size:1.1rem}
+.null-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.null-card{border:1px solid var(--line);border-radius:13px;padding:15px;text-align:center;background:#fff}.null-card strong{display:block;font-size:1.15rem;color:#174d7d;margin-bottom:5px}.null-card.null{background:#fff8e8}.null-card.zero{background:#eef5ff}.null-card.empty{background:#f7f4ff}
+.bucket-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.bucket{border:1px solid #d7e2ec;border-radius:14px;padding:14px;background:#fff}.bucket b{color:#174a77}.bucket .items{font-size:.8rem;color:#5f6f7f;margin-top:7px}.bucket .result{margin-top:9px;padding:7px 9px;background:#eef6ff;border-radius:8px;font-weight:800;color:#174a77}
+.logic-flow{display:grid;grid-template-columns:repeat(7,minmax(95px,1fr));gap:8px;align-items:stretch}.logic-node{border:1px solid #d7e2ec;border-radius:11px;padding:11px 8px;background:#fff;text-align:center;font-weight:850;color:#174a77}.logic-node:nth-child(1){background:#eef9f4}.logic-node:nth-child(2){background:#fff8e9}.logic-node:nth-child(3){background:#f5f2ff}.logic-node:nth-child(4){background:#fff3f3}.logic-node:nth-child(5){background:#eef5ff}.logic-node:nth-child(6){background:#f7faff}.logic-node:nth-child(7){background:#edf8f3}
+.handoff{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.handoff div{border:1px solid #d8e2ec;border-radius:13px;padding:13px;background:#fff}.handoff b{display:block;color:#174a77;margin-bottom:4px}
+.table-wrap{width:100%;overflow-x:auto;border:1px solid #dfe6ee;border-radius:12px;margin:14px 0 18px;background:#fff;-webkit-overflow-scrolling:touch}.table-wrap table{min-width:680px;margin:0}table{width:100%;border-collapse:collapse;font-size:.89rem}th{background:#10375e;color:#fff;padding:10px;text-align:left}td{padding:10px;border-bottom:1px solid #e2e8ee;vertical-align:top}tr:nth-child(even) td{background:#fafcfe}
+pre{margin:12px 0 16px;padding:15px 16px;border-radius:12px;background:var(--code);color:#e7f2ff;overflow:auto;max-width:100%;font:0.84rem/1.62 Consolas,"SFMono-Regular",Menlo,monospace;white-space:pre}code{font-family:Consolas,"SFMono-Regular",Menlo,monospace}.inline{padding:2px 5px;background:#e8eef5;border-radius:5px;color:#123f68}.comment{color:#98c5a1}.kw{color:#8fc7ff}.str{color:#ffd39c}
+.sql-read{display:grid;grid-template-columns:170px 1fr;gap:0;border:1px solid #dce5ee;border-radius:12px;overflow:hidden;margin:14px 0}.sql-read b,.sql-read span{padding:10px 12px;border-bottom:1px solid #e1e8ef}.sql-read b{background:#f2f7fb;color:#174b77}.sql-read span{background:#fff}.sql-read b:last-of-type,.sql-read span:last-of-type{border-bottom:0}
+details{border:1px solid #dce5ee;border-radius:12px;padding:10px 13px;margin:10px 0;background:#fff}summary{cursor:pointer;font-weight:820;color:#174a77}.question{background:#f8fbff;border-style:dashed;border-color:#aacbe8}
+.checklist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.check{border:1px solid var(--line);border-radius:11px;padding:12px 13px;background:#fbfdff}.check::before{content:"✓";display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#e9f6ef;color:#166a4f;font-weight:900;margin-right:7px}
+.glossary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.gloss{border-bottom:1px dashed #dbe4ed;padding:10px 0}.gloss b{display:block;color:#174a77}
+.footer{padding:25px 54px;background:#0b1f3a;color:#c9d7e5;font-size:.82rem}
+@media(max-width:1030px){.toc{padding:18px 28px 14px}.content{padding:0 28px 64px}.hero{padding:46px 28px 38px}.footer{padding:24px 28px}.logic-flow{grid-template-columns:repeat(4,minmax(0,1fr))}.handoff{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:780px){.grid2,.grid3,.grid4,.db-stack,.schema-map,.select-anatomy,.null-grid,.bucket-grid,.checklist,.glossary,.filter-viz{grid-template-columns:1fr}.content{padding:0 18px 52px}.toc{padding:16px 18px 12px}.toc a{font-size:.76rem;padding:6px 9px;margin-right:5px}.hero{padding:38px 18px 32px}.logic-flow,.handoff{grid-template-columns:1fr}.sql-read{grid-template-columns:1fr}.sql-read b{border-bottom:0;padding-bottom:3px}.sql-read span{padding-top:3px}.table-wrap table{min-width:620px}}
+@media(max-width:430px){.content{padding-left:14px;padding-right:14px}.visual-body,.card,.term,.question{padding:14px}.hero h1{font-size:1.82rem}.hero p{font-size:.94rem}.table-wrap table{min-width:560px}}
+@media print{.toc{display:none}.layout{display:block}body{background:#fff}.wrap{max-width:none}.hero{background:#fff;color:#111;border-bottom:2px solid #213b58;padding:25px}.hero p{color:#333}.visual,.card{box-shadow:none;break-inside:avoid}}
+
+.term-box{
+  margin:14px 0;
+  padding:14px 16px;
+  border:1px solid #cfe0ef;
+  border-left:5px solid #2563eb;
+  border-radius:12px;
+  background:#f7fbff;
+}
+.term-box b{color:#173f73}
+.term-box .en{font-family:Consolas,Monaco,"Courier New",monospace;color:#5b21b6}
+.term-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:12px;
+  margin:14px 0;
+}
+.term-mini{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px;
+  background:#fbfcfe;
+}
+.term-mini b{display:block;color:#173f73;margin-bottom:4px}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+ <div class="eyebrow">SQL FUNDAMENTALS · FINANCIAL DATA QUERY</div>
+ <h1>SQL 기초 문법<br>금융 데이터 조회와 Notebook 입력 데이터 준비</h1>
+ <p>관계형 데이터베이스의 구조를 이해하고, <b>SELECT·WHERE·ORDER BY·NULL·집계·GROUP BY·CASE·날짜 조건</b>을 이용해 필요한 데이터를 정확히 조회하는 방법을 다룹니다. 예시는 <code>fintech_fraud_lab_class</code>와 <code>stock_data</code> 스키마를 사용하며, SQL 결과를 Python 분석으로 안전하게 넘기는 기준까지 연결합니다.</p>
+ <div class="chips"><span class="chip">MySQL 8</span><span class="chip">SELECT / WHERE</span><span class="chip">GROUP BY / HAVING</span><span class="chip">금융거래</span><span class="chip">KRX 주가</span><span class="chip">Notebook Handoff</span></div>
+</header>
+<div class="layout">
+<nav class="toc">
+ <h2>목차</h2>
+ <a href="#s0">0. SQL과 관계형 DB</a>
+ <a href="#s1">1. 스키마·테이블·Grain</a>
+ <a href="#s2">2. SELECT / FROM</a>
+ <a href="#s3">3. 별칭과 표현식</a>
+ <a href="#s4">4. WHERE</a>
+ <a href="#s5">5. ORDER BY / LIMIT</a>
+ <a href="#s6">6. DISTINCT / NULL</a>
+ <a href="#s7">7. 집계 함수</a>
+ <a href="#s8">8. GROUP BY / HAVING</a>
+ <a href="#s9">9. CASE WHEN</a>
+ <a href="#s10">10. 날짜와 시점</a>
+ <a href="#s11">11. SQL 논리 처리 순서</a>
+ <a href="#s12">12. 자주 틀리는 패턴</a>
+ <a href="#s13">13. 금융 AI 데이터 준비</a>
+ <a href="#s14">14. 종합 확인 문제</a>
+ <a href="#s15">15. 핵심 용어 사전</a>
+</nav>
+<main class="content">
+
+<section id="s0">
+<h2>0. SQL과 관계형 데이터베이스를 먼저 이해하기</h2>
+<p class="lead"><b>SQL(Structured Query Language)</b>은 관계형 데이터베이스에 저장된 데이터를 조회하고 관리하는 언어입니다. SQL 문법을 외우기 전에 “데이터가 어디에 어떤 모양으로 저장되어 있는가”를 이해하면 쿼리를 훨씬 쉽게 읽을 수 있습니다.</p>
+
+<div class="visual">
+ <div class="visual-head">데이터베이스 구조를 네 단계로 보기</div>
+ <div class="visual-body"><div class="db-stack">
+  <div class="db-level"><span class="icon">🗄️</span><strong>Schema</strong><span class="small">테이블을 묶는 논리적 공간</span></div>
+  <div class="db-level"><span class="icon">▦</span><strong>Table</strong><span class="small">같은 종류의 데이터를 저장하는 표</span></div>
+  <div class="db-level"><span class="icon">↔</span><strong>Row</strong><span class="small">고객 1명·결제 1건처럼 한 건</span></div>
+  <div class="db-level"><span class="icon">↕</span><strong>Column</strong><span class="small">이름·금액·날짜 같은 속성</span></div>
+ </div></div>
+ <div class="visual-caption">SQL은 “어느 스키마의 어느 테이블에서 어떤 행과 열을 가져올 것인가?”를 표현하는 언어라고 생각하면 쉽습니다.</div>
+</div>
+
+<div class="grid3">
+ <div class="term"><h4>Primary Key(PK)</h4><p>한 테이블 안에서 각 행을 유일하게 구분하는 대표 키입니다. 예: <code>customers.customer_id</code>.</p></div>
+ <div class="term"><h4>Foreign Key(FK)</h4><p>다른 테이블의 PK를 참조하는 연결 키입니다. 예: <code>accounts.customer_id</code>.</p></div>
+ <div class="term"><h4>Grain(그레인, 한 행의 단위)</h4><p><strong>Grain</strong>은 데이터에서 <strong>한 행(Row)이 정확히 무엇을 나타내는지</strong>를 뜻합니다. 예를 들어 <code>customers</code>는 고객 1명, <code>card_payments</code>는 카드결제 1건, <code>stock_prices</code>는 종목 1개 × 거래일 1일이 한 행입니다. JOIN이나 GROUP BY 전에 Grain을 확인하면 중복 행과 잘못된 합계를 예방할 수 있습니다.</p></div>
+</div>
+
+<div class="concept"><b>Grain을 어떻게 읽을까?</b><br>
+<code>customers</code> → 한 행 = <strong>고객 1명</strong><br>
+<code>card_payments</code> → 한 행 = <strong>카드결제 1건</strong><br>
+<code>stock_prices</code> → 한 행 = <strong>종목코드 1개 × 거래일 1일의 주가 1건</strong><br><br>
+같은 테이블이라도 <code>GROUP BY customer_id</code>를 적용하면 결과의 Grain은 <strong>고객 1명</strong>으로 바뀝니다. 따라서 “원본 테이블의 Grain”과 “최종 조회 결과의 Grain”을 구분해서 봐야 합니다.
+</div>
+</section>
+
+<section id="s1">
+<h2>1. 두 스키마와 주요 테이블을 먼저 확인하기</h2>
+<p class="lead">SQL을 쓰기 전에 현재 어느 데이터베이스에 있는지 확인합니다. 같은 테이블명이 다른 스키마에 존재할 수도 있기 때문에 <code>USE</code>와 <code>SELECT DATABASE()</code>를 습관적으로 확인하면 오류를 줄일 수 있습니다.</p>
+
+<div class="visual"><div class="visual-head">이번 자료에서 사용하는 두 스키마</div><div class="visual-body"><div class="schema-map">
+ <div class="schema-box fin"><h4>fintech_fraud_lab_class</h4><p>고객·계좌·거래·카드·대출·FDS·마이데이터·모델운영·문서 데이터를 포함하는 금융 AI 실습 스키마입니다.</p><span class="tiny">customers</span><span class="tiny">accounts</span><span class="tiny">transactions</span><span class="tiny">card_payments</span><span class="tiny">loan_applications</span></div>
+ <div class="schema-box stock"><h4>stock_data</h4><p>종목 마스터와 일별 가격 시계열을 관리하는 주가 분석 스키마입니다.</p><span class="tiny">stocks</span><span class="tiny">stock_prices</span><span class="tiny">stock_collection_log</span></div>
+</div></div></div>
+
+<pre><code>SHOW DATABASES;
+
+USE fintech_fraud_lab_class;
+SELECT DATABASE();
+SHOW TABLES;
+
+USE stock_data;
+SELECT DATABASE();
+SHOW TABLES;</code></pre>
+
+<h3>테이블을 처음 볼 때는 DESCRIBE부터</h3>
+<pre><code>USE stock_data;
+DESCRIBE stocks;
+DESCRIBE stock_prices;
+
+USE fintech_fraud_lab_class;
+DESCRIBE customers;
+DESCRIBE card_payments;</code></pre>
+<div class="note"><b>DESCRIBE에서 볼 것</b><br>컬럼명, 데이터형, NULL 허용 여부, Key(PK/FK 관련 인덱스), 기본값을 확인합니다. 쿼리를 작성하기 전에 실제 컬럼명을 확인하면 존재하지 않는 컬럼을 추측해서 쓰는 오류를 줄일 수 있습니다.</div>
+</section>
+
+<section id="s2">
+<h2>2. SELECT / FROM — 원하는 열을 원하는 테이블에서 가져오기</h2>
+<p class="lead"><code>SELECT</code>는 <b>보고 싶은 열(Column)</b>, <code>FROM</code>은 <b>데이터가 있는 테이블</b>을 지정합니다.</p>
+
+<div class="visual"><div class="visual-head">SELECT 문을 한눈에 읽는 방법</div><div class="visual-body"><div class="select-anatomy">
+ <div class="clause select"><b>SELECT</b>무엇을 볼까?<br><span class="small">컬럼·계산식</span></div>
+ <div class="clause from"><b>FROM</b>어디에서 가져올까?<br><span class="small">테이블</span></div>
+ <div class="clause where"><b>WHERE</b>어떤 행만 남길까?<br><span class="small">조건</span></div>
+ <div class="clause order"><b>ORDER / LIMIT</b>어떤 순서·몇 건?<br><span class="small">표시 범위</span></div>
+</div></div></div>
+
+<div class="concept"><b>기본문법</b><pre><code>SELECT 컬럼1, 컬럼2, 컬럼3
+FROM 테이블명;</code></pre></div>
+
+<pre><code>USE stock_data;
+SELECT stock_code, company_name, market, industry
+FROM stocks
+LIMIT 20;
+
+USE fintech_fraud_lab_class;
+SELECT customer_id, gender, region, income_band, occupation, credit_score
+FROM customers
+LIMIT 20;</code></pre>
+
+<h3>SELECT *는 언제 쓰고 언제 피할까?</h3>
+<div class="grid2">
+ <div class="mistake"><h4>탐색 외에는 지양</h4><pre><code>SELECT *
+FROM customers;</code></pre><p>필요 없는 개인정보나 큰 문자열 컬럼까지 가져올 수 있고, 테이블 구조가 바뀌면 결과 구조도 함께 바뀝니다.</p></div>
+ <div class="good"><h4>필요한 컬럼만 명시</h4><pre><code>SELECT customer_id, region, credit_score
+FROM customers;</code></pre><p>조회 의도가 분명하고 네트워크·메모리 사용량을 줄이기 쉽습니다.</p></div>
+</div>
+
+
+</section>
+
+<section id="s3">
+<h2>3. 별칭(Alias)과 표현식 — 결과를 읽기 쉽게 만들기</h2>
+<p>별칭은 컬럼이나 테이블에 <b>현재 조회에서만 사용하는 임시 이름</b>을 붙입니다. DB 원본 컬럼명은 바뀌지 않습니다.</p>
+<pre><code>SELECT
+    stock_code AS ticker,
+    close_price AS close,
+    volume AS trading_volume
+FROM stock_data.stock_prices
+LIMIT 20;</code></pre>
+
+<h3>계산식에도 별칭을 붙일 수 있다</h3>
+<pre><code>SELECT
+    payment_id,
+    amount,
+    amount * 0.01 AS fee_estimate
+FROM fintech_fraud_lab_class.card_payments
+LIMIT 20;</code></pre>
+<div class="note"><b>해석</b><br><code>fee_estimate</code>는 DB에 새 컬럼을 저장한 것이 아니라 조회 결과에서만 생성된 계산 컬럼입니다.</div>
+</section>
+
+<section id="s4">
+<h2>4. WHERE — 조건에 맞는 행만 선택하기</h2>
+<p class="lead">SELECT가 필요한 <b>열</b>을 고른다면 WHERE는 조건에 맞는 <b>행</b>을 고릅니다. 금융 데이터는 행 수가 크기 때문에 분석 전에 기간·상태·종목 등을 SQL에서 먼저 제한하는 경우가 많습니다.</p>
+
+<div class="visual"><div class="visual-head">WHERE는 큰 데이터에서 필요한 행만 통과시키는 필터</div><div class="visual-body"><div class="filter-viz">
+ <div class="rows"><div class="rowbar">결제 A · 25,000원 · 국내</div><div class="rowbar hit">결제 B · 750,000원 · 해외</div><div class="rowbar">결제 C · 31,000원 · 국내</div><div class="rowbar hit">결제 D · 520,000원 · 온라인</div><div class="rowbar">결제 E · 14,000원 · 국내</div></div>
+ <div class="funnel"><strong>WHERE amount &gt;= 500000</strong><span class="small">조건을 만족한 B와 D만 결과로 전달</span></div>
+</div></div></div>
+
+<h3>비교 연산자</h3>
+<div class="table-wrap"><table><thead><tr><th>연산자</th><th>뜻</th><th>금융 데이터 예</th></tr></thead><tbody>
+<tr><td><code>=</code></td><td>같다</td><td><code>stock_code = '005930'</code></td></tr>
+<tr><td><code>&lt;&gt;</code>, <code>!=</code></td><td>같지 않다</td><td><code>status &lt;&gt; 'CLOSED'</code></td></tr>
+<tr><td><code>&gt;, &gt;=</code></td><td>크다 / 이상</td><td><code>amount &gt;= 500000</code></td></tr>
+<tr><td><code>&lt;, &lt;=</code></td><td>작다 / 이하</td><td><code>credit_score &lt; 600</code></td></tr>
+</tbody></table></div>
+
+<h3>AND / OR / NOT</h3>
+<pre><code>SELECT payment_id, customer_id, amount, is_overseas, is_online
+FROM card_payments
+WHERE amount &gt;= 500000
+  AND (is_overseas = 1 OR is_online = 1)
+LIMIT 100;</code></pre>
+<div class="warn"><b>AND와 OR를 섞을 때는 괄호를 사용</b><br>연산자 우선순위를 기억하고 있더라도 괄호로 의도를 명시하면 쿼리를 읽는 사람이 조건을 오해할 가능성이 줄어듭니다.</div>
+
+<h3>IN / BETWEEN / LIKE</h3>
+<pre><code>-- 여러 후보값 중 하나
+SELECT customer_id, risk_segment
+FROM customers
+WHERE risk_segment IN ('HIGH', 'MEDIUM');
+
+-- 범위의 양 끝값 포함
+SELECT customer_id, credit_score
+FROM customers
+WHERE credit_score BETWEEN 600 AND 750;
+
+-- 문자열 패턴
+SELECT stock_code, company_name
+FROM stock_data.stocks
+WHERE company_name LIKE '%전자%';</code></pre>
+
+<h3>기간과 상태를 함께 제한하는 예</h3>
+<pre><code>SELECT payment_id, customer_id, payment_at, amount, is_approved, fraud_label
+FROM fintech_fraud_lab_class.card_payments
+WHERE payment_at &gt;= '2026-01-01'
+  AND payment_at &lt;  '2026-08-01'
+  AND is_approved = 1
+ORDER BY payment_at
+LIMIT 200;</code></pre>
+</section>
+
+<section id="s5">
+<h2>5. ORDER BY와 LIMIT — 결과의 순서와 크기를 제어하기</h2>
+<p>관계형 DB는 <code>ORDER BY</code>가 없으면 결과 행의 순서를 보장하지 않습니다. 주가처럼 시계열 순서가 중요한 데이터는 날짜 기준 정렬을 명시해야 합니다.</p>
+<pre><code>SELECT stock_code, trade_date, close_price, volume
+FROM stock_data.stock_prices
+WHERE stock_code = '005930'
+ORDER BY trade_date ASC
+LIMIT 100;</code></pre>
+<div class="grid3">
+ <div class="card"><h4>ASC</h4><p>오름차순. 날짜는 과거 → 최근, 숫자는 작은 값 → 큰 값.</p></div>
+ <div class="card"><h4>DESC</h4><p>내림차순. 최근 날짜나 큰 금액을 먼저 보고 싶을 때 사용합니다.</p></div>
+ <div class="card"><h4>LIMIT</h4><p>현재 조회 결과에서 반환할 최대 행 수입니다. 원본 행을 삭제하지 않습니다.</p></div>
+</div>
+
+<h3>둘 이상의 기준으로 정렬</h3>
+<pre><code>SELECT customer_id, payment_at, amount
+FROM card_payments
+ORDER BY customer_id ASC, payment_at DESC
+LIMIT 100;</code></pre>
+<p>먼저 고객번호순으로 묶어 보이고, 같은 고객 안에서는 최신 결제를 먼저 보여줍니다.</p>
+</section>
+
+<section id="s6">
+<h2>6. DISTINCT와 NULL — 실제 값과 “값 없음”을 구분하기</h2>
+<h3>DISTINCT로 실제 코드값부터 확인</h3>
+<p>범주형 컬럼의 값을 추측해 WHERE 조건을 만들지 말고, 실제 저장값을 먼저 확인합니다.</p>
+<pre><code>SELECT DISTINCT payment_channel
+FROM card_payments
+ORDER BY payment_channel;
+
+SELECT DISTINCT auth_method
+FROM card_payments
+ORDER BY auth_method;</code></pre>
+
+<div class="visual"><div class="visual-head">NULL, 0, 빈 문자열은 서로 다른 값</div><div class="visual-body"><div class="null-grid">
+ <div class="null-card null"><strong>NULL</strong>값이 없거나 아직 모름<br><span class="small">IS NULL로 검사</span></div>
+ <div class="null-card zero"><strong>0</strong>숫자 값 0이 실제로 저장됨<br><span class="small">= 0으로 비교</span></div>
+ <div class="null-card empty"><strong>''</strong>문자열은 존재하지만 내용이 없음<br><span class="small">= ''로 비교</span></div>
+</div></div></div>
+
+<div class="grid2"><div class="mistake"><h4>잘못된 방식</h4><pre><code>WHERE device_id = NULL</code></pre></div><div class="good"><h4>올바른 방식</h4><pre><code>WHERE device_id IS NULL</code></pre></div></div>
+
+<pre><code>SELECT payment_id, customer_id, device_id, payment_at
+FROM card_payments
+WHERE device_id IS NULL
+LIMIT 50;</code></pre>
+
+<h3>COUNT(*)와 COUNT(column)의 차이</h3>
+<pre><code>SELECT
+    COUNT(*) AS all_rows,
+    COUNT(device_id) AS rows_with_device,
+    COUNT(*) - COUNT(device_id) AS rows_without_device
+FROM card_payments;</code></pre>
+<div class="note"><b>핵심</b><br><code>COUNT(*)</code>는 모든 행을 세지만 <code>COUNT(device_id)</code>는 <code>device_id</code>가 NULL이 아닌 행만 셉니다.</div>
+</section>
+
+<section id="s7">
+<h2>7. 집계 함수 — 여러 행을 하나의 요약값으로 계산하기</h2>
+<p class="lead">집계 함수는 데이터의 규모와 범위를 빠르게 파악하는 데 유용합니다. 처음 보는 테이블이라면 행 수·최초일·최종일·평균·합계부터 확인하면 데이터 상태를 빠르게 이해할 수 있습니다.</p>
+<div class="table-wrap"><table><thead><tr><th>함수</th><th>의미</th><th>금융 예</th></tr></thead><tbody>
+<tr><td><code>COUNT(*)</code></td><td>행 수</td><td>카드결제 총 건수</td></tr>
+<tr><td><code>SUM(amount)</code></td><td>합계</td><td>총 결제금액</td></tr>
+<tr><td><code>AVG(amount)</code></td><td>평균</td><td>평균 결제금액</td></tr>
+<tr><td><code>MIN()</code></td><td>최솟값</td><td>최초 거래일</td></tr>
+<tr><td><code>MAX()</code></td><td>최댓값</td><td>최종 거래일</td></tr>
+</tbody></table></div>
+
+<pre><code>SELECT
+    COUNT(*) AS row_count,
+    MIN(payment_at) AS min_payment_at,
+    MAX(payment_at) AS max_payment_at,
+    AVG(amount) AS avg_amount,
+    SUM(amount) AS total_amount
+FROM card_payments;</code></pre>
+
+<div class="concept"><b>주의</b><br>평균값 하나만 보면 분포를 놓칠 수 있습니다. 예를 들어 대부분이 2만원 결제인데 일부 1천만원 결제가 섞이면 평균이 크게 올라갑니다. SQL 기초 단계에서는 평균과 함께 최소·최대·건수를 같이 확인하는 습관이 좋습니다.</div>
+</section>
+
+<section id="s8">
+<h2>8. GROUP BY와 HAVING — 같은 값을 묶어 그룹별 통계 보기</h2>
+<p><code>GROUP BY</code>는 같은 값을 가진 행을 그룹으로 묶고 그룹별 COUNT·SUM·AVG 등을 계산합니다.</p>
+
+<div class="visual"><div class="visual-head">GROUP BY를 “바구니에 나눠 담고 바구니별로 계산”이라고 생각하기</div><div class="visual-body"><div class="bucket-grid">
+ <div class="bucket"><b>fraud_label = 0</b><div class="items">정상 · 정상 · 정상 · 정상 · …</div><div class="result">COUNT = 정상 건수</div></div>
+ <div class="bucket"><b>fraud_label = 1</b><div class="items">사기 · 사기 · …</div><div class="result">COUNT = 사기 건수</div></div>
+ <div class="bucket"><b>결과</b><div class="items">라벨마다 한 행씩</div><div class="result">그룹별 분포 비교</div></div>
+</div></div></div>
+
+<h3>FDS 라벨 분포</h3>
+<pre><code>SELECT fraud_label, COUNT(*) AS rows
+FROM card_payments
+WHERE is_approved = 1
+GROUP BY fraud_label
+ORDER BY fraud_label;</code></pre>
+
+<h3>종목별 보유 데이터 기간</h3>
+<pre><code>SELECT
+    stock_code,
+    COUNT(*) AS trading_days,
+    MIN(trade_date) AS min_date,
+    MAX(trade_date) AS max_date
+FROM stock_data.stock_prices
+GROUP BY stock_code
+ORDER BY trading_days DESC
+LIMIT 20;</code></pre>
+
+<h3>WHERE와 HAVING의 차이</h3>
+<pre><code>SELECT
+    customer_id,
+    COUNT(*) AS payment_count,
+    AVG(amount) AS avg_amount
+FROM card_payments
+WHERE is_approved = 1
+GROUP BY customer_id
+HAVING COUNT(*) &gt;= 10
+ORDER BY payment_count DESC;</code></pre>
+<div class="grid2"><div class="card soft"><h4>WHERE</h4><p>그룹화 <b>전</b>의 원본 행에 조건을 적용합니다.</p></div><div class="card soft"><h4>HAVING</h4><p>GROUP BY 이후 만들어진 <b>집계 결과</b>에 조건을 적용합니다.</p></div></div>
+</section>
+
+<section id="s9">
+<h2>9. CASE WHEN — 조건에 따라 값을 분류하기</h2>
+<p><code>CASE</code>는 Python의 if/elif/else와 비슷하게 조건에 따라 다른 값을 반환합니다. 원본 값을 삭제하거나 바꾸는 것이 아니라 조회 결과에 새 분류값을 만들 수 있습니다.</p>
+<pre><code>SELECT
+    customer_id,
+    credit_score,
+    CASE
+        WHEN credit_score &gt;= 800 THEN 'VERY_HIGH'
+        WHEN credit_score &gt;= 700 THEN 'HIGH'
+        WHEN credit_score &gt;= 600 THEN 'MID'
+        ELSE 'LOW'
+    END AS score_band
+FROM customers
+LIMIT 50;</code></pre>
+
+<h3>순서가 중요한 이유</h3>
+<p>CASE는 위에서 아래로 조건을 검사하고 처음 참이 되는 분기를 선택합니다.</p>
+<div class="warn"><b>예시 점수구간은 문법 이해용</b><br>실제 신용평가의 Binning이나 Scorecard 구간은 데이터 분석·모델링 절차를 통해 별도로 정의해야 합니다.</div>
+</section>
+
+<section id="s10">
+<h2>10. 날짜와 기간 조건 — 금융 데이터에서 시점을 정확히 다루기</h2>
+<p class="lead">금융 AI에서는 “그 시점에 실제로 알 수 있었던 데이터인가?”가 중요합니다. 날짜 조건을 잘못 잡으면 미래 정보가 과거 학습 데이터에 섞이는 <b>Data Leakage</b>가 발생할 수 있습니다.</p>
+
+<h3>[시작, 종료) 형태를 권장하는 이유</h3>
+<pre><code>WHERE payment_at &gt;= '2026-01-01'
+  AND payment_at &lt;  '2026-08-01'</code></pre>
+<p>DATETIME에는 시·분·초가 포함되므로 종료일의 자정 직전까지 억지로 계산하기보다 <b>시작 포함, 다음 구간 시작 미포함</b> 형태가 경계를 명확하게 만듭니다.</p>
+
+<pre><code>SELECT application_id, customer_id, application_at, approved, default_12m_label
+FROM loan_applications
+WHERE application_at &gt;= '2025-01-01'
+  AND application_at &lt;  '2026-08-01'
+ORDER BY application_at;</code></pre>
+
+<h3>날짜 함수로 분포 탐색</h3>
+<pre><code>SELECT
+    YEAR(payment_at) AS payment_year,
+    MONTH(payment_at) AS payment_month,
+    COUNT(*) AS rows
+FROM card_payments
+GROUP BY YEAR(payment_at), MONTH(payment_at)
+ORDER BY payment_year, payment_month;</code></pre>
+
+<div class="concept"><b>Point-in-Time의 출발점</b><br>날짜 조건은 “언제의 데이터를 볼 것인가”를 통제하는 가장 기본적인 장치입니다. 특정 시점 기준 최신정보를 붙이는 As-of Join은 Window 함수와 Point-in-Time 단원에서 더 확장할 수 있습니다.</div>
+</section>
+
+<section id="s11">
+<h2>11. SQL의 논리 처리 순서 — SELECT부터 쓰지만 FROM부터 생각하기</h2>
+<p>SQL 문장은 SELECT부터 작성하지만, 데이터가 처리되는 논리적 흐름을 이해하면 GROUP BY·HAVING·별칭 오류를 이해하기 쉬워집니다.</p>
+<div class="visual"><div class="visual-head">논리적 처리 흐름</div><div class="visual-body"><div class="logic-flow">
+ <div class="logic-node">1. FROM</div><div class="logic-node">2. WHERE</div><div class="logic-node">3. GROUP BY</div><div class="logic-node">4. HAVING</div><div class="logic-node">5. SELECT</div><div class="logic-node">6. ORDER BY</div><div class="logic-node">7. LIMIT</div>
+</div></div></div>
+
+<pre><code>SELECT customer_id, COUNT(*) AS payment_count
+FROM card_payments
+WHERE payment_at &gt;= '2026-01-05'
+  AND payment_at &lt;  '2026-01-06'
+GROUP BY customer_id
+HAVING COUNT(*) &gt;= 50
+ORDER BY payment_count DESC
+LIMIT 20;</code></pre>
+
+<div class="sql-read">
+ <b>FROM</b><span><code>card_payments</code>에서 출발</span>
+ <b>WHERE</b><span>지정한 하루의 결제만 남김</span>
+ <b>GROUP BY</b><span>고객별로 묶음</span>
+ <b>HAVING</b><span>50건 이상인 고객 그룹만 남김</span>
+ <b>SELECT</b><span>고객번호와 건수를 결과 컬럼으로 구성</span>
+ <b>ORDER BY</b><span>결제건수 큰 순서로 정렬</span>
+ <b>LIMIT</b><span>상위 20행만 반환</span>
+</div>
+<div class="success"><b>최종 결과의 Grain</b><br>이 쿼리에서 결과 한 행은 <b>고객 1명</b>입니다. GROUP BY를 사용하면 원본의 한 행 의미가 바뀔 수 있으므로 항상 최종 Grain을 다시 확인합니다.</div>
+</section>
+
+<section id="s12">
+<h2>12. 자주 틀리는 SQL 패턴과 수정 방법</h2>
+<div class="auto-grid">
+ <div class="card"><h4>① 존재하지 않는 컬럼 추측</h4><p>먼저 <code>DESCRIBE table_name</code>으로 실제 컬럼명을 확인합니다.</p></div>
+ <div class="card"><h4>② NULL을 = 로 비교</h4><p><code>= NULL</code>이 아니라 <code>IS NULL</code> 또는 <code>IS NOT NULL</code>을 사용합니다.</p></div>
+ <div class="card"><h4>③ 문자열 따옴표 누락</h4><p>문자열과 날짜는 일반적으로 작은따옴표로 감쌉니다. 예: <code>'HIGH'</code>, <code>'2026-01-01'</code>.</p></div>
+ <div class="card"><h4>④ ORDER BY 없이 시계열 사용</h4><p>주가·거래내역은 날짜순을 가정하지 말고 명시적으로 정렬합니다.</p></div>
+ <div class="card"><h4>⑤ WHERE와 HAVING 혼동</h4><p>원본 행 조건은 WHERE, 집계 결과 조건은 HAVING으로 구분합니다.</p></div>
+ <div class="card"><h4>⑥ SELECT * 남용</h4><p>분석에 필요한 컬럼을 명시해 데이터량과 개인정보 노출을 줄입니다.</p></div>
+</div>
+
+<h3>오류가 나면 이 순서로 확인</h3>
+<div class="visual"><div class="visual-head">SQL 디버깅 순서</div><div class="visual-body"><div class="pipe-grid">
+ <div class="pipe"><span class="n">1</span><b>현재 DB</b><code>SELECT DATABASE()</code></div>
+ <div class="pipe"><span class="n">2</span><b>테이블 존재</b><code>SHOW TABLES</code></div>
+ <div class="pipe"><span class="n">3</span><b>컬럼 구조</b><code>DESCRIBE</code></div>
+ <div class="pipe"><span class="n">4</span><b>조건값 확인</b><code>DISTINCT</code></div>
+ <div class="pipe"><span class="n">5</span><b>작게 실행</b><code>LIMIT 20</code></div>
+</div></div></div>
+</section>
+
+<section id="s13">
+<h2>13. SQL에서 금융 AI Notebook으로 데이터를 넘기는 기준</h2>
+<p class="lead">SQL의 역할은 모든 분석을 끝내는 것이 아니라 <b>필요한 원천 데이터를 정확한 범위로 가져오는 것</b>입니다. Feature Engineering·통계검정·머신러닝·Embedding은 이후 Python 단계에서 처리할 수 있습니다.</p>
+
+<div class="visual"><div class="visual-head">데이터 준비 파이프라인</div><div class="visual-body"><div class="handoff">
+ <div><b>1. Schema/Table 확인</b>원천 데이터 위치 확인</div>
+ <div><b>2. SELECT</b>필요 컬럼만 선택</div>
+ <div><b>3. WHERE</b>기간·대상·상태 제한</div>
+ <div><b>4. SQL 품질 확인</b>건수·기간·NULL·코드값 확인</div>
+ <div><b>5. Python</b>전처리·Feature·모델링 수행</div>
+</div></div></div>
+
+<h3>FDS 데이터 예</h3>
+<pre><code>SELECT
+    payment_id,
+    customer_id,
+    payment_at,
+    amount,
+    payment_channel,
+    auth_method,
+    country,
+    ip_country,
+    is_overseas,
+    is_online,
+    fraud_label
+FROM fintech_fraud_lab_class.card_payments
+WHERE is_approved = 1
+  AND payment_at &gt;= '2026-01-01'
+  AND payment_at &lt;  '2026-08-01'
+ORDER BY payment_at;</code></pre>
+<div class="warn"><b>Feature와 Target을 구분</b><br><code>fraud_label</code>은 정답(Target)이며, 모델 입력 Feature와 섞으면 안 됩니다. <code>is_approved</code>처럼 학습 대상 범위를 정하는 필터 컬럼도 모델 Feature로 사용할지 별도로 판단해야 합니다.</div>
+
+<h3>주가 데이터 예</h3>
+<pre><code>SELECT
+    stock_code,
+    trade_date,
+    open_price,
+    high_price,
+    low_price,
+    close_price,
+    volume,
+    change_rate
+FROM stock_data.stock_prices
+WHERE stock_code = '005930'
+ORDER BY trade_date;</code></pre>
+
+<div class="checklist">
+ <div class="check">어느 스키마와 테이블을 사용하는지 확인했다.</div>
+ <div class="check">분석에 필요한 컬럼만 선택했다.</div>
+ <div class="check">필요한 기간과 대상을 WHERE로 제한했다.</div>
+ <div class="check">NULL과 범주형 실제 코드값을 확인했다.</div>
+ <div class="check">행 수와 데이터 기간을 확인했다.</div>
+ <div class="check">시계열은 날짜순으로 정렬했다.</div>
+ <div class="check">Target과 Feature 후보를 구분했다.</div>
+ <div class="check">미래정보가 섞이지 않는지 확인했다.</div>
+</div>
+</section>
+
+<section id="s14">
+<h2>14. 종합 확인 문제</h2>
+<details><summary>문제 1 — 삼성전자 주가 데이터의 건수와 기간 확인</summary><pre><code>SELECT
+    stock_code,
+    COUNT(*) AS rows,
+    MIN(trade_date) AS min_date,
+    MAX(trade_date) AS max_date
+FROM stock_data.stock_prices
+WHERE stock_code = '005930'
+GROUP BY stock_code;</code></pre></details>
+
+<details><summary>문제 2 — 승인 여부별 카드결제 건수 확인</summary><pre><code>SELECT is_approved, COUNT(*) AS rows
+FROM fintech_fraud_lab_class.card_payments
+GROUP BY is_approved
+ORDER BY is_approved;</code></pre></details>
+
+<details><summary>문제 3 — 승인된 결제의 사기 라벨 분포 확인</summary><pre><code>SELECT fraud_label, COUNT(*) AS rows
+FROM fintech_fraud_lab_class.card_payments
+WHERE is_approved = 1
+GROUP BY fraud_label
+ORDER BY fraud_label;</code></pre></details>
+
+<details><summary>문제 4 — 대출신청 데이터의 최초일·최종일·건수 확인</summary><pre><code>SELECT
+    COUNT(*) AS rows,
+    MIN(application_at) AS min_application_at,
+    MAX(application_at) AS max_application_at
+FROM fintech_fraud_lab_class.loan_applications;</code></pre></details>
+
+<details><summary>문제 5 — 현재 유효한 금융정책 문서를 문서유형별로 집계</summary><pre><code>SELECT doc_type, COUNT(*) AS rows
+FROM fintech_fraud_lab_class.financial_policy_docs
+WHERE is_current = 1
+GROUP BY doc_type
+ORDER BY rows DESC;</code></pre></details>
+
+<details><summary>문제 6 — 해외 또는 온라인 고액결제 100건 조회</summary><pre><code>SELECT
+    payment_id,
+    customer_id,
+    payment_at,
+    amount,
+    is_overseas,
+    is_online
+FROM fintech_fraud_lab_class.card_payments
+WHERE amount &gt;= 500000
+  AND (is_overseas = 1 OR is_online = 1)
+ORDER BY amount DESC
+LIMIT 100;</code></pre></details>
+</section>
+
+<section id="s15">
+<h2>15. 핵심 용어 사전</h2>
+<div class="glossary">
+ <div class="gloss"><b>Schema</b>테이블을 논리적으로 묶는 데이터베이스 공간.</div>
+ <div class="gloss"><b>Table</b>같은 종류의 데이터를 행·열 구조로 저장한 객체.</div>
+ <div class="gloss"><b>Row</b>테이블 안의 한 건의 레코드.</div>
+ <div class="gloss"><b>Column</b>행을 설명하는 속성.</div>
+ <div class="gloss"><b>Grain</b>데이터에서 한 행(Row)이 정확히 무엇을 나타내는지 정의한 단위. JOIN·GROUP BY 전후에 반드시 확인해야 합니다.</div>
+ <div class="gloss"><b>Primary Key</b>각 행을 유일하게 식별하는 키.</div>
+ <div class="gloss"><b>Foreign Key</b>다른 테이블의 키를 참조해 관계를 만드는 컬럼.</div>
+ <div class="gloss"><b>NULL</b>값이 없거나 아직 알 수 없음을 나타내는 상태.</div>
+ <div class="gloss"><b>Aggregate</b>여러 행을 COUNT·SUM·AVG 등 하나의 요약값으로 계산하는 것.</div>
+ <div class="gloss"><b>GROUP BY</b>같은 값을 가진 행을 그룹으로 묶는 절.</div>
+ <div class="gloss"><b>HAVING</b>GROUP BY 이후 집계 결과에 적용하는 조건.</div>
+ <div class="gloss"><b>Data Leakage</b>예측 시점에 알 수 없었던 정보가 학습에 섞여 성능이 비정상적으로 높아지는 문제.</div>
+</div>
+</section>
+
+
+<section id="terms"><div class="section">
+<h2>SQL과 데이터 분석에서 자주 만나는 핵심 용어</h2>
+<p class="lead">문법만 알아도 SQL을 실행할 수는 있지만, 데이터 구조를 정확히 이해하려면 아래 용어를 함께 알아두는 것이 좋습니다.</p>
+
+<div class="term-grid">
+  <div class="term-mini"><b>Grain</b>테이블의 <strong>한 행이 무엇을 의미하는지</strong>를 나타내는 분석 단위입니다. 예: 고객 1명, 결제 1건, 종목×거래일 1건.</div>
+  <div class="term-mini"><b>Schema</b>관련 테이블을 묶어 관리하는 논리적 공간입니다. MySQL에서는 Database와 거의 같은 의미로 사용됩니다.</div>
+  <div class="term-mini"><b>Primary Key (PK)</b>각 행을 유일하게 구분하는 대표 키입니다. 같은 PK 값은 중복될 수 없습니다.</div>
+  <div class="term-mini"><b>Foreign Key (FK)</b>다른 테이블의 PK를 참조하여 테이블 사이의 관계를 만드는 키입니다.</div>
+  <div class="term-mini"><b>Cardinality</b>테이블 관계에서 한쪽 행이 다른 쪽과 몇 개까지 연결되는지를 뜻합니다. 예: 고객 1명 : 계좌 여러 개 = 1:N.</div>
+  <div class="term-mini"><b>Predicate</b><code>WHERE amount &gt; 100000</code>처럼 참/거짓을 판단하는 조건식을 뜻합니다.</div>
+  <div class="term-mini"><b>Aggregation</b><code>COUNT</code>, <code>SUM</code>, <code>AVG</code>처럼 여러 행을 하나의 요약값으로 계산하는 것입니다.</div>
+  <div class="term-mini"><b>Alias</b><code>AS</code>를 이용해 컬럼이나 테이블에 조회 중 사용할 임시 이름을 붙이는 것입니다.</div>
+  <div class="term-mini"><b>Filter</b>조건에 맞는 행만 남기는 작업입니다. SQL에서는 주로 <code>WHERE</code>가 담당합니다.</div>
+  <div class="term-mini"><b>Sort</b>행의 순서를 정하는 작업입니다. SQL에서는 <code>ORDER BY</code>를 사용합니다.</div>
+  <div class="term-mini"><b>Distinct</b>중복값을 제거하고 서로 다른 값만 남기는 개념입니다.</div>
+  <div class="term-mini"><b>NULL</b>0이나 빈 문자열이 아니라 <strong>값이 없거나 아직 알 수 없음</strong>을 뜻합니다.</div>
+  <div class="term-mini"><b>Target</b>머신러닝이 맞히려는 정답 컬럼입니다. 예: <code>fraud_label</code>.</div>
+  <div class="term-mini"><b>Feature</b>모델이 예측에 사용하는 입력 변수입니다. 예: 결제금액, 해외결제 여부, 거래시간 등.</div>
+  <div class="term-mini"><b>Data Leakage</b>예측 시점에는 알 수 없던 미래 정보나 정답에 가까운 정보를 학습에 섞는 오류입니다.</div>
+  <div class="term-mini"><b>Notebook</b>Python 코드, 설명, 결과를 셀 단위로 실행하고 기록하는 Jupyter 기반 분석 문서입니다.</div>
+</div>
+
+<div class="term-box">
+  <b>Grain을 확인하는 가장 쉬운 질문</b><br>
+  SQL을 작성하기 전에 <strong>“이 테이블의 한 행은 무엇인가?”</strong>,
+  GROUP BY 후에는 <strong>“결과의 한 행은 무엇인가?”</strong>라고 확인합니다.
+  이 두 질문만 습관화해도 JOIN 중복과 잘못된 집계를 크게 줄일 수 있습니다.
+</div>
+</div></section>
+</main></div>
+<footer class="footer">SQL Fundamentals · Financial Data Query · MySQL</footer>
+</div>
+</body>
+</html>

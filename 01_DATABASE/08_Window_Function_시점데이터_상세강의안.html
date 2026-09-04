@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Window Function — 시점 데이터와 금융 SQL</title>
+<style>
+:root{
+  --bg:#f4f7fb;--paper:#fff;--ink:#182335;--muted:#5a6878;--line:#d8e3ee;
+  --navy:#102c49;--blue:#2563a7;--bluebg:#eef5ff;--cyan:#0f8aa8;
+  --green:#18704d;--greenbg:#eef9f4;--amber:#a36b0d;--amberbg:#fff7e8;
+  --red:#b13a3a;--redbg:#fff2f2;--purple:#6651b4;--purplebg:#f5f2ff;
+  --code:#0d1825;--shadow:0 9px 28px rgba(15,35,55,.06);
+}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Malgun Gothic","맑은 고딕","Noto Sans KR","Apple SD Gothic Neo","Segoe UI",Arial,sans-serif;
+  line-height:1.72;word-break:keep-all;overflow-wrap:anywhere;
+}
+.wrap{max-width:1240px;margin:auto}
+.hero{
+  padding:54px 24px 46px;color:#fff;
+  background:
+    radial-gradient(circle at 82% 16%,rgba(38,190,220,.23),transparent 27%),
+    linear-gradient(135deg,#0b1b2d,#123d66 58%,#0d637b);
+}
+.eyebrow{font-size:.78rem;font-weight:900;letter-spacing:.14em;color:#cbe9ff}
+.hero h1{font-size:clamp(2rem,4.6vw,3.25rem);line-height:1.15;letter-spacing:-.045em;margin:9px 0 14px}
+.hero p{max-width:1000px;margin:0;color:#e4f1fb;font-size:1.04rem}
+.hero-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-top:22px}
+.hero-card{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);border-radius:14px;padding:13px 14px}
+.hero-card b{display:block;font-size:1.05rem;margin-bottom:2px}.hero-card span{font-size:.78rem;color:#d8e8f5}
+nav{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:7px;overflow-x:auto;padding:9px 16px;-webkit-overflow-scrolling:touch}
+nav a{white-space:nowrap;text-decoration:none;background:#eef5ff;border:1px solid #d6e4f3;color:#225781;padding:6px 10px;border-radius:999px;font-size:.76rem;font-weight:800}
+main{padding:30px 18px 74px}
+section{margin:0 0 31px;scroll-margin-top:74px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:27px;box-shadow:var(--shadow)}
+h2{font-size:clamp(1.55rem,2.5vw,1.95rem);line-height:1.36;color:var(--navy);letter-spacing:-.026em;margin:0 0 14px}
+h3{font-size:1.22rem;line-height:1.45;color:#174e80;margin:27px 0 9px}
+h4{font-size:1rem;color:#284d6c;margin:0 0 6px}
+p{margin:7px 0 12px;color:var(--muted)}
+.lead{font-size:1.055rem;color:#354556}
+.grid2,.grid3,.grid4,.term-grid,.compare-grid,.query-meta,.check-grid{
+  display:grid;gap:13px;margin:14px 0;align-items:stretch
+}
+.grid2,.compare-grid,.query-meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.term-grid{grid-template-columns:repeat(auto-fit,minmax(225px,1fr))}
+.check-grid{grid-template-columns:repeat(auto-fit,minmax(235px,1fr))}
+.card,.term,.callout,.query-box,.step,.mini{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fff}
+.card.soft,.mini{background:linear-gradient(180deg,#fcfdff,#f6f9fc)}
+.term b,.step b,.mini b{display:block;color:#153f6a;margin-bottom:4px}
+.term .en{display:block;font-family:Consolas,monospace;color:#654aa8;font-size:.84rem;margin-bottom:4px}
+.callout{margin:15px 0}
+.callout.info{border-left:5px solid var(--blue);background:var(--bluebg)}
+.callout.good{border-left:5px solid var(--green);background:var(--greenbg)}
+.callout.warn{border-left:5px solid #d18a1b;background:var(--amberbg)}
+.callout.danger{border-left:5px solid var(--red);background:var(--redbg)}
+.callout.purple{border-left:5px solid var(--purple);background:var(--purplebg)}
+.callout b,.query-box b{color:#123f69}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#edf4fa;color:#315f84;font-size:.72rem;font-weight:850;margin:2px 3px 2px 0}
+.figure{margin:18px 0;border:1px solid #dbe5ef;border-radius:17px;overflow:hidden;background:#fff;box-shadow:var(--shadow)}
+.figure-title{padding:13px 16px;background:#fafcff;border-bottom:1px solid #e4eaf0;color:#113a65;font-weight:900}
+.figure-body{padding:18px}.figure-caption{padding:9px 13px;border-top:1px solid #e4eaf0;background:#fafcff;color:#667586;font-size:.82rem}
+.pipeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:stretch}
+.node{border:1px solid #cfe0ee;border-radius:12px;padding:13px;background:#f8fbff;text-align:center}
+.node b{display:block;color:#163f69}.node small{display:block;color:#6b7988;margin-top:3px}
+.arrow{display:flex;align-items:center;justify-content:center;color:#31709e;font-weight:900;font-size:1.25rem}
+.window-visual{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:stretch}
+.partition-label{border:1px solid #c9ddec;border-radius:12px;background:#edf6ff;padding:15px;display:grid;place-items:center;text-align:center;font-weight:900;color:#174b75}
+.rows{display:grid;gap:7px}
+.data-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;border:1px solid #dce5ee;border-radius:10px;padding:8px;background:#fff}
+.data-row span{font-size:.82rem;text-align:center}
+.data-row.current{background:#fff7e8;border-color:#e5c57e}
+.data-row.past{background:#eef8f4;border-color:#cce5d9}
+.rank-board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.rank-cell{border:1px solid #d8e3ee;border-radius:11px;padding:10px;text-align:center;background:#fff}
+.rank-cell strong{display:block;color:#174b75}
+.timeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.time-card{border:1px solid #d7e2ed;border-radius:12px;padding:12px;background:#fff}
+.time-card b{display:block;color:#17476e}.time-card.ok{background:#eef8f4;border-color:#cde6da}.time-card.future{background:#fff1f1;border-color:#efcccc}
+.frame-line{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.frame-box{border:1px solid #d7e2ed;border-radius:9px;padding:10px 6px;text-align:center;background:#fff;font-size:.8rem}
+.frame-box.in{background:#eef8f4;border-color:#cce5d9}.frame-box.now{background:#fff2da;border-color:#e2bd72}
+.table-wrap{width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:13px 0 18px;background:#fff;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:700px}
+th{background:#edf5ff;color:#174d80;text-align:left;padding:10px 11px;border-bottom:1px solid #cfe0ef}
+td{padding:10px 11px;border-bottom:1px solid #e7edf3;vertical-align:top}tr:last-child td{border-bottom:none}
+pre{margin:12px 0 16px;background:var(--code);color:#dcecff;border-radius:12px;padding:15px 16px;overflow:auto;max-width:100%;font-size:.82rem;line-height:1.57;white-space:pre}
+code{font-family:Consolas,"SFMono-Regular",Menlo,monospace}.inline{background:#e8eef5;color:#153a5f;border-radius:5px;padding:2px 5px}
+.lesson-goal{margin:16px 0 18px;border:1px solid #cfe0ee;border-radius:14px;background:linear-gradient(180deg,#f8fbff,#f2f7fc);overflow:hidden}
+.goal-head{padding:11px 15px;background:#eaf3fb;border-bottom:1px solid #cfe0ee;color:#153f69;font-weight:900}
+.goal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.goal-item{padding:13px 15px;border-bottom:1px solid #e1e9f1}
+.goal-item:nth-child(odd){border-right:1px solid #e1e9f1}
+.goal-item.wide{grid-column:1/-1;border-right:none}.goal-item b{display:block;color:#174d80;margin-bottom:4px}.goal-item p{margin:0}
+.query-box{background:#fbfdff}
+details{border:1px solid var(--line);border-radius:12px;background:#fff;margin:10px 0;overflow:hidden}
+summary{cursor:pointer;padding:12px 14px;font-weight:850;color:#184d7e;background:#fbfdff}
+details>div{padding:0 14px 14px}
+.check{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#fbfdff}
+.check:before{content:"✓";display:inline-grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#e6f5ee;color:#146b4c;font-weight:900;margin-right:7px}
+footer{padding:24px 20px;text-align:center;background:#0d1d2f;color:#cbd7e5;font-size:.8rem}
+@media(max-width:960px){
+  .hero-grid,.grid4,.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .window-visual{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .hero{padding:40px 18px 34px}main{padding:24px 14px 58px}.panel{padding:19px}
+  .grid2,.grid3,.grid4,.compare-grid,.query-meta,.hero-grid{grid-template-columns:1fr}
+  .pipeline{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}
+  .goal-grid{grid-template-columns:1fr}.goal-item:nth-child(odd){border-right:none}.goal-item.wide{grid-column:auto}
+  .rank-board{grid-template-columns:1fr 1fr}.frame-line{grid-template-columns:repeat(4,minmax(0,1fr))}
+  table{min-width:620px}
+}
+@media(max-width:420px){
+  .panel{padding:16px}.figure-body{padding:13px}.hero h1{font-size:1.83rem}.hero p{font-size:.94rem}
+  .data-row{grid-template-columns:1fr 1fr}.rank-board{grid-template-columns:1fr}.frame-line{grid-template-columns:1fr 1fr}
+  table{min-width:560px}
+}
+@media print{
+  nav{display:none}body{background:#fff}.panel,.figure{box-shadow:none;break-inside:avoid}
+  main{max-width:none;padding:0}.hero{background:#fff;color:#111;border-bottom:2px solid #234}
+  .hero p,.hero .eyebrow{color:#333}
+}
+
+.query-intent{
+  margin:10px 0 12px;
+  padding:11px 13px;
+  border:1px solid #d6e4f0;
+  border-left:4px solid #2a6da0;
+  border-radius:10px;
+  background:#f7fbff;
+  color:#46586a;
+  font-size:.88rem;
+}
+.query-intent b{color:#174d80}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+<div class="eyebrow">WINDOW FUNCTION · RANK · LAG · FRAME · POINT-IN-TIME</div>
+<h1>Window Function — 상세 행을 유지하면서 순서·과거값·시점 데이터를 계산하기</h1>
+<p>GROUP BY와 Window Function의 차이부터 시작해, 고객별 순번과 순위, 직전값, 누적값, 과거구간 평균, 최신행 선택, 대출 신청시점 이전의 최신 신용정보까지 실제 금융·주가 데이터를 이용해 단계적으로 설명합니다.</p>
+<div class="hero-grid">
+<div class="hero-card"><b>OVER()</b><span>계산 범위 정의</span></div>
+<div class="hero-card"><b>PARTITION</b><span>그룹별 독립 계산</span></div>
+<div class="hero-card"><b>ORDER</b><span>그룹 안 순서</span></div>
+<div class="hero-card"><b>Frame</b><span>과거 계산 범위</span></div>
+</div></div></header>
+<nav><div class="wrap">
+<a href="#why">왜 Window인가</a><a href="#terms">핵심 용어</a><a href="#structure">구조</a>
+<a href="#rownum">ROW_NUMBER</a><a href="#rank">순위 함수</a><a href="#lag">LAG</a>
+<a href="#running">누적값</a><a href="#frame">Frame</a><a href="#latest">최신 1건</a>
+<a href="#asof">As-of</a><a href="#validate">검증</a><a href="#python">Python 연결</a><a href="#hands-on">실습 쿼리</a><a href="#practice">확인 문제</a>
+</div></nav>
+<main class="wrap">
+<section id="why"><div class="panel">
+<h2>1. Window Function은 왜 필요한가?</h2>
+<p class="lead">금융 데이터에서는 <strong>개별 거래 1건을 그대로 보고 싶으면서 동시에 그 거래가 속한 고객의 합계·평균·순위·직전값도 함께 보고 싶은 경우</strong>가 많습니다. 이때 Window Function이 필요합니다.</p>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>결제 1건을 그대로 유지하면서 같은 고객의 전체 결제금액을 각 결제행 옆에 붙입니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>GROUP BY를 사용하면 고객별 합계는 구할 수 있지만 payment_id·결제시각·개별 금액이 사라집니다. FDS처럼 개별 이벤트를 유지해야 하는 분석에서는 상세 행을 보존해야 합니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>fintech_fraud_lab_class.card_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>각 결제행에 <code>amount</code>와 같은 고객의 <code>total_customer_spent</code>가 함께 보입니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div>
+</div>
+<div class="compare-grid">
+<div class="card"><h3 style="margin-top:0">GROUP BY</h3>
+<div class="query-intent"><b>이 쿼리에서 원하는 결과:</b> 고객별 총 결제금액만 보고 싶습니다. 상세 결제는 필요하지 않은 요약 결과입니다.</div><pre><code>USE fintech_fraud_lab_class;
+-- [목적] 고객별 총 결제금액만 요약합니다.
+SELECT
+    customer_id,
+    SUM(amount) AS `total_customer_spent`
+FROM card_payments
+GROUP BY customer_id;</code></pre>
+<p><strong>결과:</strong> 고객 1명 = 1행. 개별 결제행은 사라집니다.</p></div>
+<div class="card"><h3 style="margin-top:0">Window Function</h3>
+<div class="query-intent"><b>이 쿼리에서 원하는 결과:</b> 결제 1건의 상세 정보는 그대로 두고, 같은 고객의 총 결제금액을 각 결제행 옆에 함께 보고 싶습니다.</div><pre><code>USE fintech_fraud_lab_class;
+-- [목적] 개별 결제를 그대로 보면서
+-- 같은 고객의 전체 결제금액을 각 결제행 옆에 붙입니다.
+SELECT
+    payment_id,                       -- 개별 결제 PK
+    customer_id,                      -- 고객 ID
+    amount,                           -- 이 결제의 금액
+    SUM(amount) OVER (
+        PARTITION BY customer_id      -- 고객별로 합계를 따로 계산
+    ) AS `total_customer_spent`
+FROM card_payments
+ORDER BY customer_id, payment_id
+LIMIT 200;</code></pre>
+<p><strong>결과:</strong> 결제 1건 = 1행을 유지하면서 고객별 합계가 옆에 붙습니다.</p></div>
+</div>
+<div class="figure"><div class="figure-title">GROUP BY와 Window Function의 차이</div>
+<div class="figure-body">
+<div class="pipeline">
+<div class="node"><b>결제 6행</b><small>고객 A 3건 + 고객 B 3건</small></div><div class="arrow">→</div>
+<div class="node"><b>GROUP BY</b><small>고객별 요약</small></div><div class="arrow">→</div>
+<div class="node"><b>고객 2행</b><small>상세 결제는 사라짐</small></div>
+</div>
+<div style="height:12px"></div>
+<div class="pipeline">
+<div class="node"><b>결제 6행</b><small>원본 상세</small></div><div class="arrow">→</div>
+<div class="node"><b>Window</b><small>계산값 추가</small></div><div class="arrow">→</div>
+<div class="node"><b>결제 6행</b><small>상세 유지 + 집계값</small></div>
+</div></div></div>
+<h3>1-1. 같은 행에서 개별 금액과 고객 전체 금액 비교</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>각 결제가 고객 전체 결제금액에서 차지하는 비율을 계산합니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>행 수준 값과 그룹 수준 집계값을 한 행에서 비교하면 ‘평소보다 큰 결제’ 같은 이상패턴을 탐색하기 쉬워집니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p><code>amount</code>, <code>total_customer_spent</code>, <code>spent_ratio_pct</code>가 같은 행에 함께 표시됩니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div>
+</div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] 개별 결제금액과 고객 전체 결제금액을 같은 행에서 비교합니다.
+SELECT
+    payment_id,
+    customer_id,
+    amount,
+    SUM(amount) OVER (
+        PARTITION BY customer_id
+    ) AS `total_customer_spent`,
+    ROUND(
+        amount
+        / NULLIF(
+            SUM(amount) OVER (PARTITION BY customer_id),
+            0
+        )
+        * 100,
+        2
+    ) AS `spent_ratio_pct`
+FROM card_payments
+ORDER BY customer_id, payment_id
+LIMIT 200;</code></pre>
+<div class="callout info"><b><code>NULLIF(...,0)</code>는 왜 쓰나?</b><br/>분모가 0이면 0으로 나누는 오류가 발생할 수 있으므로, 분모가 0일 때 NULL로 바꾸어 계산 오류를 방지합니다.</div>
+<h3>1-2. CTE + JOIN으로도 가능하지만 Window가 더 직접적이다</h3>
+<div class="lesson-goal">
+<div class="goal-head">두 방법을 비교하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>같은 ‘개별 결제 + 고객별 총액’ 결과를 CTE+JOIN과 Window Function 두 방식으로 만들어 구조 차이를 확인합니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>Window Function이 왜 등장했는지 이해하려면 기존 방식으로도 같은 결과를 만들 수 있다는 점을 먼저 알아야 합니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>두 방식 모두 결제 1건을 유지하면서 고객별 총액이 붙지만, Window 방식은 집계 CTE를 다시 JOIN하는 구조가 필요하지 않습니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div>
+</div>
+<div class="compare-grid">
+<div class="card"><h4>CTE + JOIN</h4><div class="query-intent"><b>이 쿼리에서 원하는 결과:</b> CTE에서 고객별 총액을 먼저 만든 뒤 원본 결제에 다시 JOIN하여 ‘개별 결제 + 고객 총액’을 함께 봅니다.</div><pre><code>USE fintech_fraud_lab_class;
+-- =========================================================
+-- [Window Function을 사용하지 않는 방법]
+-- 앞 시간에 배운 CTE를 이용해 고객별 총 결제금액을 먼저 계산한 뒤
+-- 원본 결제 테이블에 다시 JOIN합니다.
+-- =========================================================
+-- ① customer_total CTE: 고객별 총 결제금액을 1행으로 집계합니다.
+WITH customer_total AS (
+    SELECT
+        customer_id,                    -- 고객별로 그룹화할 기준 컬럼
+        SUM(amount) AS `total_spent`    -- 해당 고객의 모든 결제금액 합계
+    FROM card_payments
+    GROUP BY customer_id                -- 고객 1명 = 1행으로 집계
+)
+-- ② 원본 결제행에 CTE의 고객별 집계값을 다시 붙입니다.
+SELECT
+    cp.payment_id,                      -- 개별 결제 ID
+    cp.customer_id,                     -- 고객 ID
+    cp.amount,                          -- 개별 결제금액
+    ct.total_spent                      -- CTE에서 계산한 고객 총 결제금액
+FROM card_payments AS cp
+INNER JOIN customer_total AS ct
+  ON cp.customer_id = ct.customer_id    -- 같은 고객의 집계값을 원본 행에 연결
+ORDER BY cp.customer_id, cp.payment_id
+LIMIT 200;</code></pre></div>
+<div class="card"><h4>Window Function</h4><div class="query-intent"><b>이 쿼리에서 원하는 결과:</b> 별도 재JOIN 없이 Window Function 하나로 같은 ‘개별 결제 + 고객 총액’ 결과를 만듭니다.</div><pre><code>USE fintech_fraud_lab_class;
+-- =========================================================
+-- [Window Function을 사용하는 방법]
+-- 별도의 집계 CTE와 재JOIN 없이
+-- 원본 결제행을 유지하면서 고객별 총액을 바로 붙입니다.
+-- =========================================================
+SELECT
+    payment_id,                         -- 개별 결제 ID
+    customer_id,                        -- 고객 ID
+    amount,                             -- 개별 결제금액
+    SUM(amount) OVER (
+        PARTITION BY customer_id        -- 고객별 합계를 계산하지만 행은 줄이지 않음
+    ) AS `total_spent`
+FROM card_payments
+ORDER BY customer_id, payment_id
+LIMIT 200;</code></pre></div>
+</div>
+<div class="callout warn"><b>성능에 대한 주의</b><br/>Window Function이 항상 더 빠르다고 단정할 수는 없습니다. 실제 성능은 인덱스·정렬·데이터량·실행계획에 따라 달라집니다. 여기서의 핵심은 <strong>상세 행을 유지하면서 그룹 계산을 표현하기 더 자연스럽다</strong>는 점입니다.</div>
+</div></section>
+<section id="terms"><div class="panel">
+<h2>2. Window Function에서 자주 만나는 핵심 용어</h2>
+<div class="term-grid">
+<div class="term"><b>Window Function</b><span class="en">윈도우 함수</span><p>행을 줄이지 않고 다른 행과의 관계를 이용해 계산값을 붙이는 함수입니다.</p></div>
+<div class="term"><b>OVER()</b><span class="en">계산창 정의</span><p>Window Function이 어떤 그룹과 순서를 기준으로 계산할지 지정하는 괄호입니다.</p></div>
+<div class="term"><b>PARTITION BY</b><span class="en">그룹 나누기</span><p>전체 행을 고객별·종목별처럼 독립된 계산 그룹으로 나눕니다. GROUP BY와 달리 행을 줄이지 않습니다.</p></div>
+<div class="term"><b>ORDER BY</b><span class="en">그룹 안 순서</span><p>각 그룹 안에서 시간순·금액순 등 계산 순서를 정합니다.</p></div>
+<div class="term"><b>Window Frame</b><span class="en">계산 범위</span><p>현재 행을 기준으로 실제 계산에 포함할 앞·뒤 행의 범위를 지정합니다.</p></div>
+<div class="term"><b>ROW_NUMBER()</b><span class="en">고유 순번</span><p>정렬순서대로 1,2,3… 번호를 붙입니다. 동점이어도 서로 다른 번호를 줍니다.</p></div>
+<div class="term"><b>RANK()</b><span class="en">공동 순위</span><p>동점은 같은 순위이며 다음 순위를 건너뜁니다.</p></div>
+<div class="term"><b>DENSE_RANK()</b><span class="en">연속 공동 순위</span><p>동점은 같은 순위지만 다음 순위를 건너뛰지 않습니다.</p></div>
+<div class="term"><b>LAG()</b><span class="en">이전 행 값</span><p>현재 행에서 이전 행의 값을 가져옵니다.</p></div>
+<div class="term"><b>Point-in-Time</b><span class="en">시점 정합성</span><p>판단 시점 이후의 미래 정보를 사용하지 않는 원칙입니다.</p></div>
+<div class="term"><b>As-of</b><span class="en">기준시점 최신값</span><p>특정 시점 이전에 존재하는 값 중 가장 최근 값을 연결하는 방식입니다.</p></div>
+<div class="term"><b>Grain</b><span class="en">한 행의 단위</span><p>결과 한 행이 무엇을 의미하는지 나타냅니다. Window Function은 보통 원본 Grain을 유지합니다.</p></div>
+</div>
+</div></section>
+<section id="structure"><div class="panel">
+<h2>3. Window Function 구조 읽기</h2>
+<p class="lead">Window Function을 볼 때는 함수 이름보다 먼저 <strong>누구끼리 묶고(PARTITION), 어떤 순서로 놓고(ORDER), 어느 범위까지 볼 것인지(Frame)</strong>를 읽습니다.</p>
+<div class="figure"><div class="figure-title">Window를 그림으로 이해하기</div>
+<div class="figure-body">
+<div class="window-visual">
+<div class="partition-label">customer_id = 1002<br/><small>하나의 Partition</small></div>
+<div class="rows">
+<div class="data-row past"><span>payment 1</span><span>09:00</span><span>30,000</span><span>과거</span></div>
+<div class="data-row past"><span>payment 2</span><span>10:15</span><span>55,000</span><span>과거</span></div>
+<div class="data-row current"><span>payment 3</span><span>11:02</span><span>180,000</span><span>현재 행</span></div>
+<div class="data-row"><span>payment 4</span><span>13:40</span><span>25,000</span><span>미래 행</span></div>
+</div>
+</div></div>
+<div class="figure-caption">PARTITION BY는 누구끼리 볼지, ORDER BY는 어떤 순서로 볼지, Frame은 현재 행 기준 어디까지 계산할지 결정합니다.</div></div>
+<div class="grid4">
+<div class="step"><b>OVER()</b>Window 계산의 전체 규칙을 감싸는 부분</div>
+<div class="step"><b>PARTITION BY</b>고객별·종목별로 계산그룹 분리</div>
+<div class="step"><b>ORDER BY</b>그룹 안 시간·순위 기준 결정</div>
+<div class="step"><b>ROWS BETWEEN</b>실제 계산에 포함할 행 범위 결정</div>
+</div>
+</div></section>
+<section id="rownum"><div class="panel">
+<h2>4. ROW_NUMBER — 그룹 안에서 순번 붙이기</h2>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>고객 1002의 결제를 시간순으로 정렬하고 각 결제에 1, 2, 3… 순번을 붙입니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>Window Function이 원본 행을 없애지 않고 계산 컬럼을 추가한다는 가장 기본적인 동작을 확인하기 좋습니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>고객 1002의 결제가 시간순으로 나오고 <code>payment_seq</code>가 1부터 증가합니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div>
+</div>
+<pre><code>-- 사용할 금융 실습 DB를 명시합니다.
+USE fintech_fraud_lab_class;
+-- [목적] 고객 1002의 결제를 시간순으로 나열하고 1, 2, 3... 순번을 붙입니다.
+SELECT
+    payment_id,                 -- 결제 1건의 PK
+    customer_id,                -- 어떤 고객의 결제인지
+    payment_at,                 -- 결제시각
+    amount,                     -- 결제금액
+    ROW_NUMBER() OVER (         -- 각 행에 1부터 시작하는 고유 순번을 부여
+        ORDER BY payment_at,    -- 먼저 결제시각이 빠른 순서
+                 payment_id     -- 같은 시각이면 PK로 순서를 확정
+    ) AS `payment_seq`
+FROM card_payments
+WHERE customer_id = 1002        -- 처음에는 한 고객만 보며 원리를 이해
+ORDER BY payment_at, payment_id
+LIMIT 30;</code></pre>
+<h3>4-1. PARTITION BY를 추가하면</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>모든 고객을 한 번에 조회하면서 고객이 바뀔 때마다 순번을 다시 1부터 시작하게 합니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>실제 데이터에서는 고객 한 명씩 따로 조회하지 않고 한 SQL에서 고객별 독립 순번을 계산해야 합니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p><code>customer_id</code>가 바뀔 때마다 <code>payment_seq</code>가 다시 1부터 시작합니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div>
+</div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] 모든 고객을 조회하되 고객이 바뀔 때마다 순번을 다시 1부터 시작합니다.
+SELECT
+    payment_id,
+    customer_id,
+    payment_at,
+    amount,
+    ROW_NUMBER() OVER (
+        PARTITION BY customer_id       -- 고객별로 서로 독립된 Window를 생성
+        ORDER BY payment_at, payment_id -- 각 고객 안에서 시간순으로 정렬
+    ) AS `payment_seq`
+FROM card_payments
+ORDER BY customer_id, payment_at, payment_id
+LIMIT 200;</code></pre>
+</div></section>
+<section id="rank"><div class="panel">
+<h2>5. ROW_NUMBER · RANK · DENSE_RANK — 동점 처리 방식 비교</h2>
+<p>세 함수는 모두 순위를 계산하지만 동점이 있을 때 결과가 달라집니다.</p>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>동점 금액이 확실히 존재하는 작은 데이터에서 세 순위 함수의 차이를 확인합니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>실제 데이터에서는 같은 금액이 없으면 세 함수가 모두 비슷해 보여 차이를 이해하기 어렵습니다. 먼저 동점을 의도적으로 만든 데이터로 원리를 확인합니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p>CTE로 만든 5행의 임시 <code>sample_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>500000 두 건과 200000 두 건에서 ROW_NUMBER, RANK, DENSE_RANK가 서로 다르게 나타납니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p>결제 예시 1행 = 1행</p></div>
+</div>
+</div>
+<pre><code>USE fintech_fraud_lab_class;
+-- =========================================================
+-- [목적]
+-- ROW_NUMBER, RANK, DENSE_RANK의 차이를
+-- 동점이 있는 작은 예제로 확실하게 확인합니다.
+-- =========================================================
+-- ① sample_payments CTE:
+-- 실제 DB를 수정하지 않고 예시 5행 데이터를 임시로 만듭니다.
+WITH sample_payments AS (
+    SELECT 1 AS payment_id, 1002 AS customer_id, 500000 AS amount
+    UNION ALL
+    SELECT 2, 1002, 500000
+    UNION ALL
+    SELECT 3, 1002, 300000
+    UNION ALL
+    SELECT 4, 1002, 200000
+    UNION ALL
+    SELECT 5, 1002, 200000
+)
+-- ② 같은 amount를 기준으로 세 순위 함수를 비교합니다.
+SELECT
+    payment_id,
+    customer_id,
+    amount,
+    -- ROW_NUMBER:
+    -- 동점이어도 각 행에 반드시 서로 다른 번호를 부여합니다.
+    ROW_NUMBER() OVER (
+        ORDER BY amount DESC
+    ) AS `row_number_rank`,
+    -- RANK:
+    -- 동점은 같은 순위가 되고,
+    -- 다음 순위는 동점자 수만큼 건너뜁니다.
+    RANK() OVER (
+        ORDER BY amount DESC
+    ) AS `rank_value`,
+    -- DENSE_RANK:
+    -- 동점은 같은 순위가 되지만
+    -- 다음 순위를 건너뛰지 않습니다.
+    DENSE_RANK() OVER (
+        ORDER BY amount DESC
+    ) AS `dense_rank_value`
+FROM sample_payments
+ORDER BY amount DESC, payment_id;</code></pre>
+<div class="figure"><div class="figure-title">동점이 있을 때 순위 결과</div><div class="figure-body">
+<div class="rank-board">
+<div class="rank-cell"><strong>500,000</strong>ROW_NUMBER 1<br/>RANK 1<br/>DENSE 1</div>
+<div class="rank-cell"><strong>500,000</strong>ROW_NUMBER 2<br/>RANK 1<br/>DENSE 1</div>
+<div class="rank-cell"><strong>300,000</strong>ROW_NUMBER 3<br/>RANK 3<br/>DENSE 2</div>
+<div class="rank-cell"><strong>200,000</strong>ROW_NUMBER 4<br/>RANK 4<br/>DENSE 3</div>
+<div class="rank-cell"><strong>200,000</strong>ROW_NUMBER 5<br/>RANK 4<br/>DENSE 3</div>
+</div></div></div>
+<h3>5-1. 실제 고객별 고액 결제 순위</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>각 고객 안에서 결제금액이 큰 순서대로 세 종류의 순위를 계산합니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>고액결제를 고객별로 비교하거나 상위 거래를 찾을 때 순위 함수가 필요합니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>고객이 바뀌면 순위가 다시 1부터 시작하고, 같은 금액이 있으면 RANK와 DENSE_RANK에서 공동 순위가 보입니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div>
+</div>
+<pre><code>USE fintech_fraud_lab_class;
+-- =========================================================
+-- [목적]
+-- 실제 카드결제 데이터에서
+-- 고객마다 결제금액이 큰 순서대로 세 종류의 순위를 계산합니다.
+-- =========================================================
+SELECT
+    payment_id,                         -- 결제 PK
+    customer_id,                        -- 고객 ID
+    payment_at,                         -- 결제 시각
+    amount,                             -- 결제 금액
+    -- ROW_NUMBER:
+    -- 같은 금액이 여러 건이어도 payment_id로 순서를 확정해
+    -- 모든 결제에 서로 다른 순번을 줍니다.
+    ROW_NUMBER() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC, payment_id
+    ) AS `payment_order`,
+    -- RANK:
+    -- 같은 금액이면 같은 순위,
+    -- 다음 순위는 동점자 수만큼 건너뜁니다.
+    RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS `amount_rank`,
+    -- DENSE_RANK:
+    -- 같은 금액이면 같은 순위,
+    -- 다음 순위를 건너뛰지 않습니다.
+    DENSE_RANK() OVER (
+        PARTITION BY customer_id
+        ORDER BY amount DESC
+    ) AS `amount_dense_rank`
+FROM card_payments
+ORDER BY customer_id, amount DESC, payment_id
+LIMIT 300;</code></pre>
+<h3>5-2. 고객별 상위 3건만 남기기</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>Window Function으로 계산한 순번을 이용해 고객별 고액 결제 상위 3건만 추립니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>MySQL에서는 같은 SELECT에서 만든 Window 별칭을 WHERE에서 바로 사용할 수 없으므로 CTE로 한 번 감싸야 합니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code> + CTE <code>ranked_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>각 고객마다 <code>payment_order</code> 1~3에 해당하는 최대 3개의 결제만 남습니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div>
+</div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] 고객별 결제금액 상위 3건만 선택합니다.
+WITH ranked_payments AS (
+    SELECT
+        payment_id,
+        customer_id,
+        payment_at,
+        amount,
+        ROW_NUMBER() OVER (
+            PARTITION BY customer_id
+            ORDER BY amount DESC, payment_id
+        ) AS `payment_order`
+    FROM card_payments
+)
+SELECT
+    payment_id,
+    customer_id,
+    payment_at,
+    amount,
+    `payment_order`
+FROM ranked_payments
+WHERE `payment_order` &lt;= 3
+ORDER BY customer_id, `payment_order`;</code></pre>
+</div></section>
+<section id="lag"><div class="panel">
+<h2>6. LAG — 현재 행에서 직전값 가져오기</h2>
+<h3>6-1. 삼성전자 전일 종가</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>각 거래일의 현재 종가 옆에 바로 전 거래일 종가를 붙입니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>시계열 분석에서는 현재값만으로는 변화량을 알 수 없습니다. 직전값이 있어야 전일 대비 상승·하락 같은 변화를 계산할 수 있습니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>stock_data.stock_prices</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>첫 거래일은 이전 값이 없어 <code>prev_close_price = NULL</code>, 이후 행에는 직전 거래일 종가가 표시됩니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>stock_code × trade_date</code> 1행</p></div>
+</div>
+</div>
+<pre><code>-- DB가 바뀌므로 실제 주가 DB를 다시 명시합니다.
+USE stock_data;
+-- [목적] 삼성전자 각 거래일의 현재 종가 옆에 바로 전 거래일 종가를 붙입니다.
+SELECT
+    stock_code,
+    trade_date,
+    close_price,
+    LAG(close_price) OVER (
+        PARTITION BY stock_code    -- 종목이 바뀌면 직전값 계산을 다시 시작
+        ORDER BY trade_date        -- 거래일 순서가 곧 시계열 순서
+    ) AS `prev_close_price`
+FROM stock_prices
+WHERE stock_code = '005930'
+ORDER BY trade_date
+LIMIT 100;</code></pre>
+<h3>6-2. 고객별 직전 결제시각</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>각 결제 옆에 같은 고객의 직전 결제시각을 붙입니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>FDS에서는 현재 결제가 직전 결제와 얼마나 가까운 시간에 발생했는지가 이상패턴 판단에 유용할 수 있습니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>각 고객의 첫 결제는 NULL이고, 두 번째 결제부터 <code>prev_payment_at</code>에 이전 결제시각이 표시됩니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div>
+</div>
+<pre><code>-- 금융 DB로 다시 바뀌므로 USE를 명시합니다.
+USE fintech_fraud_lab_class;
+-- [목적] 각 결제에 같은 고객의 직전 결제시각을 붙입니다.
+SELECT
+    payment_id,
+    customer_id,
+    payment_at,
+    amount,
+    LAG(payment_at) OVER (
+        PARTITION BY customer_id        -- 고객별로 직전 결제를 따로 찾음
+        ORDER BY payment_at, payment_id -- 시간순 + PK로 순서를 확정
+    ) AS `prev_payment_at`
+FROM card_payments
+ORDER BY customer_id, payment_at, payment_id
+LIMIT 500;</code></pre>
+<div class="figure"><div class="figure-title">LAG의 방향</div><div class="figure-body">
+<div class="pipeline">
+<div class="node"><b>09:00</b><small>첫 결제</small></div><div class="arrow">→</div>
+<div class="node"><b>10:15</b><small>LAG = 09:00</small></div><div class="arrow">→</div>
+<div class="node"><b>11:02</b><small>LAG = 10:15</small></div>
+</div></div></div>
+</div></section>
+<section id="running"><div class="panel">
+<h2>7. 누적값 — 현재 행까지 계속 더하기</h2>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>고객별 결제를 시간순으로 보면서 현재 결제까지의 누적 결제금액을 계산합니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>누적합은 시간이 흐르면서 고객의 지출 규모가 어떻게 쌓이는지 확인할 때 사용합니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>첫 결제는 누적합이 자신의 금액과 같고, 이후 행으로 갈수록 이전 누적합에 현재 금액이 더해집니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div>
+</div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] 고객별 결제 흐름을 시간순으로 보면서
+-- 현재 결제까지의 누적 결제금액을 계산합니다.
+SELECT
+    payment_id,
+    customer_id,
+    payment_at,
+    amount,
+    SUM(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY payment_at, payment_id
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS `running_total_amount`
+FROM card_payments
+ORDER BY customer_id, payment_at, payment_id
+LIMIT 300;</code></pre>
+<div class="callout info"><b><code>UNBOUNDED PRECEDING</code></b><br/>현재 Partition의 맨 처음 행부터 시작한다는 뜻입니다. <code>CURRENT ROW</code>는 현재 행까지 포함한다는 뜻입니다.</div>
+</div></section>
+<section id="frame"><div class="panel">
+<h2>8. Window Frame — 현재 행 이전의 일정 범위만 계산하기</h2>
+<p class="lead">FDS에서 현재 결제가 평소보다 큰지를 보려면 현재 결제 자신을 평균에 포함하면 안 됩니다. 따라서 Frame을 이용해 <strong>현재 이전의 과거 행만</strong> 계산합니다.</p>
+<div class="figure"><div class="figure-title">ROWS BETWEEN 3 PRECEDING AND 1 PRECEDING</div><div class="figure-body">
+<div class="frame-line">
+<div class="frame-box">과거 5</div><div class="frame-box">과거 4</div>
+<div class="frame-box in">과거 3</div><div class="frame-box in">과거 2</div><div class="frame-box in">과거 1</div>
+<div class="frame-box now">현재</div><div class="frame-box">미래</div>
+</div></div><div class="figure-caption">초록색 3개 행만 평균에 포함되고 현재 행은 제외됩니다.</div></div>
+<h3>8-1. 직전 3건 평균</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>현재 결제를 제외하고 바로 이전 최대 3건의 평균 결제금액을 계산합니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>현재 이벤트가 과거 기준선 계산에 들어가면 기준선이 현재값의 영향을 받아 이상도를 왜곡할 수 있습니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>첫 결제는 NULL, 두 번째는 이전 1건 평균, 세 번째는 이전 2건 평균, 네 번째부터 최대 이전 3건 평균이 표시됩니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div>
+</div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] 고객별 현재 결제 직전 3건의 평균 결제금액을 확인합니다.
+SELECT
+    payment_id,
+    customer_id,
+    payment_at,
+    amount,
+    AVG(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY payment_at, payment_id
+        ROWS BETWEEN 3 PRECEDING AND 1 PRECEDING
+        -- 3 PRECEDING: 현재행보다 3행 앞에서 시작
+        -- 1 PRECEDING: 현재행 바로 직전에서 종료
+        -- 따라서 현재 결제금액은 평균 계산에 포함되지 않음
+    ) AS `prior_3_avg_amount`
+FROM card_payments
+ORDER BY customer_id, payment_at, payment_id
+LIMIT 300;</code></pre>
+<h3>8-2. 직전 10건 평균</h3>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>같은 원리를 직전 최대 10건까지 확장해 더 넓은 과거 기준선을 만듭니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>짧은 과거와 긴 과거는 서로 다른 행동 기준선을 만들 수 있으므로 관찰 범위를 조절하는 개념을 이해할 수 있습니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>card_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>각 결제행에 현재 이전 최대 10건의 평균이 <code>prior_10_avg_amount</code>로 표시됩니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div>
+</div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [목적] 원리는 같고 관찰 범위만 직전 10건으로 넓힙니다.
+SELECT
+    payment_id,
+    customer_id,
+    payment_at,
+    amount,
+    AVG(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY payment_at, payment_id
+        ROWS BETWEEN 10 PRECEDING AND 1 PRECEDING
+    ) AS `prior_10_avg_amount`
+FROM card_payments
+ORDER BY customer_id, payment_at, payment_id
+LIMIT 500;</code></pre>
+</div></section>
+<section id="latest"><div class="panel">
+<h2>9. CTE + ROW_NUMBER — 그룹별 최신 1건 선택</h2>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>고객별 신용보고서를 최신순으로 정렬한 뒤 가장 최신 보고서 1건만 남깁니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>한 고객에게 신용보고서가 여러 건 존재하면 현재 상태를 대표할 한 건을 선택해야 할 때가 있습니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>bureau_reports</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>보고서가 있는 고객은 고객당 최대 1행만 반환되고, 가장 최신 <code>report_date</code>가 선택됩니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>customer_id</code> 1명 = 최대 1행</p></div>
+</div>
+</div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [1단계] 고객별 report를 최신순으로 정렬하고 순번을 붙입니다.
+WITH ranked AS (
+    SELECT
+        br.report_id,
+        br.customer_id,
+        br.report_date,
+        br.external_credit_score,
+        ROW_NUMBER() OVER (
+            PARTITION BY br.customer_id
+            ORDER BY br.report_date DESC, br.report_id DESC
+            -- 최신 날짜가 1순위
+            -- 같은 날짜가 여러 건이면 report_id가 큰 행을 우선
+        ) AS `rn`
+    FROM bureau_reports AS br
+)
+-- [2단계] 각 고객의 순번 1번만 남겨 현재 기준 최신 report를 선택합니다.
+SELECT
+    report_id,
+    customer_id,
+    report_date,
+    external_credit_score
+FROM ranked
+WHERE `rn` = 1
+ORDER BY customer_id;</code></pre>
+<div class="callout warn"><b>이 쿼리만으로는 과거 대출심사 데이터에 사용할 수 없습니다.</b><br/>‘현재 기준 최신 보고서’는 과거 신청 당시에는 존재하지 않았을 수 있습니다. 과거 시점의 판단에는 신청시점 이전 최신값이 필요합니다.</div>
+</div></section>
+<section id="asof"><div class="panel">
+<h2>10. Point-in-Time / As-of — 신청시점 이전 최신 보고서 찾기</h2>
+<p class="lead">대출 신청을 평가할 때는 오늘 가장 최신 보고서가 아니라 <strong>그 신청이 발생했던 당시 사용할 수 있었던 가장 최신 신용보고서</strong>를 연결해야 합니다.</p>
+<div class="lesson-goal">
+<div class="goal-head">이 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>각 대출 신청마다 신청일 이후의 미래 보고서를 제외하고, 신청시점 이전에 존재하던 보고서 중 가장 최신 1건을 연결합니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>미래 정보를 섞으면 모델이 실제 운영 당시 알 수 없었던 정보를 학습하게 되어 성능이 과대평가되는 Data Leakage가 발생합니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>loan_applications</code>, <code>bureau_reports</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>각 <code>application_id</code>마다 최대 1행이 나오고, 선택된 <code>report_date</code>는 반드시 신청일보다 같거나 이전이어야 합니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>application_id</code> 1건 = 1행</p></div>
+</div>
+</div>
+<div class="figure"><div class="figure-title">As-of 선택 원리</div><div class="figure-body">
+<div class="timeline">
+<div class="time-card ok"><b>2025-01-10</b>report A<br/><small>후보</small></div>
+<div class="time-card ok"><b>2025-04-02</b>report B<br/><small>가장 최신 후보</small></div>
+<div class="time-card"><b>2025-05-15</b>대출 신청<br/><small>기준시점</small></div>
+<div class="time-card future"><b>2025-06-20</b>report C<br/><small>미래 정보 → 제외</small></div>
+</div></div></div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [최종형] 대출 신청마다 "신청 당시 알 수 있었던 최신 bureau report" 1건을 찾습니다.
+-- 최종 Grain: application_id 1건 = 1행
+-- ① candidates CTE: 신청별로 사용할 수 있는 과거 report 후보를 만들고 최신순 순번을 붙입니다.
+WITH candidates AS (
+    SELECT
+        la.application_id,                -- 대출 신청의 PK
+        la.customer_id,                   -- 신청 고객
+        la.application_at,                -- Point-in-Time 기준시점
+        br.report_id,                     -- 외부 신용보고서 ID
+        br.report_date,                   -- 보고서 기준일
+        br.external_credit_score,         -- 신청 당시 사용할 외부 신용점수 후보
+        ROW_NUMBER() OVER (
+            PARTITION BY la.application_id -- 대출 신청마다 순번을 새로 시작
+            ORDER BY
+                br.report_date DESC,       -- 신청일 이전 중 가장 최근 report를 우선
+                br.report_id DESC          -- 같은 날짜면 큰 report_id를 우선해 한 건으로 확정
+        ) AS `rn`
+    FROM loan_applications AS la
+    LEFT JOIN bureau_reports AS br
+      ON la.customer_id = br.customer_id
+     AND br.report_date &lt;= DATE(la.application_at)
+     -- 가장 중요한 시점 조건:
+     -- 신청 이후 생성된 report는 미래정보이므로 후보 단계에서 제거
+)
+-- ② 바깥 SELECT: 신청별 가장 최신 후보 한 건만 선택합니다.
+SELECT
+    application_id,
+    customer_id,
+    application_at,
+    report_id,
+    report_date,
+    external_credit_score
+FROM candidates
+WHERE `rn` = 1
+ORDER BY application_at, application_id;</code></pre>
+<div class="callout purple"><b>핵심 순서</b><br/>고객 연결 → <code>report_date ≤ application_at</code>로 미래 제외 → 신청별 최신순 정렬 → <code>ROW_NUMBER()</code> → <code>rn=1</code>.</div>
+</div></section>
+<section id="validate"><div class="panel">
+<h2>11. 시점 데이터는 반드시 검증하기</h2>
+<p>쿼리가 오류 없이 실행되어도 잘못된 미래 정보가 조용히 섞일 수 있습니다. 시점 데이터는 결과 자체를 검증하는 SQL을 별도로 작성하는 것이 안전합니다.</p>
+<h3>11-1. 미래 보고서가 섞였는지 확인</h3>
+<div class="lesson-goal">
+<div class="goal-head">검증 쿼리의 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>최종 선택된 보고서 중 신청일 이후의 미래 보고서가 한 건이라도 있는지 셉니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>Point-in-Time 쿼리에서 가장 위험한 오류는 미래정보 누수이므로 숫자로 0건인지 확인해야 합니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>loan_applications</code>, <code>bureau_reports</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p><code>leakage_rows = 0</code>이어야 합니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p>검증 결과 1행</p></div>
+</div>
+</div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [검증 목적] 최종 선택된 bureau report 중 신청일 이후 report가 한 건이라도 있는지 확인합니다.
+WITH candidates AS (
+    SELECT
+        la.application_id,
+        la.application_at,
+        br.report_date,
+        ROW_NUMBER() OVER (
+            PARTITION BY la.application_id
+            ORDER BY br.report_date DESC, br.report_id DESC
+        ) AS `rn`
+    FROM loan_applications AS la
+    LEFT JOIN bureau_reports AS br
+      ON la.customer_id = br.customer_id
+     AND br.report_date &lt;= DATE(la.application_at)
+)
+SELECT
+    COUNT(*) AS `leakage_rows`
+FROM candidates
+WHERE `rn` = 1
+  AND report_date &gt; DATE(application_at);</code></pre>
+<h3>11-2. 신청 1건 = 1행인지 확인</h3>
+<div class="lesson-goal">
+<div class="goal-head">검증 쿼리의 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>최종 선택 결과에서 같은 application_id가 여러 번 나오는지 확인합니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>최종 모델 입력의 Grain이 신청 1건이라면 신청 ID가 중복되어서는 안 됩니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p>선택된 As-of 결과</p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p><code>selected_rows</code>와 <code>distinct_applications</code>가 같아야 합니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p>검증 결과 1행</p></div>
+</div>
+</div>
+<pre><code>USE fintech_fraud_lab_class;
+-- [검증 목적] 선택 결과에서 application_id 중복이 있는지 확인합니다.
+WITH candidates AS (
+    SELECT
+        la.application_id,
+        ROW_NUMBER() OVER (
+            PARTITION BY la.application_id
+            ORDER BY br.report_date DESC, br.report_id DESC
+        ) AS `rn`
+    FROM loan_applications AS la
+    LEFT JOIN bureau_reports AS br
+      ON la.customer_id = br.customer_id
+     AND br.report_date &lt;= DATE(la.application_at)
+),
+selected AS (
+    SELECT application_id
+    FROM candidates
+    WHERE `rn` = 1
+)
+SELECT
+    COUNT(*) AS `selected_rows`,
+    COUNT(DISTINCT application_id) AS `distinct_applications`
+FROM selected;</code></pre>
+<div class="check-grid">
+<div class="check">선택된 report_date가 application_at 이후가 아닌가?</div>
+<div class="check">application_id가 중복되지 않는가?</div>
+<div class="check">과거 보고서가 없는 신청은 NULL로 남는가?</div>
+<div class="check">동일 날짜 보고서가 있을 때 tie-break 기준이 있는가?</div>
+</div>
+</div></section>
+<section id="python"><div class="panel">
+<h2>12. SQL 개념을 Python에서 어떻게 이어 사용하는가?</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>SQL</th><th>pandas</th><th>같은 사고방식</th></tr></thead>
+<tbody>
+<tr><td><code>ROW_NUMBER()</code></td><td><code>sort_values()</code> + <code>cumcount()</code></td><td>그룹 안 순서 만들기</td></tr>
+<tr><td><code>LAG()</code></td><td><code>shift(1)</code></td><td>직전값 가져오기</td></tr>
+<tr><td><code>ROWS ... PRECEDING</code></td><td><code>shift()</code> + <code>rolling()</code></td><td>현재값을 제외한 과거 통계</td></tr>
+<tr><td>시점조건 + 최신 1건</td><td><code>merge_asof(direction="backward")</code></td><td>기준시점 이전 최신값 연결</td></tr>
+</tbody></table></div>
+<div class="callout info"><b>중요한 연결점</b><br/>문법은 달라도 핵심 질문은 같습니다. <strong>어떤 그룹인가? 어떤 순서인가? 현재 행을 포함하는가? 미래 정보를 제외했는가?</strong></div>
+</div></section>
+<section id="hands-on"><div class="panel"><h2>13. 실습 쿼리 — 목적과 기대 결과를 먼저 확인하고 실행하기</h2><p class="lead">각 SQL을 실행하기 전에 원하는 결과를 먼저 확인합니다. 코드를 외우는 것이 아니라, 필요한 결과를 만들기 위해 PARTITION·ORDER·Frame·시점조건을 선택하는 흐름을 익히는 것이 핵심입니다.</p><h3>13-1. 고객별 결제 순번을 붙이세요.</h3><div class="lesson-goal">
+<div class="goal-head">이 실습 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>각 고객의 결제를 시간순으로 나열하고 고객별로 1, 2, 3… 순번을 붙입니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>PARTITION BY와 ORDER BY가 어떻게 함께 작동하는지 가장 직접적으로 확인할 수 있습니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>fintech_fraud_lab_class.card_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>고객이 바뀔 때마다 <code>payment_seq</code>가 다시 1부터 시작합니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div></div><pre><code>USE fintech_fraud_lab_class;
+SELECT
+    payment_id,
+    customer_id,
+    payment_at,
+    amount,
+    ROW_NUMBER() OVER (
+        PARTITION BY customer_id
+        ORDER BY payment_at, payment_id
+    ) AS `payment_seq`
+FROM card_payments
+ORDER BY customer_id, payment_at, payment_id;</code></pre><h3>13-2. 삼성전자 전일 종가를 붙이세요.</h3><div class="lesson-goal">
+<div class="goal-head">이 실습 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>삼성전자 각 거래일의 종가 옆에 바로 전 거래일 종가를 붙입니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>직전값을 가져오는 LAG의 동작을 실제 시계열 데이터에서 확인하고 pandas <code>shift(1)</code>과 연결할 수 있습니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>stock_data.stock_prices</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>첫 거래일은 이전 종가가 없어 NULL이고 이후 행에는 전 거래일 종가가 표시됩니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>stock_code × trade_date</code> 1행</p></div>
+</div></div><pre><code>USE stock_data;
+SELECT
+    stock_code,
+    trade_date,
+    close_price,
+    LAG(close_price) OVER (
+        PARTITION BY stock_code
+        ORDER BY trade_date
+    ) AS `prev_close_price`
+FROM stock_prices
+WHERE stock_code = '005930'
+ORDER BY trade_date;</code></pre><h3>13-3. 고객별 직전 5건 평균 결제금액을 구하세요.</h3><div class="lesson-goal">
+<div class="goal-head">이 실습 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>각 결제에 대해 현재 결제를 제외한 직전 최대 5건의 평균 결제금액을 계산합니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>현재값을 과거 기준선에 포함하지 않는 Window Frame의 원리를 확인합니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>fintech_fraud_lab_class.card_payments</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>첫 결제는 NULL이며 이후 행에는 가능한 과거 최대 5건 평균이 표시됩니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>payment_id</code> 1건 = 1행</p></div>
+</div></div><pre><code>USE fintech_fraud_lab_class;
+SELECT
+    payment_id,
+    customer_id,
+    payment_at,
+    amount,
+    AVG(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY payment_at, payment_id
+        ROWS BETWEEN 5 PRECEDING AND 1 PRECEDING
+    ) AS `prior_5_avg_amount`
+FROM card_payments
+ORDER BY customer_id, payment_at, payment_id;</code></pre><h3>13-4. 신청시점 이전 최신 bureau report를 선택하세요.</h3><div class="lesson-goal">
+<div class="goal-head">이 실습 쿼리를 작성하는 목적</div>
+<div class="goal-grid">
+<div class="goal-item"><b>무엇을 만들려는가?</b><p>각 대출 신청마다 신청시점 이전에 존재했던 신용보고서 중 가장 최신 1건을 선택합니다.</p></div>
+<div class="goal-item"><b>왜 필요한가?</b><p>Point-in-Time과 As-of 원리를 적용해 미래 신용정보가 모델 입력에 섞이지 않도록 하기 위해 필요합니다.</p></div>
+<div class="goal-item"><b>어떤 데이터를 사용하는가?</b><p><code>loan_applications</code>, <code>bureau_reports</code></p></div>
+<div class="goal-item"><b>실행하면 무엇이 보여야 하는가?</b><p>각 application_id가 최대 1행이며 선택된 report_date는 application_at보다 이후가 아니어야 합니다.</p></div>
+<div class="goal-item wide"><b>최종 Grain</b><p><code>application_id</code> 1건 = 1행</p></div>
+</div></div><pre><code>USE fintech_fraud_lab_class;
+WITH candidates AS (
+    SELECT
+        la.application_id,
+        la.customer_id,
+        la.application_at,
+        br.report_id,
+        br.report_date,
+        ROW_NUMBER() OVER (
+            PARTITION BY la.application_id
+            ORDER BY br.report_date DESC, br.report_id DESC
+        ) AS `rn`
+    FROM loan_applications AS la
+    LEFT JOIN bureau_reports AS br
+      ON la.customer_id = br.customer_id
+     AND br.report_date &lt;= DATE(la.application_at)
+)
+SELECT
+    application_id,
+    customer_id,
+    application_at,
+    report_id,
+    report_date
+FROM candidates
+WHERE `rn` = 1
+ORDER BY application_at, application_id;</code></pre></div></section><section id="practice"><div class="panel">
+<h2>14. 확인 문제</h2>
+<details><summary>문제 1 — 고객별 결제 순번을 붙이려면 PARTITION BY와 ORDER BY에 무엇을 넣어야 하는가?</summary><div><p><strong>답:</strong> <code>PARTITION BY customer_id</code>, <code>ORDER BY payment_at, payment_id</code>처럼 작성합니다.</p></div></details>
+<details><summary>문제 2 — ROW_NUMBER와 RANK의 가장 큰 차이는?</summary><div><p><strong>답:</strong> ROW_NUMBER는 동점이어도 서로 다른 번호를 주고, RANK는 동점에 같은 순위를 부여합니다.</p></div></details>
+<details><summary>문제 3 — LAG(close_price)는 무엇을 반환하는가?</summary><div><p><strong>답:</strong> 지정한 정렬순서에서 현재 행의 바로 이전 행에 있는 close_price를 반환합니다.</p></div></details>
+<details><summary>문제 4 — ROWS BETWEEN 3 PRECEDING AND 1 PRECEDING이 현재 행을 제외하는 이유는?</summary><div><p><strong>답:</strong> 종료 지점이 CURRENT ROW가 아니라 1 PRECEDING이므로 현재 행 직전에서 계산범위가 끝납니다.</p></div></details>
+<details><summary>문제 5 — 대출 신청시점 이후의 bureau report를 사용하면 왜 안 되는가?</summary><div><p><strong>답:</strong> 신청 당시에는 알 수 없던 미래 정보이므로 Data Leakage가 발생합니다.</p></div></details>
+<details><summary>문제 6 — As-of 결과에서 가장 먼저 확인할 두 가지는?</summary><div><p><strong>답:</strong> 미래 report가 0건인지, 그리고 application_id가 최종 결과에서 중복되지 않는지 확인합니다.</p></div></details>
+</div></section>
+</main>
+<footer>Window Function · ROW_NUMBER · RANK · LAG · Frame · Point-in-Time · As-of</footer>
+</body>
+</html>
